@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Nagrik AI — Awaaz</title>
+<style>
+@font-face{font-family:'JioType';font-weight:400;src:url('https://raw.githubusercontent.com/sunit1986/JioBharatIQ_Server/main/assets/fonts/woff2/JioTypeVarW05-Regular.woff2') format('woff2');}
+@font-face{font-family:'JioType';font-weight:500;src:url('https://raw.githubusercontent.com/sunit1986/JioBharatIQ_Server/main/assets/fonts/woff2/JioTypeW05-Medium.woff2') format('woff2');}
+@font-face{font-family:'JioType';font-weight:700;src:url('https://raw.githubusercontent.com/sunit1986/JioBharatIQ_Server/main/assets/fonts/woff2/JioTypeW05-Bold.woff2') format('woff2');}
+@font-face{font-family:'JioType';font-weight:900;src:url('https://raw.githubusercontent.com/sunit1986/JioBharatIQ_Server/main/assets/fonts/woff2/JioTypeW05-Black.woff2') format('woff2');}
+
+:root{
+  --blue:#003580; --blue-mid:#1a4fa8; --blue-light:#e8eefb; --blue-dark:#001f50;
+  --green:#1a6b3c; --green-bg:#e6f4ec; --green-20:#c3e6d2;
+  --red:#e53935; --orange:#b85e00;
+  --text:#0c0d10; --text2:rgba(25,27,30,0.6);
+  --stroke:rgba(36,38,43,0.12);
+  --pill:999px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{overscroll-behavior:none;touch-action:manipulation;}
+body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 0;}
+@media(max-width:768px){body{background:#fff!important;padding:0!important;}.phone-frame{width:100%!important;height:100vh!important;height:100dvh!important;border-radius:0!important;box-shadow:none!important;}}
+.phone-frame{width:360px;height:800px;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:32px;box-shadow:0 28px 80px rgba(0,0,0,0.22);}
+
+/* ════════ LANDING ════════ */
+.landing{position:absolute;inset:0;z-index:500;
+  background:linear-gradient(160deg,#f5f7ff 0%,#eef1fb 40%,#f0f4ff 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:28px 20px 24px;overflow-y:auto;}
+.landing.exit{animation:lExit 360ms ease-in forwards;pointer-events:none;}
+@keyframes lExit{to{opacity:0;transform:translateY(-28px) scale(.97)}}
+
+.ld-logo{font-size:38px;margin-bottom:8px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));}
+.ld-name{font-size:28px;font-weight:900;color:#0c0d10;letter-spacing:-.035em;margin-bottom:5px;}
+.ld-tag{font-size:13px;color:rgba(12,13,16,.5);font-weight:500;text-align:center;line-height:1.7;margin-bottom:20px;}
+
+/* Primary action cards */
+.ld-section-title{font-size:11px;font-weight:700;color:rgba(12,13,16,.38);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;width:100%;}
+.primary-action{display:flex;align-items:center;gap:12px;background:#fff;
+  border:1.5px solid rgba(36,38,43,.1);border-radius:14px;padding:13px 14px;
+  cursor:pointer;transition:background 150ms,transform 100ms,border-color 150ms;
+  margin-bottom:8px;width:100%;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.primary-action:last-of-type{margin-bottom:0;}
+.primary-action:active{background:#f0f4ff;transform:scale(.98);border-color:var(--blue);}
+.pa-ico{font-size:22px;flex-shrink:0;}
+.pa-body{flex:1;}
+.pa-label{font-size:14px;font-weight:700;color:#0c0d10;line-height:1.2;}
+.pa-sub{font-size:11px;color:rgba(12,13,16,.45);margin-top:2px;}
+.pa-arr{font-size:18px;color:rgba(12,13,16,.25);flex-shrink:0;}
+
+/* Services strip */
+.ld-svc-section{width:100%;margin-top:16px;margin-bottom:0;}
+.ld-svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.svc-chip{background:#fff;border:1.5px solid rgba(36,38,43,.1);
+  border-radius:12px;padding:11px 12px;display:flex;align-items:center;
+  gap:9px;cursor:pointer;transition:background 150ms,transform 100ms;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.svc-chip:active{background:#f0f4ff;transform:scale(.97);}
+.svc-ico{font-size:20px;flex-shrink:0;}
+.svc-name{font-size:12px;font-weight:600;color:#0c0d10;}
+
+/* Or divider */
+.ld-or{font-size:12px;color:rgba(12,13,16,.3);margin:14px 0 10px;
+  display:flex;align-items:center;gap:10px;width:100%;}
+.ld-or::before,.ld-or::after{content:'';flex:1;height:1px;background:rgba(12,13,16,.08);}
+
+.orb-wrap{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;}
+.orb-ring{position:absolute;border-radius:50%;border:2px solid rgba(0,53,128,.15);pointer-events:none;}
+.orb-ring-1{width:130px;height:130px;animation:orbRing 2.6s ease-out infinite;}
+.orb-ring-2{width:168px;height:168px;animation:orbRing 2.6s ease-out infinite .55s;}
+.orb-ring-3{width:206px;height:206px;animation:orbRing 2.6s ease-out infinite 1.1s;}
+@keyframes orbRing{0%{opacity:.6;transform:scale(.82)}100%{opacity:0;transform:scale(1)}}
+.orb-btn{width:96px;height:96px;border-radius:50%;background:#fff;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 12px 44px rgba(0,0,0,.38);transition:transform 130ms;z-index:2;position:relative;}
+.orb-btn:active{transform:scale(.9);}
+.orb-btn svg{width:42px;height:42px;fill:var(--blue);}
+
+.ld-hint{font-size:15px;font-weight:700;color:rgba(12,13,16,.72);letter-spacing:.02em;margin-bottom:20px;}
+.ld-pill{display:flex;align-items:center;gap:7px;background:#fff;
+  border:1.5px solid rgba(36,38,43,.1);border-radius:var(--pill);padding:7px 16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.ld-dot{width:8px;height:8px;border-radius:50%;background:#1a6b3c;animation:dotPulse 2s ease infinite;}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ld-pill-txt{font-size:12px;color:rgba(12,13,16,.55);font-weight:600;}
+
+/* ════════ HEADER ════════ */
+.v-hdr{height:56px;padding:0 12px;display:flex;align-items:center;gap:8px;
+  flex-shrink:0;border-bottom:1px solid var(--stroke);background:#fff;}
+.v-back{width:40px;height:40px;border:none;background:transparent;cursor:pointer;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.v-back svg{width:24px;height:24px;fill:#170054;}
+.v-hdr-info{flex:1;}
+.v-hdr-name{font-size:16px;font-weight:700;color:var(--text);}
+.v-hdr-sub{font-size:11px;color:var(--text2);}
+.v-badge{background:var(--blue-light);color:var(--blue);border-radius:var(--pill);padding:4px 10px;font-size:11px;font-weight:700;}
+
+/* ════════ CONVERSATION ════════ */
+.conv{flex:1;overflow-y:auto;overflow-x:clip;padding:16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none;}
+.conv::-webkit-scrollbar{display:none;}
+
+.ai-row{display:flex;gap:8px;align-items:flex-end;animation:bUp 280ms ease-out;}
+.ai-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-mid));
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ai-bub{background:var(--blue-light);border-radius:18px 18px 18px 4px;
+  padding:12px 15px;max-width:248px;font-size:14px;line-height:1.65;color:var(--text);font-weight:500;}
+
+.usr-row{display:flex;justify-content:flex-end;animation:bUp 200ms ease-out;}
+.usr-bub{background:var(--blue);color:#fff;border-radius:18px 18px 4px 18px;
+  padding:12px 15px;max-width:220px;font-size:14px;line-height:1.55;font-weight:500;}
+
+@keyframes bUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.typing-row{display:flex;gap:8px;align-items:flex-end;animation:bUp 200ms ease-out;}
+.tdots{background:var(--blue-light);border-radius:18px 18px 18px 4px;padding:13px 16px;display:flex;gap:4px;align-items:center;}
+.td{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:tdA 1.1s ease-in-out infinite;}
+.td:nth-child(2){animation-delay:.18s;}.td:nth-child(3){animation-delay:.36s;}
+@keyframes tdA{0%,80%,100%{transform:scale(.45);opacity:.35}40%{transform:scale(1);opacity:1}}
+
+.listen-row{display:flex;gap:8px;align-items:flex-end;animation:bUp 200ms ease-out;}
+.listen-bub{background:#fff;border:2px solid var(--red);border-radius:18px 18px 18px 4px;
+  padding:10px 15px;display:flex;align-items:center;gap:8px;}
+.ld{width:7px;height:7px;border-radius:50%;background:var(--red);animation:tdA .95s ease-in-out infinite;}
+.ld:nth-child(2){animation-delay:.15s;}.ld:nth-child(3){animation-delay:.3s;}
+.listen-txt{font-size:13px;color:var(--red);font-weight:700;}
+
+/* ════════ SCHEME CARD ════════ */
+.scheme-card{border-radius:16px;border:1px solid var(--stroke);overflow:hidden;animation:bUp 380ms ease-out;width:100%;}
+.sc-hd{display:flex;align-items:center;gap:10px;padding:13px 14px;color:#fff;}
+.sc-ico{font-size:24px;flex-shrink:0;}
+.sc-nm{font-size:14px;font-weight:800;line-height:1.2;}
+.sc-min{font-size:10px;opacity:.72;margin-top:2px;}
+.sc-bd{padding:13px 14px 15px;background:#fff;}
+.sc-amt{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.02em;}
+.sc-det{font-size:12px;color:var(--text2);margin-top:3px;margin-bottom:11px;}
+.sc-match{display:inline-block;background:var(--green-bg);color:var(--green);
+  border-radius:var(--pill);padding:4px 11px;font-size:11px;font-weight:700;margin-bottom:12px;}
+.sc-cta{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--pill);
+  padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:'JioType',sans-serif;}
+
+/* ════════ DOC CARD ════════ */
+.doc-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;animation:bUp 380ms ease-out;width:100%;}
+.doc-hd{background:var(--blue);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;border-radius:14px 14px 0 0;}
+.doc-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--stroke);}
+.doc-row:last-of-type{border-bottom:none;}
+.doc-ico{font-size:18px;flex-shrink:0;}
+.doc-info{flex:1;}
+.doc-name{font-size:13px;font-weight:700;color:var(--text);}
+.doc-st{font-size:11px;color:var(--text2);margin-top:1px;}
+.doc-st.ok{color:var(--green);font-weight:600;}
+.doc-btn{background:var(--blue-light);color:var(--blue);border:1.5px solid var(--blue);
+  border-radius:var(--pill);padding:5px 12px;font-size:11px;font-weight:700;
+  font-family:'JioType',sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.doc-btn.done{background:var(--green-bg);color:var(--green);border-color:var(--green-20);cursor:default;}
+.doc-verify-row{padding:11px 14px;border-top:1px solid var(--stroke);}
+.doc-verify{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--pill);
+  padding:11px;font-size:13px;font-weight:700;font-family:'JioType',sans-serif;cursor:pointer;}
+.doc-verify:disabled{opacity:.38;cursor:default;}
+
+/* ════════ SCAN ANIMATION ════════ */
+.scan-card{border-radius:14px;border:1px solid var(--stroke);padding:14px 16px;background:#fff;animation:bUp 300ms ease-out;width:100%;}
+.scan-step{display:flex;align-items:center;gap:10px;padding:5px 0;}
+.scan-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.scan-dot.pending{background:#e0e0e0;}
+.scan-dot.active{background:var(--blue);animation:tdA 1.2s infinite;}
+.scan-dot.done{background:var(--green);}
+.scan-label{font-size:13px;color:var(--text);font-weight:500;}
+.scan-label.pending{color:var(--text2);}
+
+/* ════════ RESULT CHECKLIST ════════ */
+.result-cl{border-radius:14px;border:1px solid var(--stroke);animation:bUp 380ms ease-out;width:100%;}
+.rcl-hd{background:var(--blue);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;border-radius:14px 14px 0 0;}
+.rcl-row{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--stroke);background:#fff;}
+.rcl-row:last-child{border-bottom:none;}
+.rcl-row.warn{background:#fffbf0;}
+.rcl-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.rcl-name{font-size:13px;font-weight:700;color:var(--text);}
+.rcl-msg{font-size:12px;margin-top:2px;color:var(--text2);}
+.rcl-row.warn .rcl-msg{color:var(--orange);}
+
+/* ════════ ACTION CARD (naam fix steps) ════════ */
+.action-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;animation:bUp 380ms ease-out;width:100%;}
+.ac-hd{background:var(--green);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;border-radius:14px 14px 0 0;}
+.ac-step{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-bottom:1px solid var(--stroke);}
+.ac-step:last-child{border-bottom:none;}
+.ac-ico{font-size:20px;flex-shrink:0;margin-top:1px;}
+.ac-txt{font-size:13px;font-weight:700;color:var(--text);line-height:1.4;}
+.ac-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.ac-pill{display:inline-block;background:var(--green-bg);color:var(--green);border-radius:var(--pill);padding:2px 10px;font-size:11px;font-weight:700;margin-top:4px;}
+.ac-pill.free{background:#e6f4ec;color:#1a6b3c;}
+
+/* ════════ APPLY CTA CARD ════════ */
+.apply-cta{border-radius:14px;border:1px solid var(--stroke);background:#fff;animation:bUp 380ms ease-out;width:100%;}
+.apply-cta-hd{background:var(--green);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;border-radius:14px 14px 0 0;}
+.apply-cta-msg{padding:10px 14px 6px;font-size:13px;color:var(--text);font-weight:500;line-height:1.6;}
+.apply-cta-btns{display:flex;flex-direction:column;gap:8px;padding:8px 14px 14px;}
+.apply-btn-p{background:var(--blue);color:#fff;border:none;border-radius:var(--pill);padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'JioType',sans-serif;width:100%;}
+.apply-btn-s{background:transparent;color:var(--text2);border:1.5px solid var(--stroke);border-radius:var(--pill);padding:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'JioType',sans-serif;width:100%;}
+
+/* ════════ SITE LOADER ════════ */
+.site-loader{border-radius:14px;border:1px solid var(--stroke);background:#fff;padding:20px 16px;text-align:center;animation:bUp 300ms ease-out;width:100%;}
+.sl-ico{font-size:32px;margin-bottom:8px;}
+.sl-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.sl-sub{font-size:12px;color:var(--text2);}
+.sl-bar{height:4px;background:var(--blue-light);border-radius:var(--pill);margin-top:14px;overflow:hidden;}
+.sl-fill{height:4px;background:var(--blue);border-radius:var(--pill);animation:slFill 1.8s ease-out forwards;}
+@keyframes slFill{from{width:0}to{width:100%}}
+
+/* ════════ FORM SIMULATOR ════════ */
+.form-sim{border-radius:14px;border:1px solid var(--stroke);background:#fff;animation:bUp 380ms ease-out;width:100%;overflow:hidden;}
+.form-sim-hd{background:var(--blue);color:#fff;padding:12px 14px;}
+.form-sim-title{font-size:14px;font-weight:800;}
+.form-sim-sub{font-size:11px;opacity:.75;margin-top:2px;}
+.form-prog{height:3px;background:rgba(255,255,255,.25);}
+.form-prog-fill{height:3px;background:#fff;transition:width 500ms ease;}
+.ffield{padding:11px 14px;border-bottom:1px solid var(--stroke);transition:background 200ms;}
+.ffield:last-child{border-bottom:none;}
+.ffield.active{background:var(--blue-light);}
+.ffield-lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.ffield-val{font-size:14px;font-weight:700;color:var(--text);}
+.ffield-badge{display:inline-block;background:var(--green-bg);color:var(--green);border-radius:var(--pill);padding:1px 8px;font-size:10px;font-weight:700;margin-top:3px;}
+.ffield-badge.cur{background:var(--blue-light);color:var(--blue);}
+.ffield-mic{font-size:11px;color:var(--blue);font-weight:600;margin-top:5px;}
+
+/* ════════ SUBMIT READY ════════ */
+.submit-ready{border-radius:14px;border:2px solid var(--green);background:var(--green-bg);padding:18px 16px;animation:bUp 380ms ease-out;width:100%;text-align:center;}
+.sr-ico{font-size:36px;margin-bottom:8px;}
+.sr-title{font-size:16px;font-weight:800;color:var(--green);margin-bottom:6px;}
+.sr-msg{font-size:13px;color:var(--text);line-height:1.6;}
+.sr-warn{font-size:12px;color:var(--green);margin-top:10px;font-weight:600;}
+.sr-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--pill);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'JioType',sans-serif;margin-top:14px;}
+
+/* ════════ WEB OVERLAY (mock govt site) ════════ */
+.web-overlay{position:absolute;inset:0;z-index:600;background:#f0f2f5;
+  display:flex;flex-direction:column;animation:slideUp 380ms cubic-bezier(.32,.72,0,1);}
+.web-overlay.closing{animation:slideDown 300ms ease-in forwards;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes slideDown{from{transform:translateY(0)}to{transform:translateY(100%)}}
+
+/* Browser bar */
+.wob-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:8px 12px;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.wob-back{width:32px;height:32px;border:none;background:transparent;cursor:pointer;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.wob-back:active{background:#e0e0e0;}
+.wob-url{flex:1;background:#fff;border:1.5px solid #dadce0;border-radius:20px;
+  padding:5px 12px;font-size:11px;font-weight:600;color:#333;
+  display:flex;align-items:center;gap:5px;}
+.wob-secure{font-size:10px;color:#1a6b3c;}
+
+/* GoI site header */
+.wob-goi-hd{background:#003580;color:#fff;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.wob-goi-emblem{font-size:24px;flex-shrink:0;}
+.wob-goi-nm{font-size:13px;font-weight:800;line-height:1.2;}
+.wob-goi-sub{font-size:10px;opacity:.75;margin-top:1px;}
+.wob-goi-badge{margin-left:auto;background:rgba(255,255,255,.15);border-radius:4px;
+  padding:3px 8px;font-size:9px;font-weight:700;white-space:nowrap;}
+
+/* Progress */
+.wob-prog-wrap{height:4px;background:#e0e0e0;flex-shrink:0;}
+.wob-prog-fill{height:4px;background:#003580;transition:width 500ms ease;}
+
+/* Form body */
+.wob-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.wob-form-hd{font-size:15px;font-weight:800;color:#0c0d10;}
+.wob-form-sub{font-size:12px;color:rgba(12,13,16,.5);margin-top:2px;}
+.wob-step-tag{display:inline-block;background:#e8eefb;color:#003580;border-radius:4px;
+  padding:2px 8px;font-size:10px;font-weight:700;margin-bottom:8px;}
+
+/* Form fields */
+.wob-field{background:#fff;border-radius:10px;border:1.5px solid #e0e0e0;
+  padding:12px 14px;transition:border-color 250ms,box-shadow 250ms;}
+.wob-field.active{border-color:#003580;box-shadow:0 0 0 3px rgba(0,53,128,.12);}
+.wob-field.done{border-color:#1a6b3c;}
+.wob-lbl{font-size:10px;font-weight:700;color:rgba(12,13,16,.5);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;
+  display:flex;align-items:center;justify-content:space-between;}
+.wob-req{color:#c0170f;}
+.wob-input-sim{font-size:15px;font-weight:700;color:#0c0d10;min-height:22px;}
+.wob-input-sim.empty{color:#bbb;}
+.wob-cursor{display:inline-block;width:2px;height:16px;background:#003580;
+  margin-left:1px;animation:blink .7s step-end infinite;vertical-align:middle;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.wob-field-hint{font-size:11px;color:rgba(12,13,16,.45);margin-top:4px;display:none;}
+.wob-field.active .wob-field-hint{display:block;}
+.wob-autofill{display:inline-flex;align-items:center;gap:4px;background:#e6f4ec;
+  color:#1a6b3c;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;
+  margin-top:5px;display:none;}
+.wob-field.done .wob-autofill{display:inline-flex;}
+
+/* Voice guidance strip */
+.wob-voice-strip{flex-shrink:0;background:#fff;border-top:1px solid #e0e0e0;
+  padding:10px 14px 16px;display:flex;align-items:center;gap:10px;}
+.wob-voice-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#003580,#1a4fa8);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.wob-voice-info{flex:1;}
+.wob-voice-status{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:2px;}
+.wob-voice-text{font-size:12px;color:#0c0d10;font-weight:500;line-height:1.4;}
+.wob-next-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--pill);
+  padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'JioType',sans-serif;white-space:nowrap;flex-shrink:0;}
+.wob-next-btn:disabled{opacity:.38;cursor:default;}
+
+/* ════════ MIC BAR ════════ */
+.mic-bar{flex-shrink:0;padding:8px 24px 20px;background:#fff;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  border-top:1px solid var(--stroke);}
+.mic-status{font-size:12px;font-weight:600;color:var(--text2);min-height:17px;text-align:center;}
+.mic-wrap{position:relative;width:80px;height:80px;display:flex;align-items:center;justify-content:center;}
+.mic-ring{position:absolute;border-radius:50%;border:2.5px solid rgba(229,57,53,.35);opacity:0;pointer-events:none;}
+.mic-ring.on{animation:mRing 1.4s ease-out infinite;}
+.mic-ring.r1{width:80px;height:80px;}
+.mic-ring.r2{width:102px;height:102px;animation-delay:.35s;}
+@keyframes mRing{0%{opacity:.65;transform:scale(.8)}100%{opacity:0;transform:scale(1)}}
+.mic-btn{width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:2;box-shadow:0 6px 22px rgba(0,0,0,.2);transition:background 200ms,transform 110ms;}
+.mic-btn:active{transform:scale(.9);}
+.mic-btn svg{width:30px;height:30px;fill:#fff;}
+.mic-hint{font-size:11px;color:rgba(0,53,128,.45);font-weight:500;}
+</style>
+</head>
+<body>
+<div class="phone-frame">
+
+<!-- LANDING -->
+<div class="landing" id="landing">
+  <div class="ld-logo">🏛️</div>
+  <div class="ld-name">Nagrik AI</div>
+  <div class="ld-tag">Sarkari kaam, aasaan — Hindi mein</div>
+
+  <!-- Primary Actions -->
+  <div class="ld-section-title">Main Actions</div>
+
+  <div class="primary-action" onclick="startConv('scheme')">
+    <span class="pa-ico">🔍</span>
+    <div class="pa-body">
+      <div class="pa-label">Find the right scheme for me</div>
+      <div class="pa-sub">PM Kisan · Ayushman · PM Awas + more</div>
+    </div>
+    <span class="pa-arr">›</span>
+  </div>
+
+  <div class="primary-action" onclick="startConv('docs')">
+    <span class="pa-ico">📋</span>
+    <div class="pa-body">
+      <div class="pa-label">Check my documents</div>
+      <div class="pa-sub">Verify · Find issues · Fix problems</div>
+    </div>
+    <span class="pa-arr">›</span>
+  </div>
+
+  <div class="primary-action" onclick="startConv('form')">
+    <span class="pa-ico">✍️</span>
+    <div class="pa-body">
+      <div class="pa-label">Apply or fill a form</div>
+      <div class="pa-sub">Voice-guided · Auto-fill · Step by step</div>
+    </div>
+    <span class="pa-arr">›</span>
+  </div>
+
+  <!-- Services -->
+  <div class="ld-svc-section">
+    <div class="ld-section-title">Services</div>
+    <div class="ld-svc-grid">
+      <div class="svc-chip" onclick="startConv('aadhaar')"><span class="svc-ico">🪪</span><span class="svc-name">Aadhaar Card</span></div>
+      <div class="svc-chip" onclick="startConv('passport')"><span class="svc-ico">🛂</span><span class="svc-name">Passport</span></div>
+      <div class="svc-chip" onclick="startConv('pan')"><span class="svc-ico">💳</span><span class="svc-name">PAN Card</span></div>
+      <div class="svc-chip" onclick="startConv('driving')"><span class="svc-ico">🚗</span><span class="svc-name">Driving Licence</span></div>
+    </div>
+  </div>
+
+  <!-- Voice shortcut -->
+  <div class="ld-or">या सीधे बात करो</div>
+  <div class="orb-wrap" style="width:70px;height:70px;margin-bottom:14px;">
+    <div class="orb-ring orb-ring-1" style="width:70px;height:70px;"></div>
+    <div class="orb-ring orb-ring-2" style="width:92px;height:92px;"></div>
+    <button class="orb-btn" style="width:54px;height:54px;" onclick="startConv()">
+      <svg viewBox="0 0 24 24" style="width:26px;height:26px;"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+    </button>
+  </div>
+  <div class="ld-pill">
+    <div class="ld-dot"></div>
+    <span class="ld-pill-txt">Sarvam AI · Asli Hindi Awaaz · Live</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="v-hdr" id="vHdr" style="display:none">
+  <button class="v-back" onclick="resetToLanding()">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+  </button>
+  <div class="v-hdr-info">
+    <div class="v-hdr-name">Nagrik AI</div>
+    <div class="v-hdr-sub">AI Government Guide · Hindi</div>
+  </div>
+  <span class="v-badge">हिंदी</span>
+</div>
+
+<!-- CONVERSATION -->
+<div class="conv" id="conv" style="display:none"></div>
+
+<!-- MIC BAR -->
+<div class="mic-bar" id="micBar" style="display:none">
+  <div class="mic-status" id="micStatus">Taiyaar ho raha hoon...</div>
+  <div class="mic-wrap">
+    <div class="mic-ring r1" id="mRing1"></div>
+    <div class="mic-ring r2" id="mRing2"></div>
+    <button class="mic-btn" id="micBtn" style="background:var(--blue)" onclick="onMicTap()">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+    </button>
+  </div>
+  <div class="mic-hint" id="micHint">Pehle main bolunga, phir aap</div>
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+// ── Config ──
+const SARVAM_KEY = 'sk_a7i71nh2_SpaJY8tL2k4LagAgdBwJe85S';
+const SARVAM_URL = 'https://api.sarvam.ai/text-to-speech';
+
+// ── DOM ──
+const $conv    = document.getElementById('conv');
+const $micBtn  = document.getElementById('micBtn');
+const $mRing1  = document.getElementById('mRing1');
+const $mRing2  = document.getElementById('mRing2');
+const $mStatus = document.getElementById('micStatus');
+const $mHint   = document.getElementById('micHint');
+
+// ── State ──
+let turn         = 0;
+let docPhase     = null;
+let serviceIntent = null;   // 'aadhaar'|'passport'|'pan'|'driving' — set from landing chips
+let serviceTurn  = 0;
+let listening    = false;
+let speaking     = false;
+let currentAudio = null;
+let recognition  = null;
+let docUploaded  = {};
+
+const SERVICE_INTENTS = ['aadhaar','passport','pan','driving'];
+
+const SERVICE_DEMO = {
+  aadhaar: ["आधार अपडेट करना है", "हाँ, नाम और पता दोनों बदलने हैं"],
+  passport:["नया पासपोर्ट बनाना है"],
+  pan:     ["नया PAN card चाहिए"],
+  driving: ["नया लाइसेंस बनाना है"],
+};
+
+// ── Conversation script (Devanagari — gives Sarvam authentic Indian accent) ──
+const SC = {
+  greet:   "नमस्ते! मैं नागरिक साथी हूँ — आपका सरकारी योजना में मदद करने वाला साथी। बताइए, क्या मदद चाहिए?",
+  ack0:    "ज़रूर! पहले मुझे थोड़ी सी जानकारी चाहिए।",
+  q1:      "पहला सवाल — आप क्या काम करते हैं? खेती करते हैं, या कोई नौकरी, या कुछ और?",
+  ack1:    "अच्छा, आप किसान हैं। बहुत अच्छा।",
+  q2:      "अब बताइए — घर की साल भर की कमाई कितनी है? एक लाख से कम है, या ज़्यादा?",
+  result:  "मुझे एक बहुत अच्छी योजना मिली! पीएम किसान सम्मान निधि। इसमें आपको हर साल छह हज़ार रुपये मिलेंगे — दो दो हज़ार की तीन किश्त में, सीधे बैंक अकाउंट में। यह योजना बिल्कुल आप जैसे छोटे किसानों के लिए बनी है।",
+  askDocs: "क्या आप जानना चाहेंगे कि इस योजना के लिए कौन से दस्तावेज़ चाहिए?",
+  docs:    "इस योजना के लिए तीन चीज़ें चाहिए। एक — आधार कार्ड। दो — ज़मीन का रिकॉर्ड यानी खतौनी। तीन — बैंक पासबुक। इन्हें अपलोड करके वेरीफाई करो, मैं चेक करूँगा।",
+};
+
+// ══════════════════════════════════════
+// SARVAM TTS
+// ══════════════════════════════════════
+async function speak(text, onDone) {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  speaking = true;
+  setMic('speaking');
+
+  try {
+    const res = await fetch(SARVAM_URL, {
+      method: 'POST',
+      headers: {
+        'api-subscription-key': SARVAM_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputs: [text],
+        target_language_code: 'hi-IN',
+        speaker: 'arvind',
+        model: 'bulbul:v1',
+        pace: 0.95,
+        pitch: 0,
+        loudness: 1.5,
+        enable_preprocessing: true,
+        speech_sample_rate: 22050
+      })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const b64  = data.audios?.[0];
+    if (!b64) throw new Error('No audio');
+
+    const audio = new Audio('data:audio/wav;base64,' + b64);
+    currentAudio = audio;
+    audio.onended = () => { speaking = false; currentAudio = null; setMic('idle'); onDone?.(); };
+    audio.onerror = () => { speaking = false; currentAudio = null; setMic('idle'); onDone?.(); };
+    await audio.play();
+
+  } catch (err) {
+    console.warn('Sarvam TTS error — using browser fallback:', err.message);
+    speaking = false;
+    fallbackSpeak(text, onDone);
+  }
+}
+
+function fallbackSpeak(text, onDone) {
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  speaking = true;
+  setMic('speaking');
+  const utt = new SpeechSynthesisUtterance(text);
+  const voices = synth.getVoices();
+  utt.voice = voices.find(v => v.lang === 'hi-IN') || voices.find(v => v.lang.startsWith('hi')) || null;
+  utt.lang  = 'hi-IN';
+  utt.rate  = 0.88;
+  utt.pitch = 1.0;
+  utt.onend = utt.onerror = () => { speaking = false; setMic('idle'); onDone?.(); };
+  synth.speak(utt);
+  // Chrome stuck-speech fix
+  const t = setInterval(() => { if (!synth.speaking) clearInterval(t); else synth.resume(); }, 5000);
+}
+
+// ══════════════════════════════════════
+// MIC UI
+// ══════════════════════════════════════
+function setMic(state) {
+  const S = {
+    idle:     { bg:'var(--blue)', rings:false, status:'टैप करके बात करो',     hint:'🎙️ आप बात कर सकते हैं' },
+    listening:{ bg:'#e53935',    rings:true,  status:'🔴  सुन रहा हूँ...',     hint:'बोलिए, मैं सुन रहा हूँ' },
+    speaking: { bg:'var(--blue)', rings:false, status:'🔊  बोल रहा हूँ...',    hint:'नागरिक साथी बोल रहा है' },
+    loading:  { bg:'#6b7280',    rings:false, status:'⏳  ढूंढ रहा हूँ...',    hint:'एक सेकंड...' },
+  };
+  const s = S[state] || S.idle;
+  $micBtn.style.background = s.bg;
+  $mRing1.classList.toggle('on', s.rings);
+  $mRing2.classList.toggle('on', s.rings);
+  $mStatus.textContent = s.status;
+  $mHint.textContent   = s.hint;
+}
+
+// ══════════════════════════════════════
+// BUBBLES
+// ══════════════════════════════════════
+function addAI(html) {
+  const d = document.createElement('div');
+  d.className = 'ai-row';
+  d.innerHTML = `<div class="ai-av">🏛️</div><div class="ai-bub">${html}</div>`;
+  $conv.appendChild(d);
+  scrollDown();
+  return d;
+}
+function addUser(text) {
+  const d = document.createElement('div');
+  d.className = 'usr-row';
+  d.innerHTML = `<div class="usr-bub">${text}</div>`;
+  $conv.appendChild(d);
+  scrollDown();
+}
+function showTyping() {
+  const d = document.createElement('div');
+  d.className = 'typing-row'; d.id = 'typing';
+  d.innerHTML = `<div class="ai-av">🏛️</div><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  $conv.appendChild(d); scrollDown();
+}
+function hideTyping() { document.getElementById('typing')?.remove(); }
+function showListening() {
+  const d = document.createElement('div');
+  d.className = 'listen-row'; d.id = 'listenRow';
+  d.innerHTML = `<div class="ai-av" style="background:linear-gradient(135deg,#e53935,#ff5722)">🎙️</div>
+    <div class="listen-bub"><div class="ld"></div><div class="ld"></div><div class="ld"></div>
+    <span class="listen-txt">Sun raha hoon...</span></div>`;
+  $conv.appendChild(d); scrollDown();
+}
+function hideListening() { document.getElementById('listenRow')?.remove(); }
+function scrollDown() { setTimeout(() => $conv.scrollTo({ top:$conv.scrollHeight, behavior:'smooth' }), 60); }
+
+// ══════════════════════════════════════
+// CARDS
+// ══════════════════════════════════════
+function showSchemeCard() {
+  const c = document.createElement('div');
+  c.className = 'scheme-card';
+  c.innerHTML = `
+    <div class="sc-hd" style="background:#1a6b3c">
+      <span class="sc-ico">🌾</span>
+      <div><div class="sc-nm">PM Kisan Samman Nidhi</div><div class="sc-min">Ministry of Agriculture, GoI</div></div>
+    </div>
+    <div class="sc-bd">
+      <div class="sc-amt">₹6,000 / saal</div>
+      <div class="sc-det">Do-do hazaar ki teen kisht · Seedha bank mein</div>
+      <div class="sc-match">✦ High Confidence Match</div>
+      <button class="sc-cta" onclick="triggerDocFlow()">📋 Documents check karo →</button>
+    </div>`;
+  $conv.appendChild(c); scrollDown();
+}
+
+// speakThen: speak + guaranteed onDone even if TTS callback stalls
+function speakThen(text, onDone, timeoutMs) {
+  let fired = false;
+  function finish() { if (!fired) { fired = true; onDone?.(); } }
+  speak(text, finish);
+  setTimeout(finish, timeoutMs || 10000);
+}
+
+function showDocCard() {
+  const c = document.createElement('div');
+  c.className = 'doc-card';
+  c.innerHTML = `
+    <div class="doc-hd">📄 दस्तावेज़ स्कैन करें — PM Kisan</div>
+    ${[['🪪','आधार कार्ड','d0'],['📜','खतौनी (ज़मीन का रिकॉर्ड)','d1'],['🏦','बैंक पासबुक','d2']].map(([ico,name,id])=>`
+    <div class="doc-row">
+      <span class="doc-ico">${ico}</span>
+      <div class="doc-info">
+        <div class="doc-name">${name}</div>
+        <div class="doc-st" id="st-${id}">स्कैन करें</div>
+      </div>
+      <button class="doc-btn" id="btn-${id}" onclick="tapDoc('${id}')">📷 स्कैन</button>
+    </div>`).join('')}
+    <div class="doc-verify-row">
+      <button class="doc-verify" id="verifyBtn" disabled onclick="verifyDocs()">वेरीफाई करो</button>
+    </div>`;
+  $conv.appendChild(c); scrollDown();
+}
+
+function tapDoc(id) {
+  const btn = document.getElementById('btn-'+id);
+  const st  = document.getElementById('st-'+id);
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  // Brief "scanning" delay makes it feel real
+  setTimeout(() => {
+    btn.className   = 'doc-btn done';
+    btn.textContent = '✓ हो गया';
+    st.textContent  = 'स्कैन हो गया';
+    st.className    = 'doc-st ok';
+    docUploaded[id] = true;
+    if (docUploaded.d0 && docUploaded.d1 && docUploaded.d2) {
+      const v = document.getElementById('verifyBtn');
+      v.disabled = false;
+      scrollDown();
+    }
+  }, 600);
+}
+
+function verifyDocs() {
+  addUser("वेरीफाई करो");
+  const docCard = $conv.querySelector('.doc-card');
+  if (docCard) docCard.style.opacity = '0.5';
+
+  // "Checking" speech fires in parallel — visuals don't wait for it
+  speak("ठीक है, अभी जाँच करता हूँ...", null);
+
+  // Scan card appears on its own timer (robust — not speech-dependent)
+  setTimeout(() => {
+    const scanCard = buildScanCard();
+    $conv.appendChild(scanCard);
+    scrollDown();
+
+    animateScan(scanCard, () => {
+      // ── Step 1: show results with warning ──
+      const cl = buildResultChecklist();
+      $conv.appendChild(cl); scrollDown();
+
+      const resultSpeech =
+        "आधार कार्ड — बिल्कुल ठीक है। " +
+        "खतौनी में एक समस्या है — नाम में अंतर है। रमेश कुमा लिखा है, जबकि आधार में रमेश कुमार होना चाहिए। " +
+        "बैंक पासबुक — ठीक है।";
+
+      speakThen(resultSpeech, () => {
+        // ── Step 2: explain correction is free ──
+        setTimeout(() => {
+          addAI("खतौनी में नाम की यह गलती <strong>बिल्कुल मुफ़्त</strong> में ठीक होती है — बस ७ दिन लगते हैं।");
+          speak(
+            "अच्छी बात यह है कि यह गलती बिल्कुल मुफ़्त में ठीक होती है — कोई पैसा नहीं लगता। बस सात दिन का काम है।",
+            () => {
+              // ── Step 3: ask about nearby office ──
+              setTimeout(() => {
+                addAI("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?");
+                speak("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?", () => {
+                  docPhase = 'awaiting_office_help';
+                  setMic('idle');
+                });
+              }, 500);
+            }
+          );
+        }, 600);
+      }, 12000);
+    });
+  }, 500);
+}
+
+function showNearbyOffice() {
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+
+    // Office card
+    const card = document.createElement('div');
+    card.className = 'action-card';
+    card.innerHTML = `
+      <div class="ac-hd">📍 नज़दीकी तहसील ऑफिस</div>
+      <div class="ac-step">
+        <span class="ac-ico">🏢</span>
+        <div>
+          <div class="ac-txt">तहसील कार्यालय, लखनऊ सदर</div>
+          <div class="ac-sub">विकास भवन, गोमती नगर, लखनऊ · 2.4 km दूर</div>
+          <div class="ac-sub" style="margin-top:3px;">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+        </div>
+      </div>
+      <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 आपको क्या लेकर जाना है?</div>
+      <div class="ac-step">
+        <span class="ac-ico">🪪</span>
+        <div>
+          <div class="ac-txt">आधार कार्ड</div>
+          <div class="ac-sub">Original + एक फ़ोटोकॉपी</div>
+        </div>
+      </div>
+      <div class="ac-step">
+        <span class="ac-ico">📜</span>
+        <div>
+          <div class="ac-txt">पुरानी खतौनी</div>
+          <div class="ac-sub">Original + एक फ़ोटोकॉपी</div>
+        </div>
+      </div>
+      <div class="ac-step">
+        <span class="ac-ico">📝</span>
+        <div>
+          <div class="ac-txt">काउंटर पर नाम सुधार फ़ॉर्म भरें और जमा करें</div>
+          <div class="ac-sub">फ़ॉर्म वहीं मिलेगा — दोनों की एक-एक फ़ोटोकॉपी साथ दें</div>
+          <span class="ac-pill free">बिल्कुल मुफ़्त · कोई फ़ीस नहीं</span>
+        </div>
+      </div>
+      <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+        <span class="ac-ico">📬</span>
+        <div>
+          <div class="ac-txt">सही खतौनी घर पर पोस्ट से आ जाएगी</div>
+          <div class="ac-sub">फ़ॉर्म जमा होने के ७–१० दिन में डिलीवरी</div>
+        </div>
+      </div>`;
+    $conv.appendChild(card); scrollDown();
+
+    speakThen(
+      "नज़दीकी तहसील ऑफिस — विकास भवन, गोमती नगर — वहाँ दो चीज़ें लेकर जाएं। एक — आधार कार्ड, और दो — पुरानी खतौनी। दोनों की एक-एक फ़ोटोकॉपी भी साथ रखें। काउंटर पर पहुँचकर नाम सुधार फ़ॉर्म माँगें — वह वहीं मिलेगा। फ़ॉर्म भरकर जमा करें। इसके बाद सात से दस दिन में सही की हुई खतौनी पोस्ट से आपके घर आ जाएगी।",
+      () => {
+        setTimeout(() => {
+          addAI("खतौनी घर आ जाए तो उसे यहाँ अपलोड करें — मैं दोबारा जाँचूँगा।");
+          speak("खतौनी घर आ जाए तो उसे यहाँ अपलोड करें।", () => {
+            showReUploadCard();
+            setMic('idle');
+          });
+        }, 600);
+      }, 12000
+    );
+  }, 900);
+}
+
+function showReUploadCard() {
+  const c = document.createElement('div');
+  c.className = 'doc-card'; c.id = 'reUploadCard';
+  c.innerHTML = `
+    <div class="doc-hd" style="background:#b85e00">📤 ठीक की हुई खतौनी अपलोड करें</div>
+    <div class="doc-row">
+      <span class="doc-ico">📜</span>
+      <div class="doc-info">
+        <div class="doc-name">खतौनी (नाम सुधरा हुआ)</div>
+        <div class="doc-st" id="st-re">स्कैन करें</div>
+      </div>
+      <button class="doc-btn" id="btn-re" onclick="tapReDoc()">📷 स्कैन</button>
+    </div>`;
+  $conv.appendChild(c); scrollDown();
+}
+
+function tapReDoc() {
+  const btn = document.getElementById('btn-re');
+  const st  = document.getElementById('st-re');
+  btn.disabled = true; btn.textContent = '⏳';
+  setTimeout(() => {
+    btn.className = 'doc-btn done'; btn.textContent = '✓ हो गया';
+    st.textContent = 'स्कैन हो गया'; st.className = 'doc-st ok';
+    scrollDown();
+    setTimeout(showAllClearResults, 700);
+  }, 800);
+}
+
+function showAllClearResults() {
+  addUser("हो गया");
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    // All-clear checklist
+    const cl = document.createElement('div');
+    cl.className = 'result-cl';
+    cl.innerHTML = `
+      <div class="rcl-hd" style="background:var(--green)">✅ PM Kisan — सभी दस्तावेज़ सही हैं</div>
+      <div class="rcl-row">
+        <span class="rcl-ico">✅</span>
+        <div><div class="rcl-name">आधार कार्ड</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+      </div>
+      <div class="rcl-row">
+        <span class="rcl-ico">✅</span>
+        <div><div class="rcl-name">खतौनी</div><div class="rcl-msg">नाम सुधरा — अब बिल्कुल ठीक है</div></div>
+      </div>
+      <div class="rcl-row">
+        <span class="rcl-ico">✅</span>
+        <div><div class="rcl-name">बैंक पासबुक</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+      </div>`;
+    $conv.appendChild(cl); scrollDown();
+
+    speakThen(
+      "बहुत बढ़िया! अब तीनों दस्तावेज़ बिल्कुल सही हैं। आधार कार्ड — ठीक। खतौनी — ठीक। बैंक पासबुक — ठीक।",
+      () => {
+        setTimeout(() => {
+          addAI("क्या आपको PM Kisan का फ़ॉर्म भरने में मदद चाहिए?");
+          speak("क्या आपको PM Kisan का फ़ॉर्म भरने में मदद चाहिए?", () => {
+            docPhase = 'awaiting_form_help';
+            setMic('idle');
+          });
+        }, 600);
+      }, 8000
+    );
+  }, 1200);
+}
+
+function buildScanCard() {
+  const docs = [
+    'आधार कार्ड जाँच रहा हूँ...',
+    'खतौनी जाँच रहा हूँ...',
+    'बैंक पासबुक जाँच रहा हूँ...'
+  ];
+  const card = document.createElement('div');
+  card.className = 'scan-card';
+  card.id = 'scanCard';
+  card.innerHTML = docs.map((label, i) => `
+    <div class="scan-step">
+      <div class="scan-dot ${i === 0 ? 'active' : 'pending'}" id="sdot-${i}"></div>
+      <span class="scan-label ${i === 0 ? '' : 'pending'}" id="slbl-${i}">${label}</span>
+    </div>
+  `).join('');
+  return card;
+}
+
+function animateScan(card, onDone) {
+  // dot 0 starts active; every 800ms mark it done and activate next
+  let idx = 1;
+  function step() {
+    document.getElementById('sdot-' + (idx - 1)).className = 'scan-dot done';
+    document.getElementById('slbl-' + (idx - 1)).className = 'scan-label';
+    if (idx < 3) {
+      document.getElementById('sdot-' + idx).className = 'scan-dot active';
+      document.getElementById('slbl-' + idx).className = 'scan-label';
+      idx++;
+      setTimeout(step, 800);
+    } else {
+      // All three done — remove card then call onDone
+      setTimeout(() => { card.remove(); onDone(); }, 400);
+    }
+  }
+  setTimeout(step, 800);
+}
+
+function buildResultChecklist() {
+  const cl = document.createElement('div');
+  cl.className = 'result-cl';
+  cl.innerHTML = `
+    <div class="rcl-hd">📋 PM Kisan — दस्तावेज़ जाँच</div>
+    <div class="rcl-row">
+      <span class="rcl-ico">✅</span>
+      <div><div class="rcl-name">आधार कार्ड</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+    </div>
+    <div class="rcl-row warn">
+      <span class="rcl-ico">⚠️</span>
+      <div>
+        <div class="rcl-name">खतौनी</div>
+        <div class="rcl-msg">नाम में अंतर: "Ramesh Kuma" vs "Ramesh Kumar"</div>
+      </div>
+    </div>
+    <div class="rcl-row">
+      <span class="rcl-ico">✅</span>
+      <div><div class="rcl-name">बैंक पासबुक</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+    </div>`;
+  return cl;
+}
+
+// ══════════════════════════════════════
+// CONVERSATION TURNS
+// ══════════════════════════════════════
+const DEMO_DEFAULTS = [
+  "मुझे सरकारी योजना के बारे में जानना है",
+  "खेती करता हूँ",
+  "एक लाख से कम है",
+  "हाँ, ज़रूर बताओ"
+];
+
+// ══════════════════════════════════════
+// SERVICE FLOWS (Aadhaar / Passport / PAN / Driving)
+// ══════════════════════════════════════
+function processServiceTurn(said) {
+  hideListening();
+  listening = false;
+  const demos = SERVICE_DEMO[serviceIntent] || [];
+  const text  = (said && said.trim()) ? said.trim() : (demos[serviceTurn] || 'हाँ');
+  addUser(text);
+  const t = serviceTurn;
+  serviceTurn++;
+
+  if (serviceIntent === 'aadhaar') {
+    if (t === 0) {
+      // Detect sub-intent from what user said
+      const lower = text.toLowerCase();
+      const isUpdate = /update|updat|badl|theek|correct|naam|pata|address|mobile|number/i.test(lower);
+      showTyping(); setMic('loading');
+      setTimeout(() => {
+        hideTyping();
+        showAadhaarGuide(isUpdate ? 'update' : 'update');
+      }, 900);
+    } else if (t === 1) {
+      // User answered: online vs center
+      const lower = text.toLowerCase();
+      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(lower);
+      showTyping(); setMic('loading');
+      setTimeout(() => {
+        hideTyping();
+        if (wantsOnline) {
+          openAadhaarOnlineOverlay();
+        } else {
+          showAadhaarCenterGuide();
+        }
+      }, 900);
+    }
+  } else {
+    // Other services — generic "coming soon" nudge back to PM Kisan demo
+    showTyping(); setMic('loading');
+    setTimeout(() => {
+      hideTyping();
+      addAI(`${serviceIntent === 'passport' ? 'पासपोर्ट' : serviceIntent === 'pan' ? 'PAN Card' : 'Driving Licence'} सेवा जल्द आ रही है! अभी PM Kisan योजना का पूरा demo देखें।`);
+      speak('यह सेवा जल्द आ रही है।', () => setMic('idle'));
+    }, 900);
+  }
+}
+
+function showAadhaarGuide(subIntent) {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🪪 आधार अपडेट — पूरी जानकारी</div>
+
+    <div class="ac-step">
+      <span class="ac-ico">💻</span>
+      <div>
+        <div class="ac-txt">ऑनलाइन अपडेट करें</div>
+        <div class="ac-sub">myaadhaar.uidai.gov.in → "Update Aadhaar" → नाम / पता / मोबाइल</div>
+        <span class="ac-pill free">₹50 शुल्क · घर बैठे</span>
+      </div>
+    </div>
+
+    <div class="ac-step">
+      <span class="ac-ico">🏢</span>
+      <div>
+        <div class="ac-txt">नज़दीकी आधार सेंटर जाएं</div>
+        <div class="ac-sub">India Post, Hazratganj · 1.2 km</div>
+        <div class="ac-sub" style="margin-top:2px">CSC Centre, Gomti Nagar · 2.1 km</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+      </div>
+    </div>
+
+    <div class="ac-step">
+      <span class="ac-ico">📄</span>
+      <div>
+        <div class="ac-txt">साथ लेकर जाएं</div>
+        <div class="ac-sub">• आधार कार्ड (Original)</div>
+        <div class="ac-sub">• पहचान प्रमाण — PAN / Voter ID / Passport</div>
+        <div class="ac-sub">• पते का प्रमाण — बिजली बिल / राशन कार्ड (अगर पता बदलना है)</div>
+      </div>
+    </div>
+
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">⏱️</span>
+      <div>
+        <div class="ac-txt">अपडेट ९० दिनों में हो जाता है</div>
+        <div class="ac-sub">SMS और UIDAI website पर status track करें</div>
+        <span class="ac-pill free">₹50 शुल्क · कोई एजेंट ज़रूरी नहीं</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card);
+  scrollDown();
+
+  const speech =
+    "आधार अपडेट करने के दो तरीके हैं। " +
+    "पहला — ऑनलाइन। myaadhaar.uidai.gov.in पर जाएं, Update Aadhaar पर क्लिक करें। नाम, पता, मोबाइल नंबर — सब कुछ घर बैठे बदल सकते हैं। बस पचास रुपये लगते हैं। " +
+    "दूसरा — नज़दीकी आधार सेंटर। आपके पास इंडिया पोस्ट हज़रतगंज और गोमती नगर CSC सेंटर है। " +
+    "साथ में आधार कार्ड और एक पहचान प्रमाण लेकर जाएं — PAN कार्ड, वोटर ID, या पासपोर्ट। " +
+    "अगर पता बदलना है तो बिजली बिल या राशन कार्ड भी लाएं। " +
+    "अपडेट नब्बे दिनों में हो जाता है।";
+
+  speakThen(speech, () => {
+    setTimeout(() => {
+      addAI("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?");
+      speak("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?", () => setMic('idle'));
+    }, 500);
+  }, 14000);
+}
+
+// ══════════════════════════════════════
+// SCHEME CONVERSATION TURNS
+// ══════════════════════════════════════
+function processUserTurn(said) {
+  hideListening();
+  listening = false;
+  const text = (said && said.trim()) ? said.trim() : DEMO_DEFAULTS[turn];
+  addUser(text);
+  const t = turn;
+  turn++;
+
+  if (t === 0) {
+    setTimeout(() => {
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        addAI(SC.ack0 + '<br><br>' + SC.q1);
+        speak(SC.ack0 + ' ' + SC.q1, () => setMic('idle')); // Devanagari → native accent
+      }, 700);
+    }, 350);
+
+  } else if (t === 1) {
+    setTimeout(() => {
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        addAI(SC.ack1 + '<br><br>' + SC.q2);
+        speak(SC.ack1 + ' ' + SC.q2, () => setMic('idle'));
+      }, 700);
+    }, 350);
+
+  } else if (t === 2) {
+    setTimeout(() => {
+      showTyping();
+      setMic('loading');
+      setTimeout(() => {
+        hideTyping();
+        addAI(SC.result);
+        showSchemeCard();           // card appears as speech begins
+        speak(SC.result, () => {
+          setTimeout(() => {
+            addAI(SC.askDocs);
+            speak(SC.askDocs, () => setMic('idle'));
+          }, 500);
+        });
+      }, 1400);
+    }, 400);
+
+  } else if (t === 3) {
+    triggerDocFlow();
+  }
+}
+
+function triggerDocFlow() {
+  if (turn <= 3) turn = 4;
+  showTyping();
+  setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    addAI(SC.docs);
+    showDocCard();
+    speak(SC.docs, () => setMic('idle'));
+  }, 700);
+}
+
+// ══════════════════════════════════════
+// FORM DATA
+// ══════════════════════════════════════
+const KISAN_FORM = [
+  { lbl:'पूरा नाम',             val:'रमेश कुमार',     hint:'आधार कार्ड पर जैसा लिखा है वैसा ही',    voice:'पहला खाना है — पूरा नाम। मैंने भरा है — रमेश कुमार। यह बिल्कुल आधार जैसा होना चाहिए, वरना फ़ॉर्म रिजेक्ट हो सकता है।' },
+  { lbl:'जन्म तारीख',           val:'15/05/1990',      hint:'DD/MM/YYYY — आधार से मिलनी चाहिए',       voice:'दूसरा खाना — जन्म तारीख। मैंने भरा है — पंद्रह मई, उन्नीस सौ नब्बे। यह उम्र और आधार लिंकेज के लिए ज़रूरी है।' },
+  { lbl:'राज्य',                val:'Uttar Pradesh',   hint:'योजना का पैसा राज्य-वार आता है',          voice:'तीसरा खाना — राज्य। मैंने भरा है — उत्तर प्रदेश। योजना का पैसा आपके राज्य के हिसाब से आएगा।' },
+  { lbl:'ज़मीन (हेक्टेयर में)', val:'1.5',             hint:'2 हेक्टेयर से कम होनी चाहिए',             voice:'चौथा खाना — ज़मीन। मैंने भरा है — डेढ़ हेक्टेयर। PM Kisan के लिए ज़मीन दो हेक्टेयर से कम होनी चाहिए।' },
+  { lbl:'बैंक अकाउंट नंबर',     val:'XXXX 1234',       hint:'आधार से लिंक होना ज़रूरी है',              voice:'पाँचवाँ खाना — बैंक अकाउंट नंबर। पैसा सीधे इसी अकाउंट में आएगा — यह आधार से लिंक होना चाहिए।' },
+  { lbl:'IFSC कोड',             val:'SBIN0001234',     hint:'बैंक की पासबुक के पहले पेज पर मिलेगा',    voice:'आखिरी खाना — IFSC कोड। यह बैंक की पासबुक पर मिलेगा। मैंने भरा है — एस बी आई एन शून्य शून्य शून्य एक दो तीन चार।' },
+];
+let formFieldIdx = 0;
+let formPhase    = null; // null | 'field_N' | 'final'
+let webOverlayOpen = false;
+
+// ══════════════════════════════════════
+// APPLY FLOW
+// ══════════════════════════════════════
+function buildApplyCTA() {
+  const c = document.createElement('div');
+  c.className = 'apply-cta';
+  c.innerHTML = `
+    <div class="apply-cta-hd">🎉 अगला कदम — Apply करें</div>
+    <div class="apply-cta-msg">दो दस्तावेज़ बिल्कुल सही हैं। मैं आवाज़ से हर खाना भरने में मदद करूँगा — जैसे कोई साथ बैठकर फ़ॉर्म भरा रहा हो।</div>
+    <div class="apply-cta-btns">
+      <button class="apply-btn-p" onclick="startFormFlow()">📋 PM Kisan Apply करें →</button>
+      <button class="apply-btn-s" onclick="triggerNaamFix()">✏️ पहले नाम ठीक करें</button>
+    </div>`;
+  return c;
+}
+
+function triggerNaamFix() {
+  docPhase = null;
+  addUser("पहले नाम ठीक करूँगा");
+  showNaamFix();
+}
+
+function startFormFlow() {
+  document.querySelectorAll('.apply-btn-p,.apply-btn-s').forEach(b => b.disabled = true);
+
+  // Beat 1 — full announcement, wait for speech to truly finish
+  addAI("ज़रूर! मैं आपको अभी <strong>PM Kisan की आधिकारिक सरकारी वेबसाइट</strong> पर ले जाता हूँ।<br><br>आपने जो जानकारी दी — उससे मैंने सभी ज़रूरी खाने पहले से भर दिए हैं। हम साथ में एक-एक खाना देखेंगे — मैं बताऊँगा कि क्या भरा है और क्यों।");
+
+  speak(
+    "ज़रूर! मैं आपको अभी PM Kisan की आधिकारिक सरकारी वेबसाइट पर ले जाता हूँ। आपने जो जानकारी दी थी — उससे मैंने सभी ज़रूरी खाने पहले से भर दिए हैं। हम साथ में एक-एक खाना देखेंगे और मैं बताऊँगा कि क्या भरा है और क्यों।",
+    () => {
+      // Beat 2 — 700ms pause, then show loader (feels like actual redirect)
+      setTimeout(() => {
+        const loader = document.createElement('div');
+        loader.className = 'site-loader';
+        loader.innerHTML = `<div class="sl-ico">🌐</div>
+          <div class="sl-title">pmkisan.gov.in खुल रहा है...</div>
+          <div class="sl-sub">Official Government of India Website</div>
+          <div class="sl-bar"><div class="sl-fill"></div></div>`;
+        $conv.appendChild(loader); scrollDown();
+
+        // Beat 3 — 3.5s loader so user clearly sees the redirect happening
+        setTimeout(() => {
+          loader.remove();
+          showFormSimulator();
+        }, 3500);
+      }, 700);
+    }
+  );
+}
+
+function showFormSimulator() {
+  formFieldIdx = 0;
+  webOverlayOpen = true;
+
+  // Build the overlay
+  const ov = document.createElement('div');
+  ov.className = 'web-overlay'; ov.id = 'webOverlay';
+  ov.innerHTML = `
+    <!-- Browser bar -->
+    <div class="wob-bar">
+      <button class="wob-back" onclick="closeWebOverlay()">✕</button>
+      <div class="wob-url"><span class="wob-secure">🔒</span> pmkisan.gov.in</div>
+    </div>
+    <!-- GoI header -->
+    <div class="wob-goi-hd">
+      <span class="wob-goi-emblem">🏛️</span>
+      <div>
+        <div class="wob-goi-nm">PM Kisan Samman Nidhi</div>
+        <div class="wob-goi-sub">Ministry of Agriculture & Farmers Welfare, GoI</div>
+      </div>
+      <div class="wob-goi-badge">OFFICIAL</div>
+    </div>
+    <!-- Progress bar -->
+    <div class="wob-prog-wrap"><div class="wob-prog-fill" id="wobProg" style="width:0%"></div></div>
+    <!-- Form body -->
+    <div class="wob-body" id="wobBody">
+      <div>
+        <div class="wob-step-tag">STEP 2 OF 3 — Farmer Details</div>
+        <div class="wob-form-hd">New Farmer Registration</div>
+        <div class="wob-form-sub">सभी खाने आधार कार्ड के अनुसार भरें</div>
+      </div>
+      ${KISAN_FORM.map((f,i) => `
+        <div class="wob-field" id="wf-${i}">
+          <div class="wob-lbl">${f.lbl} <span class="wob-req">*</span></div>
+          <div class="wob-input-sim empty" id="wi-${i}">—</div>
+          <div class="wob-field-hint">${f.hint}</div>
+          <div class="wob-autofill">✓ Auto-filled</div>
+        </div>`).join('')}
+    </div>
+    <!-- Voice guidance strip -->
+    <div class="wob-voice-strip">
+      <div class="wob-voice-av">🏛️</div>
+      <div class="wob-voice-info">
+        <div class="wob-voice-status">🔊 आवाज़ से गाइड हो रहा हूँ</div>
+        <div class="wob-voice-text" id="wobVoiceTxt">एक पल...</div>
+      </div>
+      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceFormField()" disabled>अगला →</button>
+    </div>`;
+
+  document.querySelector('.phone-frame').appendChild(ov);
+  setTimeout(() => voiceGuideField(0), 1500);
+}
+
+function voiceGuideField(idx) {
+  formPhase = 'field_' + idx;
+  const f = KISAN_FORM[idx];
+
+  // Update progress bar
+  const pct = Math.round((idx / KISAN_FORM.length) * 100);
+  const bar = document.getElementById('wobProg');
+  if (bar) bar.style.width = pct + '%';
+
+  // Deactivate previous fields, mark done
+  KISAN_FORM.forEach((_, i) => {
+    const row = document.getElementById('wf-' + i);
+    if (!row) return;
+    if (i < idx) row.className = 'wob-field done';
+    else if (i === idx) row.className = 'wob-field active';
+    else row.className = 'wob-field';
+  });
+
+  // Scroll the active field into view inside wob-body
+  setTimeout(() => {
+    const activeField = document.getElementById('wf-' + idx);
+    if (activeField) activeField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+
+  // Update voice strip text
+  const vtxt = document.getElementById('wobVoiceTxt');
+  if (vtxt) vtxt.textContent = f.voice.split('।')[0] + '।';
+
+  // Disable next button while speaking
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) btn.disabled = true;
+
+  // Type in the value with cursor animation
+  const inputEl = document.getElementById('wi-' + idx);
+  if (inputEl) {
+    inputEl.className = 'wob-input-sim';
+    inputEl.innerHTML = '<span class="wob-cursor"></span>';
+    setTimeout(() => typeInField(inputEl, f.val, () => {
+      // Enable next button after type-in
+      if (btn) btn.disabled = false;
+    }), 400);
+  }
+
+  // Speak field guidance
+  speakThen(f.voice, () => {
+    if (btn) btn.disabled = false;
+    setMic('idle');
+  }, 10000);
+}
+
+function typeInField(el, text, done) {
+  let i = 0;
+  el.innerHTML = '<span class="wob-cursor"></span>';
+  const t = setInterval(() => {
+    el.innerHTML = text.slice(0, ++i) + '<span class="wob-cursor"></span>';
+    if (i >= text.length) {
+      clearInterval(t);
+      el.innerHTML = text; // remove cursor when done
+      done?.();
+    }
+  }, 45);
+}
+
+function advanceFormField() {
+  if (speaking) {
+    currentAudio?.pause(); currentAudio = null;
+    window.speechSynthesis?.cancel();
+    speaking = false;
+  }
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) btn.disabled = true;
+
+  formFieldIdx++;
+  if (formFieldIdx >= KISAN_FORM.length) {
+    showFormReview();
+    return;
+  }
+  voiceGuideField(formFieldIdx);
+}
+
+function showFormReview() {
+  formPhase = 'final';
+  // Mark all fields done, 100% progress
+  const bar = document.getElementById('wobProg');
+  if (bar) bar.style.width = '100%';
+  KISAN_FORM.forEach((_, i) => {
+    const row = document.getElementById('wf-' + i);
+    if (row) row.className = 'wob-field done';
+  });
+
+  // Update voice strip
+  const vtxt = document.getElementById('wobVoiceTxt');
+  if (vtxt) vtxt.textContent = 'सभी खाने भर गए। एक बार देखें और Submit करें।';
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) { btn.textContent = '✅ Submit करें'; btn.disabled = false; btn.onclick = showSubmitConfirm; }
+
+  // Scroll to top of form body
+  const body = document.getElementById('wobBody');
+  if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
+
+  speakThen(
+    "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे तक देख लीजिए। सब सही लगे तो Submit का बटन दबाइए — यह काम आपको खुद करना है, मैं submit नहीं करूँगा।",
+    () => setMic('idle'), 14000
+  );
+}
+
+function showSubmitConfirm() {
+  // Close overlay, go back to chat, show final card
+  closeWebOverlay();
+  setTimeout(() => {
+    const card = document.createElement('div');
+    card.className = 'submit-ready';
+    card.innerHTML = `
+      <div class="sr-ico">✅</div>
+      <div class="sr-title">फ़ॉर्म तैयार है!</div>
+      <div class="sr-msg">सभी छह खाने सही भरे हैं। PM Kisan की वेबसाइट पर जाकर Submit दबाएं — ₹6,000 सालाना आपके बैंक में।</div>
+      <div class="sr-warn">⚠️ Submit आपको खुद करना है — मैं नहीं करूँगा।</div>
+      <button class="sr-btn" onclick="openOfficialSite()">🌐 pmkisan.gov.in खोलें →</button>`;
+    $conv.appendChild(card); scrollDown();
+    speak("फ़ॉर्म बिल्कुल तैयार है। अब pmkisan.gov.in पर जाकर submit का बटन दबाइए। शुभकामनाएं!", () => setMic('idle'));
+  }, 400);
+}
+
+// ══════════════════════════════════════
+// AADHAAR ONLINE FLOW
+// ══════════════════════════════════════
+const UIDAI_FORM = [
+  { lbl:'आधार नंबर', val:'XXXX XXXX 1234', hint:'12 अंकों का आधार नंबर — आखिरी 4 दिखाई दे रहे हैं', voice:'पहला खाना — आधार नंबर। मैंने भरा है — आपका रजिस्टर्ड आधार नंबर। यह पहले से UIDAI के सर्वर पर लिंक है।' },
+  { lbl:'रजिस्टर्ड मोबाइल', val:'+91 98765 43210', hint:'OTP इसी नंबर पर आएगा — आधार से लिंक होना चाहिए', voice:'दूसरा खाना — मोबाइल नंबर। यह आधार से लिंक होना चाहिए — OTP इसी पर आएगा।' },
+  { lbl:'क्या बदलना है?', val:'नाम (Name)', hint:'एक बार में एक बदलाव हो सकता है', voice:'तीसरा खाना — क्या बदलना है। मैंने चुना है — नाम। आप चाहें तो पता या मोबाइल भी बदल सकते हैं।' },
+  { lbl:'नया नाम', val:'रमेश कुमार', hint:'बिल्कुल वैसा लिखें जैसा सरकारी दस्तावेज़ में है', voice:'चौथा खाना — नया नाम। मैंने भरा है — रमेश कुमार। ध्यान रहे — PAN कार्ड या पासपोर्ट जैसा ही लिखें, वरना reject हो सकता है।' },
+  { lbl:'प्रमाण दस्तावेज़', val:'PAN Card', hint:'नाम बदलने के लिए government ID ज़रूरी है', voice:'पाँचवाँ खाना — प्रमाण दस्तावेज़। PAN कार्ड, पासपोर्ट, या वोटर ID — कोई भी एक चलेगा।' },
+];
+let uidaiFieldIdx = 0;
+
+function openAadhaarOnlineOverlay() {
+  uidaiFieldIdx = 0;
+  addAI("ज़रूर! मैं आपको <strong>UIDAI की आधिकारिक वेबसाइट</strong> पर ले जाता हूँ — सभी ज़रूरी खाने पहले से भरे हैं।");
+  speak("ज़रूर! मैं आपको UIDAI की आधिकारिक वेबसाइट पर ले जाता हूँ। आपके सभी ज़रूरी खाने पहले से भरे हैं।", () => {
+    setTimeout(() => {
+      const loader = document.createElement('div');
+      loader.className = 'site-loader';
+      loader.innerHTML = `<div class="sl-ico">🌐</div>
+        <div class="sl-title">myaadhaar.uidai.gov.in खुल रहा है...</div>
+        <div class="sl-sub">UIDAI — Unique Identification Authority of India</div>
+        <div class="sl-bar"><div class="sl-fill"></div></div>`;
+      $conv.appendChild(loader); scrollDown();
+      setTimeout(() => {
+        loader.remove();
+        showUidaiFormOverlay();
+      }, 3500);
+    }, 600);
+  });
+}
+
+function showUidaiFormOverlay() {
+  webOverlayOpen = true;
+  const ov = document.createElement('div');
+  ov.className = 'web-overlay'; ov.id = 'webOverlay';
+  ov.innerHTML = `
+    <div class="wob-bar">
+      <button class="wob-back" onclick="closeWebOverlay()">✕</button>
+      <div class="wob-url"><span class="wob-secure">🔒</span> myaadhaar.uidai.gov.in</div>
+    </div>
+    <div class="wob-goi-hd" style="background:#003580">
+      <span class="wob-goi-emblem">🆔</span>
+      <div>
+        <div class="wob-goi-nm">myAadhaar — Update Request</div>
+        <div class="wob-goi-sub">UIDAI — Unique Identification Authority of India</div>
+      </div>
+      <div class="wob-goi-badge">OFFICIAL</div>
+    </div>
+    <div class="wob-prog-wrap"><div class="wob-prog-fill" id="wobProg" style="width:0%"></div></div>
+    <div class="wob-body" id="wobBody">
+      <div>
+        <div class="wob-step-tag">STEP 1 OF 2 — Identity Verification</div>
+        <div class="wob-form-hd">Aadhaar Update Request</div>
+        <div class="wob-form-sub">आधार अपडेट के लिए नीचे जानकारी भरें · शुल्क: ₹50</div>
+      </div>
+      ${UIDAI_FORM.map((f,i) => `
+        <div class="wob-field" id="wuf-${i}">
+          <div class="wob-lbl">${f.lbl} <span class="wob-req">*</span></div>
+          <div class="wob-input-sim empty" id="wui-${i}">—</div>
+          <div class="wob-field-hint">${f.hint}</div>
+          <div class="wob-autofill">✓ Auto-filled</div>
+        </div>`).join('')}
+    </div>
+    <div class="wob-voice-strip">
+      <div class="wob-voice-av">🏛️</div>
+      <div class="wob-voice-info">
+        <div class="wob-voice-status">🔊 आवाज़ से गाइड हो रहा हूँ</div>
+        <div class="wob-voice-text" id="wobVoiceTxt">एक पल...</div>
+      </div>
+      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceUidaiField()" disabled>अगला →</button>
+    </div>`;
+  document.querySelector('.phone-frame').appendChild(ov);
+  setTimeout(() => voiceGuideUidaiField(0), 1500);
+}
+
+function voiceGuideUidaiField(idx) {
+  formPhase = 'field_' + idx;
+  const f = UIDAI_FORM[idx];
+  const pct = Math.round((idx / UIDAI_FORM.length) * 100);
+  const bar = document.getElementById('wobProg');
+  if (bar) bar.style.width = pct + '%';
+
+  UIDAI_FORM.forEach((_, i) => {
+    const row = document.getElementById('wuf-' + i);
+    if (!row) return;
+    if (i < idx) row.className = 'wob-field done';
+    else if (i === idx) row.className = 'wob-field active';
+    else row.className = 'wob-field';
+  });
+  setTimeout(() => {
+    const el = document.getElementById('wuf-' + idx);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 200);
+
+  const vtxt = document.getElementById('wobVoiceTxt');
+  if (vtxt) vtxt.textContent = f.voice.split('।')[0] + '।';
+
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) btn.disabled = true;
+
+  const inputEl = document.getElementById('wui-' + idx);
+  if (inputEl) {
+    inputEl.className = 'wob-input-sim';
+    inputEl.innerHTML = '<span class="wob-cursor"></span>';
+    setTimeout(() => typeInField(inputEl, f.val, () => { if (btn) btn.disabled = false; }), 400);
+  }
+
+  speakThen(f.voice, () => { if (btn) btn.disabled = false; setMic('idle'); }, 10000);
+}
+
+function advanceUidaiField() {
+  if (speaking) { currentAudio?.pause(); currentAudio = null; window.speechSynthesis?.cancel(); speaking = false; }
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) btn.disabled = true;
+  uidaiFieldIdx++;
+  if (uidaiFieldIdx >= UIDAI_FORM.length) {
+    showUidaiFormReview();
+    return;
+  }
+  voiceGuideUidaiField(uidaiFieldIdx);
+}
+
+function showUidaiFormReview() {
+  formPhase = 'final';
+  const bar = document.getElementById('wobProg');
+  if (bar) bar.style.width = '100%';
+  UIDAI_FORM.forEach((_, i) => {
+    const row = document.getElementById('wuf-' + i);
+    if (row) row.className = 'wob-field done';
+  });
+  const vtxt = document.getElementById('wobVoiceTxt');
+  if (vtxt) vtxt.textContent = 'सभी खाने भरे। Submit करके ₹50 पेमेंट करें।';
+  const btn = document.getElementById('wobNextBtn');
+  if (btn) { btn.textContent = '✅ Submit करें'; btn.disabled = false; btn.onclick = showUidaiSubmitConfirm; }
+  const body = document.getElementById('wobBody');
+  if (body) body.scrollTo({ top:0, behavior:'smooth' });
+  speakThen(
+    "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे देख लीजिए। सब ठीक लगे तो Submit दबाइए — इसके बाद पचास रुपये का payment होगा और OTP आएगा।",
+    () => setMic('idle'), 14000
+  );
+}
+
+function showUidaiSubmitConfirm() {
+  closeWebOverlay();
+  setTimeout(() => {
+    const card = document.createElement('div');
+    card.className = 'submit-ready';
+    card.innerHTML = `
+      <div class="sr-ico">✅</div>
+      <div class="sr-title">आधार अपडेट रिक्वेस्ट तैयार!</div>
+      <div class="sr-msg">UIDAI वेबसाइट पर Submit करें → ₹50 payment करें → OTP verify करें → अपडेट ९० दिन में हो जाएगा।</div>
+      <div class="sr-warn">⚠️ Submit और payment आपको खुद करना है।</div>
+      <button class="sr-btn" onclick="window.open('https://myaadhaar.uidai.gov.in','_blank')">🌐 myaadhaar.uidai.gov.in →</button>`;
+    $conv.appendChild(card); scrollDown();
+    speak("आधार अपडेट रिक्वेस्ट तैयार है। UIDAI वेबसाइट पर submit करें, पचास रुपये payment करें, OTP verify करें — बस काम हो जाएगा! नब्बे दिन में अपडेट आ जाएगा।", () => setMic('idle'));
+  }, 400);
+}
+
+// ══════════════════════════════════════
+// AADHAAR CENTER GUIDE
+// ══════════════════════════════════════
+function showAadhaarCenterGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🏢 नज़दीकी आधार सेंटर — स्टेप-बाय-स्टेप</div>
+    <div class="ac-step">
+      <span class="ac-ico">📍</span>
+      <div>
+        <div class="ac-txt">India Post — Hazratganj</div>
+        <div class="ac-sub">Hazratganj Post Office, Lucknow · <strong>1.2 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📍</span>
+      <div>
+        <div class="ac-txt">CSC Centre — Gomti Nagar</div>
+        <div class="ac-sub">Common Service Centre, Gomti Nagar · <strong>2.1 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 6 बजे</div>
+      </div>
+    </div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 साथ क्या लेकर जाएं?</div>
+    <div class="ac-step">
+      <span class="ac-ico">🪪</span>
+      <div>
+        <div class="ac-txt">आधार कार्ड — Original</div>
+        <div class="ac-sub">Original दिखाएं + एक फ़ोटोकॉपी दें</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📄</span>
+      <div>
+        <div class="ac-txt">पहचान प्रमाण</div>
+        <div class="ac-sub">PAN कार्ड / वोटर ID / पासपोर्ट — Original + फ़ोटोकॉपी</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">🏠</span>
+      <div>
+        <div class="ac-txt">पते का प्रमाण (अगर पता बदलना है)</div>
+        <div class="ac-sub">बिजली बिल / राशन कार्ड / बैंक स्टेटमेंट</div>
+      </div>
+    </div>
+    <div class="ac-hd" style="background:#1a6b3c;border-radius:0;margin-top:0">🪜 काउंटर पर क्या करें?</div>
+    <div class="ac-step">
+      <span class="ac-ico">1️⃣</span>
+      <div><div class="ac-txt">Counter पर जाकर बोलें — "Aadhaar Update"</div><div class="ac-sub">Token लें और नंबर आने पर काउंटर पर जाएं</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">2️⃣</span>
+      <div><div class="ac-txt">Operator को बताएं क्या बदलना है</div><div class="ac-sub">नाम / पता / मोबाइल — बोलकर बताएं</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">3️⃣</span>
+      <div><div class="ac-txt">Biometric verification देना होगा</div><div class="ac-sub">अंगूठा या आँख की scan — मशीन पर करनी होगी</div></div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">📬</span>
+      <div>
+        <div class="ac-txt">URN नंबर मिलेगा — इससे status track करें</div>
+        <div class="ac-sub">₹50 शुल्क · अपडेट ९० दिन में हो जाता है</div>
+        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "आपके पास दो नज़दीकी सेंटर हैं। इंडिया पोस्ट हज़रतगंज — सिर्फ़ डेढ़ किलोमीटर दूर। और CSC सेंटर, गोमती नगर — दो किलोमीटर। " +
+    "साथ में आधार कार्ड और एक पहचान प्रमाण लेकर जाएं — PAN कार्ड या वोटर ID। दोनों की फ़ोटोकॉपी भी रखें। " +
+    "काउंटर पर पहुँचकर बोलें — आधार अपडेट चाहिए। Operator form भरेगा, आपको biometric scan देनी होगी। " +
+    "इसके बाद URN नंबर मिलेगा — इससे आप status track कर सकते हैं। पचास रुपये शुल्क लगेगा और नब्बे दिन में अपडेट हो जाएगा।",
+    () => {
+      setTimeout(() => {
+        addAI("और कोई मदद चाहिए? या PM Kisan जैसी कोई योजना देखनी है?");
+        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+      }, 600);
+    }, 16000
+  );
+}
+
+function closeWebOverlay() {
+  const ov = document.getElementById('webOverlay');
+  if (!ov) return;
+  webOverlayOpen = false;
+  formPhase = null;
+  ov.classList.add('closing');
+  setTimeout(() => ov.remove(), 300);
+}
+
+function openOfficialSite() {
+  addAI("pmkisan.gov.in खुल रही है — Submit आप खुद करें। शुभकामनाएं! 🌾");
+  window.open('https://pmkisan.gov.in', '_blank');
+}
+
+// ══════════════════════════════════════
+// MIC TAP
+// ══════════════════════════════════════
+function onMicTap() {
+  if (speaking) {
+    currentAudio?.pause(); currentAudio = null;
+    window.speechSynthesis?.cancel();
+    speaking = false; setMic('idle'); return;
+  }
+  if (listening) {
+    try { recognition?.stop(); } catch(e) {} return;
+  }
+  // When web overlay is open, mic tap advances to next field
+  if (webOverlayOpen && formPhase && formPhase.startsWith('field_')) {
+    if (serviceIntent === 'aadhaar') advanceUidaiField();
+    else advanceFormField();
+    return;
+  }
+  if (docPhase === 'awaiting_office_help') {
+    docPhase = null;
+    addUser("हाँ, बताओ");
+    showNearbyOffice();
+    return;
+  }
+  if (docPhase === 'awaiting_form_help') {
+    docPhase = null;
+    addUser("हाँ, मदद चाहिए");
+    startFormFlow();
+    return;
+  }
+  // Form field advancement — mic tap = "done, next field"
+  if (formPhase && formPhase.startsWith('field_')) {
+    if (serviceIntent === 'aadhaar') advanceUidaiField();
+    else advanceFormField();
+    return;
+  }
+  if (formPhase === 'final') return;
+  // Service flow (Aadhaar) — allow up to 2 turns (intent → online/center choice)
+  if (serviceIntent && serviceTurn < 2) { startListening(); return; }
+  if (serviceIntent) return; // service flow done
+  if (turn > 3) return;
+  startListening();
+}
+
+function startListening() {
+  listening = true;
+  setMic('listening');
+  showListening();
+
+  if (!recognition) {
+    setTimeout(() => {
+      if (listening) {
+        if (serviceIntent) processServiceTurn(null);
+        else processUserTurn(null);
+      }
+    }, 2800);
+    return;
+  }
+
+  let handled = false;
+  function done(said) {
+    if (handled) return; handled = true;
+    if (serviceIntent) processServiceTurn(said);
+    else processUserTurn(said);
+  }
+  recognition.onresult = e => done(e.results[0][0].transcript);
+  recognition.onerror  = () => done(null);
+  recognition.onend    = () => done(null);
+  try { recognition.start(); } catch(e) { done(null); }
+  setTimeout(() => done(null), 8000);
+}
+
+// ══════════════════════════════════════
+// INIT / NAV
+// ══════════════════════════════════════
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.lang = 'hi-IN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+}
+
+function startConv(intent) {
+  // Intent-specific greetings — all route into the same existing flow
+  const greetMap = {
+    scheme:  "नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।",
+    docs:    "नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?",
+    form:    "नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।",
+    aadhaar: "नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?",
+    passport:"नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?",
+    pan:     "नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?",
+    driving: "नमस्ते! ड्राइविंग लाइसेंस के लिए मदद करूँगा। नया बनाना है, या रिन्यू करना है?",
+  };
+  SC.greet = greetMap[intent] || SC.greet;
+  serviceIntent = SERVICE_INTENTS.includes(intent) ? intent : null;
+  serviceTurn   = 0;
+
+  document.getElementById('landing').classList.add('exit');
+  setTimeout(() => {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('vHdr').style.display    = 'flex';
+    $conv.style.display = 'flex';
+    document.getElementById('micBar').style.display  = 'flex';
+    setupRecognition();
+    turn = 0;
+    setTimeout(() => {
+      addAI(SC.greet);
+      speak(SC.greet, () => setMic('idle'));
+    }, 380);
+  }, 380);
+}
+
+function resetToLanding() {
+  currentAudio?.pause(); currentAudio = null;
+  window.speechSynthesis?.cancel();
+  try { recognition?.stop(); } catch(e) {}
+  speaking = listening = false;
+  turn = 0; docUploaded = {}; docPhase = null; formPhase = null; formFieldIdx = 0;
+  serviceIntent = null; serviceTurn = 0;
+  closeWebOverlay();
+  webOverlayOpen = false;
+  $conv.innerHTML = '';
+  $conv.style.display = 'none';
+  document.getElementById('vHdr').style.display   = 'none';
+  document.getElementById('micBar').style.display = 'none';
+  const ld = document.getElementById('landing');
+  ld.style.display = 'flex';
+  ld.classList.remove('exit');
+}
+</script>
+</body>
+</html>
