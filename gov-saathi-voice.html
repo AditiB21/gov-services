@@ -411,7 +411,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 
 <!-- MIC BAR -->
 <div class="mic-bar" id="micBar" style="display:none">
-  <div class="unified-box">
+  <div class="unified-box" style="width:100%">
     <input class="unified-input" id="chatInput" type="text" placeholder="Ask your question..."
       onkeydown="if(event.key==='Enter')submitChatText()">
     <div class="unified-bar-row">
@@ -1211,12 +1211,22 @@ function showFormSimulator() {
       </div>
       <button class="wob-next-btn" id="wobNextBtn" onclick="advanceFormField()" disabled>अगला →</button>
     </div>
-    <div class="wob-input-row">
-      <input class="chat-input" id="wobChatInput" type="text" placeholder="यहाँ टाइप करें..."
-        onkeydown="if(event.key==='Enter')submitWobText()">
-      <button class="chat-send-btn" onclick="submitWobText()">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
+    <div style="padding:0 14px 14px;background:#fff;">
+      <div class="unified-box" style="width:100%">
+        <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
+          onkeydown="if(event.key==='Enter')submitWobText()">
+        <div class="unified-bar-row">
+          <div class="unified-icons">
+            <button class="unified-icon-btn" onclick="submitWobText()">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
+          </div>
+          <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+            <span>Speak</span>
+          </button>
+        </div>
+      </div>
     </div>`;
 
   document.querySelector('.phone-frame').appendChild(ov);
@@ -1418,12 +1428,22 @@ function showUidaiFormOverlay() {
       </div>
       <button class="wob-next-btn" id="wobNextBtn" onclick="advanceUidaiField()" disabled>अगला →</button>
     </div>
-    <div class="wob-input-row">
-      <input class="chat-input" id="wobChatInput" type="text" placeholder="यहाँ टाइप करें..."
-        onkeydown="if(event.key==='Enter')submitWobText()">
-      <button class="chat-send-btn" onclick="submitWobText()">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
+    <div style="padding:0 14px 14px;background:#fff;">
+      <div class="unified-box" style="width:100%">
+        <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
+          onkeydown="if(event.key==='Enter')submitWobText()">
+        <div class="unified-bar-row">
+          <div class="unified-icons">
+            <button class="unified-icon-btn" onclick="submitWobText()">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
+          </div>
+          <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+            <span>Speak</span>
+          </button>
+        </div>
+      </div>
     </div>`;
   document.querySelector('.phone-frame').appendChild(ov);
   setTimeout(() => voiceGuideUidaiField(0), 1500);
