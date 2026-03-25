@@ -335,6 +335,26 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .speak-pill-btn{display:flex;align-items:center;gap:6px;border:none;border-radius:var(--pill);padding:9px 18px;font-size:13px;font-weight:700;font-family:'JioType',sans-serif;color:#fff;cursor:pointer;transition:background 200ms,transform 110ms;}
 .speak-pill-btn:active{transform:scale(.96);}
 .speak-pill-btn svg{width:16px;height:16px;fill:#fff;}
+
+/* ════════ HELP DESK FAQs ════════ */
+.faq-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;overflow:hidden;animation:bUp 380ms ease-out;width:100%;}
+.faq-card-hd{background:linear-gradient(135deg,#1a4fa8,#003580);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;}
+.faq-list{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;}
+.faq-item{display:flex;align-items:flex-start;gap:10px;background:#f5f7ff;border-radius:10px;padding:10px 12px;cursor:pointer;transition:background 140ms,transform 100ms;border:1px solid transparent;}
+.faq-item:active{background:#e8eefb;transform:scale(.98);border-color:var(--blue);}
+.faq-item-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.faq-item-txt{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.4;}
+.faq-item-sub{font-size:11px;color:var(--text2);font-weight:400;margin-top:2px;}
+
+/* Help desk answer card */
+.hd-answer{border-radius:14px;background:#fff;border:1px solid var(--stroke);padding:14px;animation:bUp 380ms ease-out;width:100%;}
+.hd-answer-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.hd-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.hd-step-num{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.hd-step-txt{font-size:12.5px;color:var(--text);line-height:1.5;font-weight:500;}
+.hd-step-txt b{font-weight:700;}
+.hd-tip{background:#e6f4ec;border-radius:8px;padding:8px 10px;font-size:11.5px;color:#1a6b3c;font-weight:600;margin-top:4px;line-height:1.5;}
+.hd-note{background:#fff8e1;border-radius:8px;padding:8px 10px;font-size:11.5px;color:#b85e00;font-weight:600;margin-top:6px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -373,6 +393,15 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
     <div class="pa-body">
       <div class="pa-label">Apply or fill a form</div>
       <div class="pa-sub">Voice-guided · Auto-fill · Step by step</div>
+    </div>
+    <span class="pa-arr">›</span>
+  </div>
+
+  <div class="primary-action" onclick="startConv('helpdesk')">
+    <span class="pa-ico">🎧</span>
+    <div class="pa-body">
+      <div class="pa-label">Help Desk</div>
+      <div class="pa-sub">Aadhaar · Ration Card · Passport · Any query</div>
     </div>
     <span class="pa-arr">›</span>
   </div>
@@ -480,6 +509,7 @@ let turn         = 0;
 let docPhase     = null;
 let serviceIntent = null;   // 'aadhaar'|'passport'|'pan'|'driving' — set from landing chips
 let serviceTurn  = 0;
+let helpdeskMode = false;
 let listening    = false;
 let speaking     = false;
 let currentAudio = null;
@@ -1839,6 +1869,8 @@ function onMicTap() {
     return;
   }
   if (formPhase === 'final') return;
+  // Help desk — open-ended Q&A via mic
+  if (helpdeskMode) { startListening(); return; }
   // Service flow (Aadhaar) — allow up to 2 turns (intent → online/center choice)
   if (serviceIntent && serviceTurn < 2) { startListening(); return; }
   if (serviceIntent) return;
@@ -1855,7 +1887,8 @@ function startListening() {
   if (!recognition) {
     setTimeout(() => {
       if (listening) {
-        if (schemePhase === 'awaiting_selection') processSchemeSelection(null);
+        if (helpdeskMode) processHelpdeskQuery(null);
+        else if (schemePhase === 'awaiting_selection') processSchemeSelection(null);
         else if (serviceIntent) processServiceTurn(null);
         else processUserTurn(null);
       }
@@ -1866,7 +1899,8 @@ function startListening() {
   let handled = false;
   function done(said) {
     if (handled) return; handled = true;
-    if (schemePhase === 'awaiting_selection') processSchemeSelection(said);
+    if (helpdeskMode) processHelpdeskQuery(said);
+    else if (schemePhase === 'awaiting_selection') processSchemeSelection(said);
     else if (serviceIntent) processServiceTurn(said);
     else processUserTurn(said);
   }
@@ -1942,6 +1976,7 @@ function handleChatText(text) {
     return;
   }
   if (formPhase === 'final') return;
+  if (helpdeskMode) { processHelpdeskQuery(text); return; }
   if (schemePhase === 'awaiting_selection') { processSchemeSelection(text); return; }
   if (serviceIntent && serviceTurn < 2) { processServiceTurn(text); return; }
   if (serviceIntent) return;
@@ -1960,19 +1995,205 @@ function setupRecognition() {
   recognition.interimResults = false;
 }
 
+// ══════════════════════════════════════
+// HELP DESK
+// ══════════════════════════════════════
+const HELPDESK_FAQS = [
+  {
+    ico: '👶',
+    q: 'नवजात / बच्चे का आधार कैसे बनाएँ?',
+    sub: '5 साल से कम उम्र के बच्चे का आधार',
+    key: 'baal_aadhaar',
+  },
+  {
+    ico: '🪪',
+    q: 'आधार में नाम / पता कैसे बदलें?',
+    sub: 'ऑनलाइन और ऑफलाइन दोनों तरीके',
+    key: 'aadhaar_update',
+  },
+  {
+    ico: '🛂',
+    q: 'नया पासपोर्ट कैसे बनाएँ?',
+    sub: 'Documents · Fee · Appointment · Timeline',
+    key: 'passport_new',
+  },
+  {
+    ico: '🌾',
+    q: 'राशन कार्ड कैसे बनवाएँ / अपडेट करें?',
+    sub: 'नया नाम जोड़ना · पोर्टेबिलिटी · शिकायत',
+    key: 'ration_card',
+  },
+];
+
+const HELPDESK_KB = {
+  baal_aadhaar: {
+    title: '👶 बच्चे का आधार (Baal Aadhaar)',
+    voice: 'पाँच साल से कम उम्र के बच्चे का आधार बनाने के लिए माता या पिता का आधार, बच्चे का जन्म प्रमाण पत्र लेकर नज़दीकी आधार केंद्र जाएँ। बच्चे की फ़ोटो ली जाएगी, बायोमेट्रिक नहीं। 5 साल पूरे होने पर बायोमेट्रिक अपडेट ज़रूरी है। यह नीला रंग का आधार होता है और बिल्कुल मुफ़्त है।',
+    steps: [
+      { t: '<b>नज़दीकी आधार केंद्र ढूंढें</b>', s: 'uidai.gov.in → "Locate Enrolment Centre"' },
+      { t: '<b>ये दस्तावेज़ साथ ले जाएँ</b>', s: 'माता/पिता का आधार + बच्चे का जन्म प्रमाण पत्र (Birth Certificate / Discharge Summary)' },
+      { t: '<b>एनरोलमेंट फ़ॉर्म भरें</b>', s: 'काउंटर से फ़ॉर्म लें, माता या पिता की जानकारी भरें। बच्चे का बायोमेट्रिक नहीं लिया जाता — सिर्फ़ फ़ोटो' },
+      { t: '<b>रसीद सँभालकर रखें</b>', s: 'Enrolment ID नंबर दिया जाएगा, इससे status track करें' },
+      { t: '<b>90 दिनों में आधार मिलेगा</b>', s: 'डाक से घर आएगा, या uidai.gov.in से Download करें' },
+    ],
+    tip: '✅ 5 साल पूरे होने पर और 15 साल की उम्र में बायोमेट्रिक अपडेट ज़रूरी है — यह मुफ़्त है।',
+    note: '⚠️ अगर जन्म प्रमाण नहीं है, तो अस्पताल का Discharge Summary या Immunization Card भी चलेगा।',
+  },
+  aadhaar_update: {
+    title: '🪪 आधार अपडेट — नाम / पता बदलें',
+    voice: 'आधार में नाम या पता बदलने के दो तरीके हैं। ऑनलाइन — myaadhaar.uidai.gov.in पर जाएँ, लॉगिन करें, Update Aadhaar पर क्लिक करें और ज़रूरी दस्तावेज़ अपलोड करें — शुल्क 50 रुपये है। ऑफलाइन — नज़दीकी आधार केंद्र जाएँ, फ़ॉर्म भरें और दस्तावेज़ दें।',
+    steps: [
+      { t: '<b>ऑनलाइन तरीका (घर बैठे)</b>', s: 'myaadhaar.uidai.gov.in → Login with OTP → "Update Aadhaar" → बदलाव चुनें → Document upload करें → ₹50 शुल्क' },
+      { t: '<b>ऑफलाइन तरीका (केंद्र पर)</b>', s: 'नज़दीकी Aadhaar Kendra जाएँ → Correction Form भरें → Original + Photocopy दें → ₹50 शुल्क' },
+      { t: '<b>नाम बदलने के लिए</b>', s: 'PAN Card / Voter ID / Passport / Driving Licence / School Certificate में से कोई एक' },
+      { t: '<b>पता बदलने के लिए</b>', s: 'Electricity Bill / Bank Passbook / Rent Agreement / Passport में से कोई एक (3 महीने से पुराना न हो)' },
+      { t: '<b>Update Request Number (URN) सँभालें</b>', s: 'इससे myaadhaar.gov.in पर 30 दिनों में status देखें' },
+    ],
+    tip: '✅ URN मिलने के 30 दिनों में अपडेट पूरा हो जाता है।',
+    note: '⚠️ मोबाइल नंबर बदलने के लिए सिर्फ़ ऑफलाइन (आधार केंद्र) जाना पड़ता है।',
+  },
+  passport_new: {
+    title: '🛂 नया पासपोर्ट कैसे बनाएँ',
+    voice: 'नया पासपोर्ट बनाने के लिए passportindia.gov.in पर जाकर अकाउंट बनाएँ, Application Form भरें और Appointment लें। शुल्क 1500 रुपये है। ज़रूरी दस्तावेज़ हैं — आधार, जन्म प्रमाण पत्र, पता प्रमाण और पुराना पासपोर्ट अगर है तो। Passport Seva Kendra पर जाएँ, Document Verification होगा, फिर Police Verification और 30 से 45 दिनों में पासपोर्ट मिलेगा।',
+    steps: [
+      { t: '<b>Online Registration करें</b>', s: 'passportindia.gov.in → New User Registration → Login → "Apply for Fresh Passport"' },
+      { t: '<b>Form भरें व Appointment लें</b>', s: 'Normal — ₹1,500 (45 दिन) | Tatkal — ₹3,500 (7 दिन)' },
+      { t: '<b>ये दस्तावेज़ साथ ले जाएँ</b>', s: 'आधार + Voter ID/Driving Licence (पता) + जन्म प्रमाण (Birth Certificate/10th Marksheet) + पुराना पासपोर्ट (अगर हो)' },
+      { t: '<b>Passport Seva Kendra जाएँ</b>', s: 'Documents Verify होंगे, Biometric & Photo लिया जाएगा' },
+      { t: '<b>Police Verification</b>', s: 'घर पर Police आएगी या थाने से clearance — 7 से 15 दिन' },
+    ],
+    tip: '✅ Tatkal में Police Verification बाद में होती है और पासपोर्ट जल्दी मिलता है।',
+    note: '⚠️ पहले Online Appointment लें, बिना Appointment के PSK नहीं जाएँ।',
+  },
+  ration_card: {
+    title: '🌾 राशन कार्ड — नया बनाएँ / अपडेट करें',
+    voice: 'राशन कार्ड बनाने के लिए अपने राज्य की Food Department की वेबसाइट पर जाएँ या नज़दीकी CSC (Common Service Centre) जाएँ। ज़रूरी दस्तावेज़ हैं — आधार, पता प्रमाण, परिवार के सभी सदस्यों के आधार और आय प्रमाण पत्र। नया नाम जोड़ने के लिए भी यही प्रक्रिया है।',
+    steps: [
+      { t: '<b>अपने राज्य की वेबसाइट खोजें</b>', s: 'Google पर "[राज्य का नाम] ration card apply online" सर्च करें, जैसे "UP ration card apply"' },
+      { t: '<b>ये दस्तावेज़ तैयार रखें</b>', s: 'आधार (सभी परिवार वाले) + पता प्रमाण + आय प्रमाण + Bank Passbook + पासपोर्ट साइज़ फ़ोटो' },
+      { t: '<b>CSC (Jan Seva Kendra) जाएँ</b>', s: 'अगर ऑनलाइन मुश्किल हो तो नज़दीकी CSC से Apply करवाएँ — nominally ₹30–50 शुल्क' },
+      { t: '<b>नया सदस्य जोड़ना हो तो</b>', s: 'शादी की स्थिति में Marriage Certificate + आधार | नवजात के लिए Birth Certificate + माँ का आधार' },
+      { t: '<b>राशन Portability (One Nation One Ration)</b>', s: 'अगर आप दूसरे राज्य में हैं, तो आधार से किसी भी PDS दुकान से राशन ले सकते हैं' },
+    ],
+    tip: '✅ NFSA App या mera.pmgsy.nic.in पर अपना नाम check करें।',
+    note: '⚠️ राशन कार्ड की प्रक्रिया राज्यवार अलग होती है — अपने राज्य की website ज़रूर देखें।',
+  },
+};
+
+// Keyword → KB key matcher
+function matchHelpdeskQuery(text) {
+  const t = (text || '').toLowerCase();
+  if (/baby|बच्च|infant|neonatal|newborn|नवजात|baal|बाल|shishu|शिशु|child|5.*year|साल.*बच्|जन्म.*आधार|aadhar.*baby|0.*month|month.*old|\d+\s*month/i.test(t)) return 'baal_aadhaar';
+  if (/aadhaar.*update|update.*aadhaar|आधार.*बदल|नाम.*बदल|पता.*बदल|address.*change|name.*change|correction|सुधार|address.*update|aadhar.*correct/i.test(t)) return 'aadhaar_update';
+  if (/passport|पासपोर्ट/i.test(t)) return 'passport_new';
+  if (/ration|राशन|ration card|pds|पीडीएस/i.test(t)) return 'ration_card';
+  // generic aadhaar without update context → baal_aadhaar if mentions baby/month, else aadhaar_update
+  if (/aadhaar|aadhar|आधार/i.test(t)) return 'aadhaar_update';
+  return null;
+}
+
+function showHelpdeskFAQs() {
+  const c = document.createElement('div');
+  c.className = 'faq-card';
+  c.innerHTML = `<div class="faq-card-hd">🎧 अक्सर पूछे जाने वाले सवाल</div>
+    <div class="faq-list">` +
+    HELPDESK_FAQS.map(f => `
+      <div class="faq-item" onclick="handleHelpdeskFAQ('${f.key}')">
+        <div class="faq-item-ico">${f.ico}</div>
+        <div><div class="faq-item-txt">${f.q}</div><div class="faq-item-sub">${f.sub}</div></div>
+      </div>`).join('') +
+  `</div>`;
+  $conv.appendChild(c);
+  scrollDown();
+}
+
+function handleHelpdeskFAQ(key) {
+  const faq = HELPDESK_FAQS.find(f => f.key === key);
+  if (!faq) return;
+  addUser(`${faq.ico} ${faq.q}`);
+  showHelpdeskAnswer(key);
+}
+
+function showHelpdeskAnswer(key) {
+  const kb = HELPDESK_KB[key];
+  if (!kb) {
+    showTyping(); setMic('loading');
+    setTimeout(() => {
+      hideTyping();
+      const msg = 'यह जानकारी अभी उपलब्ध नहीं है। कृपया अपना सवाल दोबारा पूछें।';
+      addAI(msg);
+      speak(msg, () => {
+        addAI('कोई और सवाल हो तो बताएँ — मैं हाज़िर हूँ! 😊');
+        setMic('idle');
+      });
+    }, 700);
+    return;
+  }
+
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    // Render rich answer card
+    const c = document.createElement('div');
+    c.className = 'ai-row';
+    const stepsHtml = kb.steps.map((s, i) =>
+      `<div class="hd-step"><div class="hd-step-num">${i + 1}</div><div class="hd-step-txt">${s.t}<br><span style="font-weight:400;color:var(--text2);font-size:11.5px">${s.s}</span></div></div>`
+    ).join('');
+    c.innerHTML = `<div class="ai-av">🏛️</div>
+      <div class="hd-answer">
+        <div class="hd-answer-title">${kb.title}</div>
+        ${stepsHtml}
+        ${kb.tip ? `<div class="hd-tip">${kb.tip}</div>` : ''}
+        ${kb.note ? `<div class="hd-note">${kb.note}</div>` : ''}
+      </div>`;
+    $conv.appendChild(c);
+    scrollDown();
+
+    speak(kb.voice, () => {
+      setTimeout(() => {
+        addAI('कोई और सवाल है? बताएँ — मैं हाज़िर हूँ! आप ऊपर दी गई FAQs में से भी चुन सकते हैं।');
+        setMic('idle');
+      }, 400);
+    });
+  }, 900);
+}
+
+function processHelpdeskQuery(text) {
+  if (!text || !text.trim()) {
+    addAI('मुझे आपका सवाल सुनाई नहीं दिया। कृपया फिर से पूछें।');
+    setMic('idle');
+    return;
+  }
+  addUser(text);
+  const key = matchHelpdeskQuery(text);
+  if (key) {
+    showHelpdeskAnswer(key);
+  } else {
+    showTyping(); setMic('loading');
+    setTimeout(() => {
+      hideTyping();
+      const msg = 'आपके सवाल के लिए — कृपया नज़दीकी Jan Seva Kendra (CSC) या संबंधित विभाग की helpline पर संपर्क करें। क्या आप आधार, पासपोर्ट, राशन कार्ड या किसी और विषय पर जानकारी चाहते हैं?';
+      addAI(msg);
+      speak(msg, () => setMic('idle'));
+    }, 700);
+  }
+}
+
 function startConv(intent) {
   // Intent-specific greetings — all route into the same existing flow
   const greetMap = {
-    scheme:  "नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।",
-    docs:    "नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?",
-    form:    "नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।",
-    aadhaar: "नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?",
-    passport:"नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?",
-    pan:     "नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?",
-    driving: "नमस्ते! ड्राइविंग लाइसेंस के लिए मदद करूँगा। नया बनाना है, या रिन्यू करना है?",
+    scheme:    "नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।",
+    docs:      "नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?",
+    form:      "नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।",
+    aadhaar:   "नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?",
+    passport:  "नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?",
+    pan:       "नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?",
+    driving:   "नमस्ते! ड्राइविंग लाइसेंस के लिए मदद करूँगा। नया बनाना है, या रिन्यू करना है?",
+    helpdesk:  "नमस्ते! मैं नागरिक साथी हूँ — आपका सरकारी Help Desk। आधार, पासपोर्ट, राशन कार्ड, योजनाएँ — किसी भी सरकारी काम में पूरी जानकारी दूँगा। नीचे से कोई सवाल चुनें या अपना सवाल लिखें / बोलें।",
   };
   SC.greet = greetMap[intent] || SC.greet;
   serviceIntent = SERVICE_INTENTS.includes(intent) ? intent : null;
+  helpdeskMode  = (intent === 'helpdesk');
   serviceTurn   = 0;
 
   document.getElementById('landing').classList.add('exit');
@@ -1986,7 +2207,15 @@ function startConv(intent) {
     setTimeout(() => {
       addAI(SC.greet);
       speak(SC.greet, () => {
-        if (pendingFirstMessage) {
+        if (helpdeskMode) {
+          showHelpdeskFAQs();
+          if (pendingFirstMessage) {
+            const msg = pendingFirstMessage; pendingFirstMessage = null;
+            setTimeout(() => processHelpdeskQuery(msg), 400);
+          } else {
+            setMic('idle');
+          }
+        } else if (pendingFirstMessage) {
           const msg = pendingFirstMessage; pendingFirstMessage = null;
           setTimeout(() => processUserTurn(msg), 300);
         } else {
@@ -2003,7 +2232,7 @@ function resetToLanding() {
   try { recognition?.stop(); } catch(e) {}
   speaking = listening = false;
   turn = 0; docUploaded = {}; docPhase = null; formPhase = null; formFieldIdx = 0;
-  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null; schemePhase = null;
+  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null; schemePhase = null; helpdeskMode = false;
   closeWebOverlay();
   webOverlayOpen = false;
   $conv.innerHTML = '';
