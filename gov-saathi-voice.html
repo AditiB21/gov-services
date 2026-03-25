@@ -395,7 +395,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
     <div class="unified-bar-row">
       <div class="unified-icons">
         <button class="unified-icon-btn" onclick="submitLandingText()">
-          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
         <button class="unified-icon-btn" onclick="startConv()">
           <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
@@ -433,7 +433,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
     <div class="unified-bar-row">
       <div class="unified-icons">
         <button class="unified-icon-btn" onclick="submitChatText()">
-          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
         <button class="unified-icon-btn" onclick="onMicTap()">
           <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
@@ -642,8 +642,31 @@ function showSchemeResults() {
   $conv.appendChild(c); scrollDown();
 }
 
+function processSchemeSelection(text) {
+  const t = (text || '').toLowerCase();
+  let key = null;
+  if (/kisan|किसान|farmer|kheti|खेती|agri/i.test(t))               key = 'kisan';
+  else if (/ayushman|आयुष्मान|health|swasthya|स्वास्थ्य|hospital/i.test(t)) key = 'ayushman';
+  else if (/awas|आवास|hous|ghar|घर|makan|मकान/i.test(t))            key = 'awas';
+  else if (/vishwakarma|विश्वकर्मा|craft|karigar|कारीगर|skill|livelihood|mudra/i.test(t)) key = 'vishwakarma';
+  // fallback: match number
+  else if (/\b1\b|पहल/.test(t))  key = 'kisan';
+  else if (/\b2\b|दूसर/.test(t)) key = 'ayushman';
+  else if (/\b3\b|तीसर/.test(t)) key = 'awas';
+  else if (/\b4\b|चौथ/.test(t))  key = 'vishwakarma';
+
+  if (key) {
+    schemePhase = null;
+    selectScheme(key);
+  } else {
+    addAI("कृपया एक योजना बताएं — <b>PM Kisan</b> (खेती), <b>Ayushman Bharat</b> (स्वास्थ्य), <b>PM Awas</b> (आवास), या <b>PM Vishwakarma</b> (आजीविका)।");
+    speak("कृपया एक योजना चुनें।", () => setMic('idle'));
+  }
+}
+
 function selectScheme(key) {
   selectedScheme = key;
+  schemePhase = null;
   const s = SCHEMES[key];
   document.querySelectorAll('.sr-btn-sel').forEach(b => b.disabled = true);
   addUser(`${s.icon} ${s.name} — Documents देखें`);
@@ -1132,7 +1155,13 @@ function processUserTurn(said) {
         hideTyping();
         addAI(SC.result);
         showSchemeResults();
-        speak(SC.result, () => setMic('idle'));
+        speak(SC.result, () => {
+          schemePhase = 'awaiting_selection';
+          setTimeout(() => {
+            addAI("कौन सी योजना के लिए आवेदन करना चाहेंगे? ऊपर किसी एक कार्ड पर टैप करें, या यहाँ नाम टाइप / बोलें।");
+            speak("कौन सी योजना के लिए आवेदन करना चाहेंगे? किसी एक को चुनें।", () => setMic('idle'));
+          }, 400);
+        });
       }, 1400);
     }, 400);
   }
@@ -1160,6 +1189,7 @@ let formPhase    = null;
 let webOverlayOpen = false;
 let selectedScheme = null;
 let activeForm     = null;
+let schemePhase    = null; // null | 'awaiting_selection'
 
 // ── Multi-scheme data ──
 const SCHEMES = {
@@ -1336,7 +1366,7 @@ function showFormSimulator() {
         <div class="unified-bar-row">
           <div class="unified-icons">
             <button class="unified-icon-btn" onclick="submitWobText()">
-              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
           </div>
           <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
@@ -1551,7 +1581,7 @@ function showUidaiFormOverlay() {
         <div class="unified-bar-row">
           <div class="unified-icons">
             <button class="unified-icon-btn" onclick="submitWobText()">
-              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
           </div>
           <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
@@ -1784,7 +1814,8 @@ function onMicTap() {
   if (formPhase === 'final') return;
   // Service flow (Aadhaar) — allow up to 2 turns (intent → online/center choice)
   if (serviceIntent && serviceTurn < 2) { startListening(); return; }
-  if (serviceIntent) return; // service flow done
+  if (serviceIntent) return;
+  if (schemePhase === 'awaiting_selection') { startListening(); return; }
   if (turn > 3) return;
   startListening();
 }
@@ -1797,7 +1828,8 @@ function startListening() {
   if (!recognition) {
     setTimeout(() => {
       if (listening) {
-        if (serviceIntent) processServiceTurn(null);
+        if (schemePhase === 'awaiting_selection') processSchemeSelection(null);
+        else if (serviceIntent) processServiceTurn(null);
         else processUserTurn(null);
       }
     }, 2800);
@@ -1807,7 +1839,8 @@ function startListening() {
   let handled = false;
   function done(said) {
     if (handled) return; handled = true;
-    if (serviceIntent) processServiceTurn(said);
+    if (schemePhase === 'awaiting_selection') processSchemeSelection(said);
+    else if (serviceIntent) processServiceTurn(said);
     else processUserTurn(said);
   }
   recognition.onresult = e => done(e.results[0][0].transcript);
@@ -1882,6 +1915,7 @@ function handleChatText(text) {
     return;
   }
   if (formPhase === 'final') return;
+  if (schemePhase === 'awaiting_selection') { processSchemeSelection(text); return; }
   if (serviceIntent && serviceTurn < 2) { processServiceTurn(text); return; }
   if (serviceIntent) return;
   if (turn <= 3) { processUserTurn(text); return; }
@@ -1942,7 +1976,7 @@ function resetToLanding() {
   try { recognition?.stop(); } catch(e) {}
   speaking = listening = false;
   turn = 0; docUploaded = {}; docPhase = null; formPhase = null; formFieldIdx = 0;
-  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null;
+  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null; schemePhase = null;
   closeWebOverlay();
   webOverlayOpen = false;
   $conv.innerHTML = '';
