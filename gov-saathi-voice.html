@@ -325,8 +325,12 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 
 /* ════════ UNIFIED INPUT BAR ════════ */
 .unified-box{background:#f0f2f5;border-radius:18px;padding:12px 14px 10px;margin:0;}
-.unified-input{width:100%;background:transparent;border:none;outline:none;font-size:14px;font-family:'JioType',-apple-system,sans-serif;color:var(--text);resize:none;line-height:1.4;}
+.unified-input-wrap{display:flex;align-items:center;gap:8px;}
+.unified-input{flex:1;background:transparent;border:none;outline:none;font-size:14px;font-family:'JioType',-apple-system,sans-serif;color:var(--text);resize:none;line-height:1.4;}
 .unified-input::placeholder{color:rgba(12,13,16,.38);}
+.send-btn-corner{width:34px;height:34px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 110ms,background 150ms;}
+.send-btn-corner:active{transform:scale(.88);}
+.send-btn-corner svg{width:15px;height:15px;fill:#fff;}
 .unified-bar-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 .unified-icons{display:flex;align-items:center;gap:10px;}
 .unified-icon-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;}
@@ -390,13 +394,15 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 </div><!-- end ld-scroll -->
 <div class="ld-bar">
   <div class="unified-box" style="width:100%">
-    <input class="unified-input" id="ldInput" type="text" placeholder="Ask your question..."
-      onkeydown="if(event.key==='Enter')submitLandingText()">
+    <div class="unified-input-wrap">
+      <input class="unified-input" id="ldInput" type="text" placeholder="Ask your question..."
+        onkeydown="if(event.key==='Enter')submitLandingText()">
+      <button class="send-btn-corner" onclick="submitLandingText()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
     <div class="unified-bar-row">
       <div class="unified-icons">
-        <button class="unified-icon-btn" onclick="submitLandingText()">
-          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
         <button class="unified-icon-btn" onclick="startConv()">
           <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
         </button>
@@ -428,13 +434,15 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 <!-- MIC BAR -->
 <div class="mic-bar" id="micBar" style="display:none">
   <div class="unified-box" style="width:100%">
-    <input class="unified-input" id="chatInput" type="text" placeholder="Ask your question..."
-      onkeydown="if(event.key==='Enter')submitChatText()">
+    <div class="unified-input-wrap">
+      <input class="unified-input" id="chatInput" type="text" placeholder="Ask your question..."
+        onkeydown="if(event.key==='Enter')submitChatText()">
+      <button class="send-btn-corner" onclick="submitChatText()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
     <div class="unified-bar-row">
       <div class="unified-icons">
-        <button class="unified-icon-btn" onclick="submitChatText()">
-          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
         <button class="unified-icon-btn" onclick="onMicTap()">
           <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
         </button>
@@ -1361,12 +1369,17 @@ function showFormSimulator() {
     </div>
     <div style="padding:0 14px 14px;background:#fff;">
       <div class="unified-box" style="width:100%">
-        <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
-          onkeydown="if(event.key==='Enter')submitWobText()">
+        <div class="unified-input-wrap">
+          <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
+            onkeydown="if(event.key==='Enter')submitWobText()">
+          <button class="send-btn-corner" onclick="submitWobText()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
         <div class="unified-bar-row">
           <div class="unified-icons">
             <button class="unified-icon-btn" onclick="submitWobText()">
-              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
           </div>
           <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
@@ -1576,12 +1589,17 @@ function showUidaiFormOverlay() {
     </div>
     <div style="padding:0 14px 14px;background:#fff;">
       <div class="unified-box" style="width:100%">
-        <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
-          onkeydown="if(event.key==='Enter')submitWobText()">
+        <div class="unified-input-wrap">
+          <input class="unified-input" id="wobChatInput" type="text" placeholder="Ask your question..."
+            onkeydown="if(event.key==='Enter')submitWobText()">
+          <button class="send-btn-corner" onclick="submitWobText()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
         <div class="unified-bar-row">
           <div class="unified-icons">
             <button class="unified-icon-btn" onclick="submitWobText()">
-              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
           </div>
           <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
