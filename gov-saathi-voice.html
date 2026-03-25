@@ -400,12 +400,23 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
     <span class="ld-pill-txt">Sarvam AI · Asli Hindi Awaaz · Live</span>
   </div>
   <div class="ld-or" style="margin-top:14px">या टाइप करके पूछो</div>
-  <div class="chat-input-row">
-    <input class="chat-input" id="ldInput" type="text" placeholder="यहाँ लिखें... (जैसे: PM Kisan योजना)"
+  <div class="unified-box" style="width:100%">
+    <input class="unified-input" id="ldInput" type="text" placeholder="Ask your question..."
       onkeydown="if(event.key==='Enter')submitLandingText()">
-    <button class="chat-send-btn" onclick="submitLandingText()">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-    </button>
+    <div class="unified-bar-row">
+      <div class="unified-icons">
+        <button class="unified-icon-btn" onclick="submitLandingText()">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        </button>
+        <button class="unified-icon-btn" onclick="startConv()">
+          <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+        </button>
+      </div>
+      <button class="speak-pill-btn" onclick="startConv()" style="background:var(--blue)">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+        Speak
+      </button>
+    </div>
   </div>
 </div>
 
