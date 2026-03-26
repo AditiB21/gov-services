@@ -663,10 +663,14 @@ const SC = {
 // SARVAM TTS
 // ══════════════════════════════════════
 async function speak(text, onDone) {
-  if (currentLang === 'en') { fallbackSpeak(text, onDone); return; }
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   speaking = true;
   setMic('speaking');
+
+  // Language config: Hindi → male 'arvind', English → female 'anushka' (Indian English)
+  const isEn = currentLang === 'en';
+  const langCode = isEn ? 'en-IN' : 'hi-IN';
+  const speaker  = isEn ? 'anushka' : 'arvind';
 
   try {
     const res = await fetch(SARVAM_URL, {
@@ -677,11 +681,11 @@ async function speak(text, onDone) {
       },
       body: JSON.stringify({
         inputs: [text],
-        target_language_code: 'hi-IN',
-        speaker: 'arvind',
+        target_language_code: langCode,
+        speaker: speaker,
         model: 'bulbul:v1',
-        pace: 0.95,
-        pitch: 0,
+        pace: isEn ? 0.92 : 0.95,
+        pitch: isEn ? 0.1 : 0,
         loudness: 1.5,
         enable_preprocessing: true,
         speech_sample_rate: 22050
@@ -714,10 +718,16 @@ function fallbackSpeak(text, onDone) {
   const utt = new SpeechSynthesisUtterance(text);
   const voices = synth.getVoices();
   const tgtLang = currentLang === 'en' ? 'en-IN' : 'hi-IN';
-  utt.voice = voices.find(v => v.lang === tgtLang) || voices.find(v => v.lang.startsWith(currentLang === 'en' ? 'en' : 'hi')) || null;
+  const isEn = currentLang === 'en';
+  utt.voice = isEn
+    ? (voices.find(v => v.lang === 'en-IN' && /female|woman|zira|hazel|raveena|heera/i.test(v.name))
+      || voices.find(v => v.lang === 'en-IN')
+      || voices.find(v => v.lang.startsWith('en') && /female|woman|zira|hazel|raveena/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('en')) || null)
+    : (voices.find(v => v.lang === 'hi-IN') || voices.find(v => v.lang.startsWith('hi')) || null);
   utt.lang  = tgtLang;
-  utt.rate  = 0.88;
-  utt.pitch = 1.0;
+  utt.rate  = isEn ? 0.9 : 0.88;
+  utt.pitch = isEn ? 1.1 : 1.0;
   utt.onend = utt.onerror = () => { speaking = false; setMic('idle'); onDone?.(); };
   synth.speak(utt);
   // Chrome stuck-speech fix
