@@ -336,6 +336,11 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .speak-pill-btn:active{transform:scale(.96);}
 .speak-pill-btn svg{width:16px;height:16px;fill:#fff;}
 
+/* ════════ LANG SELECTOR ════════ */
+.lang-sel-wrap{position:absolute;top:14px;right:14px;z-index:10;}
+.lang-sel{border:1.5px solid rgba(36,38,43,.18);border-radius:var(--pill);padding:6px 10px;font-size:12px;font-weight:700;font-family:'JioType',sans-serif;color:var(--text);background:#fff;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:border-color 150ms;}
+.lang-sel:focus{border-color:var(--blue);}
+
 /* ════════ HELP DESK FAQs ════════ */
 .faq-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;overflow:hidden;animation:bUp 380ms ease-out;width:100%;}
 .faq-card-hd{background:linear-gradient(135deg,#1a4fa8,#003580);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;}
@@ -362,19 +367,25 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 
 <!-- LANDING -->
 <div class="landing" id="landing">
+<div class="lang-sel-wrap">
+  <select class="lang-sel" id="langSelect" onchange="setLang(this.value)">
+    <option value="hi">🇮🇳 हिंदी</option>
+    <option value="en">🇬🇧 English</option>
+  </select>
+</div>
 <div class="ld-scroll">
   <div class="ld-logo">🏛️</div>
   <div class="ld-name">Nagrik AI</div>
-  <div class="ld-tag">Sarkari kaam, aasaan — Aapki Bhasha mein</div>
+  <div class="ld-tag" id="ld-tagline">Sarkari kaam, aasaan — Aapki Bhasha mein</div>
 
   <!-- Primary Actions -->
-  <div class="ld-section-title">Main Actions</div>
+  <div class="ld-section-title" id="ld-main-title">Main Actions</div>
 
   <div class="primary-action" onclick="startConv('scheme')">
     <span class="pa-ico">🔍</span>
     <div class="pa-body">
-      <div class="pa-label">Find the right scheme for me</div>
-      <div class="pa-sub">PM Kisan · Ayushman · PM Awas + more</div>
+      <div class="pa-label" id="ld-scheme-label">Find the right scheme for me</div>
+      <div class="pa-sub" id="ld-scheme-sub">PM Kisan · Ayushman · PM Awas + more</div>
     </div>
     <span class="pa-arr">›</span>
   </div>
@@ -382,8 +393,8 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   <div class="primary-action" onclick="startConv('docs')">
     <span class="pa-ico">📋</span>
     <div class="pa-body">
-      <div class="pa-label">Check my documents</div>
-      <div class="pa-sub">Verify · Find issues · Fix problems</div>
+      <div class="pa-label" id="ld-docs-label">Check my documents</div>
+      <div class="pa-sub" id="ld-docs-sub">Verify · Find issues · Fix problems</div>
     </div>
     <span class="pa-arr">›</span>
   </div>
@@ -391,8 +402,8 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   <div class="primary-action" onclick="startConv('form')">
     <span class="pa-ico">✍️</span>
     <div class="pa-body">
-      <div class="pa-label">Apply or fill a form</div>
-      <div class="pa-sub">Voice-guided · Auto-fill · Step by step</div>
+      <div class="pa-label" id="ld-form-label">Apply or fill a form</div>
+      <div class="pa-sub" id="ld-form-sub">Voice-guided · Auto-fill · Step by step</div>
     </div>
     <span class="pa-arr">›</span>
   </div>
@@ -400,15 +411,15 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   <div class="primary-action" onclick="startConv('helpdesk')">
     <span class="pa-ico">🎧</span>
     <div class="pa-body">
-      <div class="pa-label">Help Desk</div>
-      <div class="pa-sub">Aadhaar · Ration Card · Passport · Any query</div>
+      <div class="pa-label" id="ld-helpdesk-label">Help Desk</div>
+      <div class="pa-sub" id="ld-helpdesk-sub">Aadhaar · Ration Card · Passport · Any query</div>
     </div>
     <span class="pa-arr">›</span>
   </div>
 
   <!-- Services -->
   <div class="ld-svc-section">
-    <div class="ld-section-title">Services</div>
+    <div class="ld-section-title" id="ld-services-title">Services</div>
     <div class="ld-svc-grid">
       <div class="svc-chip" onclick="startConv('aadhaar')"><span class="svc-ico">🪪</span><span class="svc-name">Aadhaar Card</span></div>
       <div class="svc-chip" onclick="startConv('passport')"><span class="svc-ico">🛂</span><span class="svc-name">Passport</span></div>
@@ -435,7 +446,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
       </div>
       <button class="speak-pill-btn" onclick="startConv()" style="background:var(--blue)">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
-        Speak
+        <span id="ldSpeakTxt">Speak</span>
       </button>
     </div>
   </div>
@@ -449,7 +460,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   </button>
   <div class="v-hdr-info">
     <div class="v-hdr-name">Nagrik AI</div>
-    <div class="v-hdr-sub">AI Government Guide · Hindi</div>
+    <div class="v-hdr-sub" id="vHdrSub">AI Government Guide · Hindi</div>
   </div>
   <span class="v-badge">हिंदी</span>
 </div>
@@ -525,6 +536,115 @@ const SERVICE_DEMO = {
   driving: ["नया लाइसेंस बनाना है", "ऑनलाइन करना है"],
 };
 
+// ══════════════════════════════════════
+// LANGUAGE STRINGS
+// ══════════════════════════════════════
+let currentLang = 'hi';
+function T(k) { return (STRINGS[currentLang] || STRINGS.hi)[k] || k; }
+
+const STRINGS = {
+  hi: {
+    tagline:'Sarkari kaam, aasaan — Aapki Bhasha mein',
+    mainActions:'Main Actions', services:'Services',
+    scheme_label:'सही योजना खोजें', scheme_sub:'PM Kisan · Ayushman · PM Awas + more',
+    docs_label:'दस्तावेज़ जाँचें', docs_sub:'Verify · समस्या खोजें · सुधार करें',
+    form_label:'फ़ॉर्म भरें / आवेदन करें', form_sub:'आवाज़ से · Auto-fill · Step by step',
+    helpdesk_label:'Help Desk', helpdesk_sub:'Aadhaar · Ration Card · Passport · Any query',
+    placeholder:'अपना सवाल लिखें...', speak:'बोलें',
+    hdr_sub:'AI सरकारी गाइड · हिंदी',
+    mic_idle:'टैप करके बात करो', mic_idle_hint:'🎙️ आप बात कर सकते हैं',
+    mic_listening:'🔴  सुन रहा हूँ...', mic_listening_hint:'बोलिए, मैं सुन रहा हूँ',
+    mic_speaking:'🔊  बोल रहा हूँ...', mic_speaking_hint:'नागरिक साथी बोल रहा है',
+    mic_loading:'⏳  ढूंढ रहा हूँ...', mic_loading_hint:'एक सेकंड...',
+    greet_default:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल पूछूँगा।',
+    greet_scheme:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।',
+    greet_docs:'नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?',
+    greet_form:'नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।',
+    greet_aadhaar:'नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?',
+    greet_passport:'नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?',
+    greet_pan:'नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?',
+    greet_driving:'नमस्ते! ड्राइविंग लाइसेंस के लिए मदद करूँगा। नया बनाना है, या रिन्यू करना है?',
+    greet_helpdesk:'नमस्ते! मैं नागरिक साथी हूँ — आपका सरकारी Help Desk। आधार, पासपोर्ट, राशन कार्ड, योजनाएँ — किसी भी सरकारी काम में पूरी जानकारी दूँगा। नीचे से कोई सवाल चुनें या अपना सवाल लिखें / बोलें।',
+    sc_q1:'पहला सवाल — आप मुख्य रूप से क्या काम करते हैं? खेती, नौकरी, खुद का काम, या अभी कोई काम नहीं?',
+    sc_q2:'अच्छा! अब बताइए — घर की पूरी साल भर की कमाई कितनी है? एक लाख से कम, एक से तीन लाख के बीच, या तीन लाख से ज़्यादा?',
+    sc_q3:'एक आखिरी सवाल — परिवार में कितने लोग हैं? और क्या अभी पक्का मकान है?',
+    sc_result:'बहुत बढ़िया! आपकी जानकारी के आधार पर मुझे ४ योजनाएँ मिली हैं — खेती, स्वास्थ्य, आवास, और आजीविका। नीचे देखें और जो योजना चाहिए उसे चुनें।',
+    scheme_results_hd:'✦ आपके लिए ४ योजनाएँ मिलीं',
+    scheme_dropdown_lbl:'एक योजना चुनें जिसके लिए आवेदन करना है',
+    scheme_dropdown_ph:'— योजना चुनें —',
+    scheme_confirm_btn:'आगे बढ़ें →',
+    scheme_pick_msg:'कौन सी योजना के लिए आवेदन करना चाहेंगे? ऊपर किसी एक कार्ड पर टैप करें, या यहाँ नाम टाइप / बोलें।',
+    scheme_pick_speak:'कौन सी योजना के लिए आवेदन करना चाहेंगे? किसी एक को चुनें।',
+    faq_card_hd:'🎧 अक्सर पूछे जाने वाले सवाल',
+    faq_1_q:'नवजात / बच्चे का आधार कैसे बनाएँ?', faq_1_sub:'5 साल से कम उम्र के बच्चे का आधार',
+    faq_2_q:'आधार में नाम / पता कैसे बदलें?', faq_2_sub:'ऑनलाइन और ऑफलाइन दोनों तरीके',
+    faq_3_q:'नया पासपोर्ट कैसे बनाएँ?', faq_3_sub:'Documents · Fee · Appointment · Timeline',
+    faq_4_q:'राशन कार्ड कैसे बनवाएँ / अपडेट करें?', faq_4_sub:'नया नाम जोड़ना · पोर्टेबिलिटी · शिकायत',
+    faq_more:'कोई और सवाल है? बताएँ — मैं हाज़िर हूँ! आप ऊपर दी गई FAQs में से भी चुन सकते हैं।',
+    faq_not_heard:'मुझे आपका सवाल सुनाई नहीं दिया। कृपया फिर से पूछें।',
+    faq_not_found:'यह जानकारी अभी उपलब्ध नहीं है। कृपया अपना सवाल दोबारा पूछें।',
+    faq_generic_ans:'आपके सवाल के लिए — कृपया नज़दीकी Jan Seva Kendra (CSC) या संबंधित विभाग की helpline पर संपर्क करें। क्या आप आधार, पासपोर्ट, राशन कार्ड या किसी और विषय पर जानकारी चाहते हैं?',
+  },
+  en: {
+    tagline:'Government services, made easy — In your language',
+    mainActions:'Main Actions', services:'Services',
+    scheme_label:'Find the right scheme for me', scheme_sub:'PM Kisan · Ayushman · PM Awas + more',
+    docs_label:'Check my documents', docs_sub:'Verify · Find issues · Fix problems',
+    form_label:'Apply or fill a form', form_sub:'Voice-guided · Auto-fill · Step by step',
+    helpdesk_label:'Help Desk', helpdesk_sub:'Aadhaar · Ration Card · Passport · Any query',
+    placeholder:'Ask your question...', speak:'Speak',
+    hdr_sub:'AI Government Guide · English',
+    mic_idle:'Tap to speak', mic_idle_hint:'🎙️ You can speak now',
+    mic_listening:'🔴  Listening...', mic_listening_hint:"Speak, I'm listening",
+    mic_speaking:'🔊  Speaking...', mic_speaking_hint:'Nagrik AI is speaking',
+    mic_loading:'⏳  Searching...', mic_loading_hint:'One moment...',
+    greet_default:"Hello! I'm Nagrik Saathi. I'll find the best government schemes for you — just 3 quick questions.",
+    greet_scheme:"Hello! I'm Nagrik Saathi. I'll find the right government scheme for you. Let me ask a few questions first.",
+    greet_docs:"Hello! I'm Nagrik Saathi. I'll help check your documents. First, tell me — what do you do for a living?",
+    greet_form:"Hello! I'm Nagrik Saathi. I'll help you fill forms with voice guidance. Let me collect some details first.",
+    greet_aadhaar:"Hello! I'm here to help with your Aadhaar Card. Tell me — do you want to update it, new enrolment, or something else?",
+    greet_passport:"Hello! I'll help you with your Passport. Do you need a fresh passport, or a renewal?",
+    greet_pan:"Hello! I'll help you with your PAN Card. Do you need a new one, or want to make a correction?",
+    greet_driving:"Hello! I'll help you with your Driving Licence. Do you need a new licence, or a renewal?",
+    greet_helpdesk:"Hello! I'm Nagrik Saathi — your Government Help Desk. Aadhaar, Passport, Ration Card, Schemes — I'll guide you on any government service. Choose a question below or type/speak your query.",
+    sc_q1:'First question — What do you mainly do? Farming, a job, self-employed, or currently not working?',
+    sc_q2:'Got it! Now tell me — what is your total annual household income? Less than ₹1 lakh, between ₹1–3 lakh, or more than ₹3 lakh?',
+    sc_q3:'One last question — How many people are in your family? And do you currently have a permanent (pucca) house?',
+    sc_result:"Excellent! Based on your information, I found 4 eligible schemes for you — farming, health, housing, and livelihood. See below and choose the scheme you'd like to apply for.",
+    scheme_results_hd:'✦ 4 Schemes Found For You',
+    scheme_dropdown_lbl:'Choose a scheme to apply for',
+    scheme_dropdown_ph:'— Select a scheme —',
+    scheme_confirm_btn:'Proceed →',
+    scheme_pick_msg:'Which scheme would you like to apply for? Tap a card above, or type/speak the name here.',
+    scheme_pick_speak:'Which scheme would you like to apply for? Please choose one.',
+    faq_card_hd:'🎧 Frequently Asked Questions',
+    faq_1_q:'How to make Aadhaar for a newborn / infant?', faq_1_sub:'Aadhaar for children under 5 years',
+    faq_2_q:'How to update name / address in Aadhaar?', faq_2_sub:'Online and offline methods',
+    faq_3_q:'How to apply for a new Passport?', faq_3_sub:'Documents · Fee · Appointment · Timeline',
+    faq_4_q:'How to get / update a Ration Card?', faq_4_sub:'Add member · Portability · Complaints',
+    faq_more:"Any more questions? I'm here to help! You can also pick from the FAQs above.",
+    faq_not_heard:"I couldn't hear your question. Please try again.",
+    faq_not_found:'This information is not available right now. Please ask your question again.',
+    faq_generic_ans:"For your query — please contact your nearest Jan Seva Kendra (CSC) or the concerned department's helpline. Would you like info on Aadhaar, Passport, Ration Card, or any other topic?",
+  },
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('langSelect').value = lang;
+  const set = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = T(key); };
+  const setPH = (id, key) => { const e = document.getElementById(id); if (e) e.placeholder = T(key); };
+  set('ld-tagline','tagline'); set('ld-main-title','mainActions'); set('ld-services-title','services');
+  set('ld-scheme-label','scheme_label'); set('ld-scheme-sub','scheme_sub');
+  set('ld-docs-label','docs_label'); set('ld-docs-sub','docs_sub');
+  set('ld-form-label','form_label'); set('ld-form-sub','form_sub');
+  set('ld-helpdesk-label','helpdesk_label'); set('ld-helpdesk-sub','helpdesk_sub');
+  set('vHdrSub','hdr_sub');
+  setPH('ldInput','placeholder'); setPH('chatInput','placeholder');
+  set('ldSpeakTxt','speak'); set('speakBtnTxt','speak');
+  if (recognition) recognition.lang = lang === 'en' ? 'en-IN' : 'hi-IN';
+}
+
 // ── Conversation script ──
 const SC = {
   greet:  "नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल पूछूँगा।",
@@ -538,6 +658,7 @@ const SC = {
 // SARVAM TTS
 // ══════════════════════════════════════
 async function speak(text, onDone) {
+  if (currentLang === 'en') { fallbackSpeak(text, onDone); return; }
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   speaking = true;
   setMic('speaking');
@@ -587,8 +708,9 @@ function fallbackSpeak(text, onDone) {
   setMic('speaking');
   const utt = new SpeechSynthesisUtterance(text);
   const voices = synth.getVoices();
-  utt.voice = voices.find(v => v.lang === 'hi-IN') || voices.find(v => v.lang.startsWith('hi')) || null;
-  utt.lang  = 'hi-IN';
+  const tgtLang = currentLang === 'en' ? 'en-IN' : 'hi-IN';
+  utt.voice = voices.find(v => v.lang === tgtLang) || voices.find(v => v.lang.startsWith(currentLang === 'en' ? 'en' : 'hi')) || null;
+  utt.lang  = tgtLang;
   utt.rate  = 0.88;
   utt.pitch = 1.0;
   utt.onend = utt.onerror = () => { speaking = false; setMic('idle'); onDone?.(); };
@@ -602,10 +724,10 @@ function fallbackSpeak(text, onDone) {
 // ══════════════════════════════════════
 function setMic(state) {
   const S = {
-    idle:     { bg:'var(--blue)', rings:false, status:'टैप करके बात करो',     hint:'🎙️ आप बात कर सकते हैं' },
-    listening:{ bg:'#e53935',    rings:true,  status:'🔴  सुन रहा हूँ...',     hint:'बोलिए, मैं सुन रहा हूँ' },
-    speaking: { bg:'var(--blue)', rings:false, status:'🔊  बोल रहा हूँ...',    hint:'नागरिक साथी बोल रहा है' },
-    loading:  { bg:'#6b7280',    rings:false, status:'⏳  ढूंढ रहा हूँ...',    hint:'एक सेकंड...' },
+    idle:     { bg:'var(--blue)', rings:false, status:T('mic_idle'),      hint:T('mic_idle_hint') },
+    listening:{ bg:'#e53935',    rings:true,  status:T('mic_listening'),  hint:T('mic_listening_hint') },
+    speaking: { bg:'var(--blue)', rings:false, status:T('mic_speaking'),  hint:T('mic_speaking_hint') },
+    loading:  { bg:'#6b7280',    rings:false, status:T('mic_loading'),    hint:T('mic_loading_hint') },
   };
   const s = S[state] || S.idle;
   $micBtn.style.background = s.bg;
@@ -667,15 +789,15 @@ function showSchemeResults() {
     `<option value="${key}">${s.icon} ${s.name} — ${s.benefit}</option>`
   ).join('');
   c.innerHTML = `
-    <div class="sr-hd">✦ आपके लिए ४ योजनाएँ मिलीं</div>
+    <div class="sr-hd">${T('scheme_results_hd')}</div>
     <div class="scheme-chips">${chipsHtml}</div>
     <div class="scheme-dropdown-wrap">
-      <div class="scheme-dropdown-lbl">एक योजना चुनें जिसके लिए आवेदन करना है</div>
+      <div class="scheme-dropdown-lbl">${T('scheme_dropdown_lbl')}</div>
       <select class="scheme-select" id="schemeDropdown" onchange="document.getElementById('schemeConfirmBtn').disabled=!this.value">
-        <option value="">— योजना चुनें —</option>
+        <option value="">${T('scheme_dropdown_ph')}</option>
         ${optionsHtml}
       </select>
-      <button class="scheme-confirm-btn" id="schemeConfirmBtn" disabled onclick="confirmSchemeSelection()">आगे बढ़ें →</button>
+      <button class="scheme-confirm-btn" id="schemeConfirmBtn" disabled onclick="confirmSchemeSelection()">${T('scheme_confirm_btn')}</button>
     </div>`;
   $conv.appendChild(c); scrollDown();
 }
@@ -1190,8 +1312,8 @@ function processUserTurn(said) {
       showTyping();
       setTimeout(() => {
         hideTyping();
-        addAI(SC.q1);
-        speak(SC.q1, () => setMic('idle'));
+        addAI(T('sc_q1'));
+        speak(T('sc_q1'), () => setMic('idle'));
       }, 700);
     }, 350);
 
@@ -1200,8 +1322,8 @@ function processUserTurn(said) {
       showTyping();
       setTimeout(() => {
         hideTyping();
-        addAI(SC.q2);
-        speak(SC.q2, () => setMic('idle'));
+        addAI(T('sc_q2'));
+        speak(T('sc_q2'), () => setMic('idle'));
       }, 700);
     }, 350);
 
@@ -1210,8 +1332,8 @@ function processUserTurn(said) {
       showTyping();
       setTimeout(() => {
         hideTyping();
-        addAI(SC.q3);
-        speak(SC.q3, () => setMic('idle'));
+        addAI(T('sc_q3'));
+        speak(T('sc_q3'), () => setMic('idle'));
       }, 700);
     }, 350);
 
@@ -1220,13 +1342,13 @@ function processUserTurn(said) {
       showTyping(); setMic('loading');
       setTimeout(() => {
         hideTyping();
-        addAI(SC.result);
+        addAI(T('sc_result'));
         showSchemeResults();
-        speak(SC.result, () => {
+        speak(T('sc_result'), () => {
           schemePhase = 'awaiting_selection';
           setTimeout(() => {
-            addAI("कौन सी योजना के लिए आवेदन करना चाहेंगे? ऊपर किसी एक कार्ड पर टैप करें, या यहाँ नाम टाइप / बोलें।");
-            speak("कौन सी योजना के लिए आवेदन करना चाहेंगे? किसी एक को चुनें।", () => setMic('idle'));
+            addAI(T('scheme_pick_msg'));
+            speak(T('scheme_pick_speak'), () => setMic('idle'));
           }, 400);
         });
       }, 1400);
@@ -2010,7 +2132,7 @@ function setupRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return;
   recognition = new SR();
-  recognition.lang = 'hi-IN';
+  recognition.lang = currentLang === 'en' ? 'en-IN' : 'hi-IN';
   recognition.continuous = false;
   recognition.interimResults = false;
 }
@@ -2018,32 +2140,14 @@ function setupRecognition() {
 // ══════════════════════════════════════
 // HELP DESK
 // ══════════════════════════════════════
-const HELPDESK_FAQS = [
-  {
-    ico: '👶',
-    q: 'नवजात / बच्चे का आधार कैसे बनाएँ?',
-    sub: '5 साल से कम उम्र के बच्चे का आधार',
-    key: 'baal_aadhaar',
-  },
-  {
-    ico: '🪪',
-    q: 'आधार में नाम / पता कैसे बदलें?',
-    sub: 'ऑनलाइन और ऑफलाइन दोनों तरीके',
-    key: 'aadhaar_update',
-  },
-  {
-    ico: '🛂',
-    q: 'नया पासपोर्ट कैसे बनाएँ?',
-    sub: 'Documents · Fee · Appointment · Timeline',
-    key: 'passport_new',
-  },
-  {
-    ico: '🌾',
-    q: 'राशन कार्ड कैसे बनवाएँ / अपडेट करें?',
-    sub: 'नया नाम जोड़ना · पोर्टेबिलिटी · शिकायत',
-    key: 'ration_card',
-  },
-];
+function getHelpdeskFAQs() {
+  return [
+    { ico:'👶', q:T('faq_1_q'), sub:T('faq_1_sub'), key:'baal_aadhaar' },
+    { ico:'🪪', q:T('faq_2_q'), sub:T('faq_2_sub'), key:'aadhaar_update' },
+    { ico:'🛂', q:T('faq_3_q'), sub:T('faq_3_sub'), key:'passport_new' },
+    { ico:'🌾', q:T('faq_4_q'), sub:T('faq_4_sub'), key:'ration_card' },
+  ];
+}
 
 const HELPDESK_KB = {
   baal_aadhaar: {
@@ -2115,9 +2219,9 @@ function matchHelpdeskQuery(text) {
 function showHelpdeskFAQs() {
   const c = document.createElement('div');
   c.className = 'faq-card';
-  c.innerHTML = `<div class="faq-card-hd">🎧 अक्सर पूछे जाने वाले सवाल</div>
+  c.innerHTML = `<div class="faq-card-hd">${T('faq_card_hd')}</div>
     <div class="faq-list">` +
-    HELPDESK_FAQS.map(f => `
+    getHelpdeskFAQs().map(f => `
       <div class="faq-item" onclick="handleHelpdeskFAQ('${f.key}')">
         <div class="faq-item-ico">${f.ico}</div>
         <div><div class="faq-item-txt">${f.q}</div><div class="faq-item-sub">${f.sub}</div></div>
@@ -2128,7 +2232,7 @@ function showHelpdeskFAQs() {
 }
 
 function handleHelpdeskFAQ(key) {
-  const faq = HELPDESK_FAQS.find(f => f.key === key);
+  const faq = getHelpdeskFAQs().find(f => f.key === key);
   if (!faq) return;
   addUser(`${faq.ico} ${faq.q}`);
   showHelpdeskAnswer(key);
@@ -2140,10 +2244,10 @@ function showHelpdeskAnswer(key) {
     showTyping(); setMic('loading');
     setTimeout(() => {
       hideTyping();
-      const msg = 'यह जानकारी अभी उपलब्ध नहीं है। कृपया अपना सवाल दोबारा पूछें।';
+      const msg = T('faq_not_found');
       addAI(msg);
       speak(msg, () => {
-        addAI('कोई और सवाल हो तो बताएँ — मैं हाज़िर हूँ! 😊');
+        addAI(T('faq_more'));
         setMic('idle');
       });
     }, 700);
@@ -2171,7 +2275,7 @@ function showHelpdeskAnswer(key) {
 
     speak(kb.voice, () => {
       setTimeout(() => {
-        addAI('कोई और सवाल है? बताएँ — मैं हाज़िर हूँ! आप ऊपर दी गई FAQs में से भी चुन सकते हैं।');
+        addAI(T('faq_more'));
         setMic('idle');
       }, 400);
     });
@@ -2180,7 +2284,7 @@ function showHelpdeskAnswer(key) {
 
 function processHelpdeskQuery(text) {
   if (!text || !text.trim()) {
-    addAI('मुझे आपका सवाल सुनाई नहीं दिया। कृपया फिर से पूछें।');
+    addAI(T('faq_not_heard'));
     setMic('idle');
     return;
   }
@@ -2192,7 +2296,7 @@ function processHelpdeskQuery(text) {
     showTyping(); setMic('loading');
     setTimeout(() => {
       hideTyping();
-      const msg = 'आपके सवाल के लिए — कृपया नज़दीकी Jan Seva Kendra (CSC) या संबंधित विभाग की helpline पर संपर्क करें। क्या आप आधार, पासपोर्ट, राशन कार्ड या किसी और विषय पर जानकारी चाहते हैं?';
+      const msg = T('faq_generic_ans');
       addAI(msg);
       speak(msg, () => setMic('idle'));
     }, 700);
@@ -2200,18 +2304,14 @@ function processHelpdeskQuery(text) {
 }
 
 function startConv(intent) {
-  // Intent-specific greetings — all route into the same existing flow
+  // Intent-specific greetings — resolved from STRINGS for current language
   const greetMap = {
-    scheme:    "नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।",
-    docs:      "नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?",
-    form:      "नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।",
-    aadhaar:   "नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?",
-    passport:  "नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?",
-    pan:       "नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?",
-    driving:   "नमस्ते! ड्राइविंग लाइसेंस के लिए मदद करूँगा। नया बनाना है, या रिन्यू करना है?",
-    helpdesk:  "नमस्ते! मैं नागरिक साथी हूँ — आपका सरकारी Help Desk। आधार, पासपोर्ट, राशन कार्ड, योजनाएँ — किसी भी सरकारी काम में पूरी जानकारी दूँगा। नीचे से कोई सवाल चुनें या अपना सवाल लिखें / बोलें।",
+    scheme:   T('greet_scheme'),   docs:     T('greet_docs'),
+    form:     T('greet_form'),     aadhaar:  T('greet_aadhaar'),
+    passport: T('greet_passport'), pan:      T('greet_pan'),
+    driving:  T('greet_driving'),  helpdesk: T('greet_helpdesk'),
   };
-  SC.greet = greetMap[intent] || SC.greet;
+  SC.greet = greetMap[intent] || T('greet_default');
   serviceIntent = SERVICE_INTENTS.includes(intent) ? intent : null;
   helpdeskMode  = (intent === 'helpdesk');
   serviceTurn   = 0;
