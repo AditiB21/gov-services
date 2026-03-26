@@ -35,8 +35,8 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .landing.exit{animation:lExit 360ms ease-in forwards;pointer-events:none;}
 @keyframes lExit{to{opacity:0;transform:translateY(-28px) scale(.97)}}
 
-.ld-logo{font-size:38px;margin-bottom:8px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));}
-.ld-name{font-size:28px;font-weight:900;color:#0c0d10;letter-spacing:-.035em;margin-bottom:5px;}
+.ld-logo{font-size:38px;margin-bottom:8px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.1));text-align:center;width:100%;}
+.ld-name{font-size:28px;font-weight:900;color:#0c0d10;letter-spacing:-.035em;margin-bottom:5px;text-align:center;width:100%;}
 .ld-tag{font-size:13px;color:rgba(12,13,16,.5);font-weight:500;text-align:center;line-height:1.7;margin-bottom:20px;}
 
 /* Primary action cards */
@@ -365,7 +365,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 <div class="ld-scroll">
   <div class="ld-logo">🏛️</div>
   <div class="ld-name">Nagrik AI</div>
-  <div class="ld-tag">Sarkari kaam, aasaan — Hindi mein</div>
+  <div class="ld-tag">Sarkari kaam, aasaan — Aapki Bhasha mein</div>
 
   <!-- Primary Actions -->
   <div class="ld-section-title">Main Actions</div>
@@ -520,9 +520,9 @@ const SERVICE_INTENTS = ['aadhaar','passport','pan','driving'];
 
 const SERVICE_DEMO = {
   aadhaar: ["आधार अपडेट करना है", "हाँ, नाम और पता दोनों बदलने हैं"],
-  passport:["नया पासपोर्ट बनाना है"],
-  pan:     ["नया PAN card चाहिए"],
-  driving: ["नया लाइसेंस बनाना है"],
+  passport:["नया पासपोर्ट बनाना है", "ऑनलाइन करना है"],
+  pan:     ["नया PAN card चाहिए", "ऑनलाइन करना है"],
+  driving: ["नया लाइसेंस बनाना है", "ऑनलाइन करना है"],
 };
 
 // ── Conversation script ──
@@ -1081,14 +1081,34 @@ function processServiceTurn(said) {
         }
       }, 900);
     }
-  } else {
-    // Other services — generic "coming soon" nudge back to PM Kisan demo
-    showTyping(); setMic('loading');
-    setTimeout(() => {
-      hideTyping();
-      addAI(`${serviceIntent === 'passport' ? 'पासपोर्ट' : serviceIntent === 'pan' ? 'PAN Card' : 'Driving Licence'} सेवा जल्द आ रही है! अभी PM Kisan योजना का पूरा demo देखें।`);
-      speak('यह सेवा जल्द आ रही है।', () => setMic('idle'));
-    }, 900);
+  } else if (serviceIntent === 'pan') {
+    if (t === 0) {
+      const isCorrection = /correct|सुधार|change|badl|update|wrong|galat|गलत/i.test(text.toLowerCase());
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); showPanGuide(isCorrection ? 'correction' : 'new'); }, 900);
+    } else if (t === 1) {
+      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('pan') : showPanCenterGuide(); }, 900);
+    }
+  } else if (serviceIntent === 'passport') {
+    if (t === 0) {
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); showPassportGuide(); }, 900);
+    } else if (t === 1) {
+      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('passport') : showPassportCenterGuide(); }, 900);
+    }
+  } else if (serviceIntent === 'driving') {
+    if (t === 0) {
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); showDrivingGuide(); }, 900);
+    } else if (t === 1) {
+      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
+      showTyping(); setMic('loading');
+      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('driving') : showDrivingCenterGuide(); }, 900);
+    }
   }
 }
 
