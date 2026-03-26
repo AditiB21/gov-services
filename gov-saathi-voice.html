@@ -337,9 +337,15 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .speak-pill-btn svg{width:16px;height:16px;fill:#fff;}
 
 /* ════════ LANG SELECTOR ════════ */
-.lang-sel-wrap{position:absolute;top:14px;right:14px;z-index:10;}
-.lang-sel{border:1.5px solid rgba(36,38,43,.18);border-radius:var(--pill);padding:6px 10px;font-size:12px;font-weight:700;font-family:'JioType',sans-serif;color:var(--text);background:#fff;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:border-color 150ms;}
-.lang-sel:focus{border-color:var(--blue);}
+.lang-sel-wrap{position:absolute;top:14px;right:14px;z-index:20;}
+.lang-btn{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(36,38,43,.14);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,.1);transition:border-color 150ms,box-shadow 150ms;padding:0;flex-direction:column;gap:1px;}
+.lang-btn:active{box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.lang-btn svg{width:16px;height:16px;fill:var(--blue);}
+.lang-btn-lbl{font-size:8px;font-weight:700;font-family:'JioType',sans-serif;color:var(--blue);line-height:1;}
+.lang-menu{position:absolute;top:44px;right:0;background:#fff;border-radius:12px;border:1px solid var(--stroke);box-shadow:0 6px 20px rgba(0,0,0,.13);overflow:hidden;min-width:130px;animation:bUp 180ms ease-out;}
+.lang-opt{padding:11px 16px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:'JioType',sans-serif;transition:background 120ms;display:flex;align-items:center;gap:8px;}
+.lang-opt:active{background:#f0f4ff;}
+.lang-opt.active{color:var(--blue);font-weight:700;}
 
 /* ════════ HELP DESK FAQs ════════ */
 .faq-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;overflow:hidden;animation:bUp 380ms ease-out;width:100%;}
@@ -368,10 +374,14 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 <!-- LANDING -->
 <div class="landing" id="landing">
 <div class="lang-sel-wrap">
-  <select class="lang-sel" id="langSelect" onchange="setLang(this.value)">
-    <option value="hi">🇮🇳 हिंदी</option>
-    <option value="en">🇬🇧 English</option>
-  </select>
+  <button class="lang-btn" id="langBtn" onclick="toggleLangMenu(event)">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    <span class="lang-btn-lbl" id="langBtnLbl">हि</span>
+  </button>
+  <div class="lang-menu" id="langMenu" style="display:none">
+    <div class="lang-opt active" id="langOptHi" onclick="setLang('hi')">🇮🇳 हिंदी</div>
+    <div class="lang-opt" id="langOptEn" onclick="setLang('en')">🇬🇧 English</div>
+  </div>
 </div>
 <div class="ld-scroll">
   <div class="ld-logo">🏛️</div>
@@ -421,10 +431,10 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   <div class="ld-svc-section">
     <div class="ld-section-title" id="ld-services-title">Services</div>
     <div class="ld-svc-grid">
-      <div class="svc-chip" onclick="startConv('aadhaar')"><span class="svc-ico">🪪</span><span class="svc-name">Aadhaar Card</span></div>
-      <div class="svc-chip" onclick="startConv('passport')"><span class="svc-ico">🛂</span><span class="svc-name">Passport</span></div>
-      <div class="svc-chip" onclick="startConv('pan')"><span class="svc-ico">💳</span><span class="svc-name">PAN Card</span></div>
-      <div class="svc-chip" onclick="startConv('driving')"><span class="svc-ico">🚗</span><span class="svc-name">Driving Licence</span></div>
+      <div class="svc-chip" onclick="startConv('aadhaar')"><span class="svc-ico">🪪</span><span class="svc-name" id="ld-svc-aadhaar">Aadhaar Card</span></div>
+      <div class="svc-chip" onclick="startConv('passport')"><span class="svc-ico">🛂</span><span class="svc-name" id="ld-svc-passport">Passport</span></div>
+      <div class="svc-chip" onclick="startConv('pan')"><span class="svc-ico">💳</span><span class="svc-name" id="ld-svc-pan">PAN Card</span></div>
+      <div class="svc-chip" onclick="startConv('driving')"><span class="svc-ico">🚗</span><span class="svc-name" id="ld-svc-driving">Driving Licence</span></div>
     </div>
   </div>
 
@@ -542,6 +552,21 @@ const SERVICE_DEMO = {
 let currentLang = 'hi';
 function T(k) { return (STRINGS[currentLang] || STRINGS.hi)[k] || k; }
 
+function toggleLangMenu(e) {
+  e && e.stopPropagation();
+  const menu = document.getElementById('langMenu');
+  if (!menu) return;
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Close when clicking outside
+    setTimeout(() => document.addEventListener('click', function close() {
+      menu.style.display = 'none';
+      document.removeEventListener('click', close);
+    }), 10);
+  }
+}
+
 const STRINGS = {
   hi: {
     tagline:'Sarkari kaam, aasaan — Aapki Bhasha mein',
@@ -549,7 +574,8 @@ const STRINGS = {
     scheme_label:'सही योजना खोजें', scheme_sub:'PM Kisan · Ayushman · PM Awas + more',
     docs_label:'दस्तावेज़ जाँचें', docs_sub:'Verify · समस्या खोजें · सुधार करें',
     form_label:'फ़ॉर्म भरें / आवेदन करें', form_sub:'आवाज़ से · Auto-fill · Step by step',
-    helpdesk_label:'Help Desk', helpdesk_sub:'Aadhaar · Ration Card · Passport · Any query',
+    helpdesk_label:'हेल्प डेस्क', helpdesk_sub:'आधार · राशन कार्ड · पासपोर्ट · कोई भी सवाल',
+    svc_aadhaar:'आधार कार्ड', svc_passport:'पासपोर्ट', svc_pan:'PAN कार्ड', svc_driving:'ड्राइविंग लाइसेंस',
     placeholder:'अपना सवाल लिखें...', speak:'बोलें',
     hdr_sub:'AI सरकारी गाइड · हिंदी',
     mic_idle:'टैप करके बात करो', mic_idle_hint:'🎙️ आप बात कर सकते हैं',
@@ -592,6 +618,7 @@ const STRINGS = {
     docs_label:'Check my documents', docs_sub:'Verify · Find issues · Fix problems',
     form_label:'Apply or fill a form', form_sub:'Voice-guided · Auto-fill · Step by step',
     helpdesk_label:'Help Desk', helpdesk_sub:'Aadhaar · Ration Card · Passport · Any query',
+    svc_aadhaar:'Aadhaar Card', svc_passport:'Passport', svc_pan:'PAN Card', svc_driving:'Driving Licence',
     placeholder:'Ask your question...', speak:'Speak',
     hdr_sub:'AI Government Guide · English',
     mic_idle:'Tap to speak', mic_idle_hint:'🎙️ You can speak now',
@@ -639,9 +666,21 @@ function setLang(lang) {
   set('ld-docs-label','docs_label'); set('ld-docs-sub','docs_sub');
   set('ld-form-label','form_label'); set('ld-form-sub','form_sub');
   set('ld-helpdesk-label','helpdesk_label'); set('ld-helpdesk-sub','helpdesk_sub');
+  set('ld-svc-aadhaar','svc_aadhaar'); set('ld-svc-passport','svc_passport');
+  set('ld-svc-pan','svc_pan'); set('ld-svc-driving','svc_driving');
   set('vHdrSub','hdr_sub');
   setPH('ldInput','placeholder'); setPH('chatInput','placeholder');
   set('ldSpeakTxt','speak'); set('speakBtnTxt','speak');
+  // Update lang button label + active state
+  const lbl = document.getElementById('langBtnLbl');
+  if (lbl) lbl.textContent = lang === 'en' ? 'EN' : 'हि';
+  const hiOpt = document.getElementById('langOptHi');
+  const enOpt = document.getElementById('langOptEn');
+  if (hiOpt) hiOpt.classList.toggle('active', lang === 'hi');
+  if (enOpt) enOpt.classList.toggle('active', lang === 'en');
+  // Close dropdown
+  const menu = document.getElementById('langMenu');
+  if (menu) menu.style.display = 'none';
   if (recognition) recognition.lang = lang === 'en' ? 'en-IN' : 'hi-IN';
 }
 
