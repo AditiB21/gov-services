@@ -336,16 +336,11 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .speak-pill-btn:active{transform:scale(.96);}
 .speak-pill-btn svg{width:16px;height:16px;fill:#fff;}
 
-/* ════════ LANG SELECTOR ════════ */
-.lang-sel-wrap{position:absolute;top:14px;right:14px;z-index:20;}
-.lang-btn{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(36,38,43,.14);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,.1);transition:border-color 150ms,box-shadow 150ms;padding:0;flex-direction:column;gap:1px;}
-.lang-btn:active{box-shadow:0 1px 2px rgba(0,0,0,.08);}
-.lang-btn svg{width:16px;height:16px;fill:var(--blue);}
-.lang-btn-lbl{font-size:8px;font-weight:700;font-family:'JioType',sans-serif;color:var(--blue);line-height:1;}
-.lang-menu{position:absolute;top:44px;right:0;background:#fff;border-radius:12px;border:1px solid var(--stroke);box-shadow:0 6px 20px rgba(0,0,0,.13);overflow:hidden;min-width:130px;animation:bUp 180ms ease-out;}
-.lang-opt{padding:11px 16px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;font-family:'JioType',sans-serif;transition:background 120ms;display:flex;align-items:center;gap:8px;}
-.lang-opt:active{background:#f0f4ff;}
-.lang-opt.active{color:var(--blue);font-weight:700;}
+/* ════════ LANG TOGGLE ════════ */
+.lang-toggle{position:absolute;top:14px;right:14px;z-index:20;display:flex;background:rgba(0,0,0,.07);border-radius:var(--pill);padding:2px;gap:0;}
+.lang-tog{border:none;border-radius:var(--pill);padding:5px 11px;font-size:11px;font-weight:700;font-family:'JioType',sans-serif;cursor:pointer;background:transparent;color:rgba(12,13,16,.45);transition:all 160ms;line-height:1.2;}
+.lang-tog.active{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.13);}
+.lang-tog:not(.active):active{color:rgba(12,13,16,.7);}
 
 /* ════════ HELP DESK FAQs ════════ */
 .faq-card{border-radius:14px;border:1px solid var(--stroke);background:#fff;overflow:hidden;animation:bUp 380ms ease-out;width:100%;}
@@ -373,15 +368,9 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 
 <!-- LANDING -->
 <div class="landing" id="landing">
-<div class="lang-sel-wrap">
-  <button class="lang-btn" id="langBtn" onclick="toggleLangMenu(event)">
-    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-    <span class="lang-btn-lbl" id="langBtnLbl">हि</span>
-  </button>
-  <div class="lang-menu" id="langMenu" style="display:none">
-    <div class="lang-opt active" id="langOptHi" onclick="setLang('hi')">🇮🇳 हिंदी</div>
-    <div class="lang-opt" id="langOptEn" onclick="setLang('en')">🇬🇧 English</div>
-  </div>
+<div class="lang-toggle">
+  <button class="lang-tog active" id="langHiBtn" onclick="setLang('hi')">हि</button>
+  <button class="lang-tog" id="langEnBtn" onclick="setLang('en')">EN</button>
 </div>
 <div class="ld-scroll">
   <div class="ld-logo">🏛️</div>
@@ -552,20 +541,6 @@ const SERVICE_DEMO = {
 let currentLang = 'hi';
 function T(k) { return (STRINGS[currentLang] || STRINGS.hi)[k] || k; }
 
-function toggleLangMenu(e) {
-  e && e.stopPropagation();
-  const menu = document.getElementById('langMenu');
-  if (!menu) return;
-  const isOpen = menu.style.display !== 'none';
-  menu.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) {
-    // Close when clicking outside
-    setTimeout(() => document.addEventListener('click', function close() {
-      menu.style.display = 'none';
-      document.removeEventListener('click', close);
-    }), 10);
-  }
-}
 
 const STRINGS = {
   hi: {
@@ -671,16 +646,8 @@ function setLang(lang) {
   set('vHdrSub','hdr_sub');
   setPH('ldInput','placeholder'); setPH('chatInput','placeholder');
   set('ldSpeakTxt','speak'); set('speakBtnTxt','speak');
-  // Update lang button label + active state
-  const lbl = document.getElementById('langBtnLbl');
-  if (lbl) lbl.textContent = lang === 'en' ? 'EN' : 'हि';
-  const hiOpt = document.getElementById('langOptHi');
-  const enOpt = document.getElementById('langOptEn');
-  if (hiOpt) hiOpt.classList.toggle('active', lang === 'hi');
-  if (enOpt) enOpt.classList.toggle('active', lang === 'en');
-  // Close dropdown
-  const menu = document.getElementById('langMenu');
-  if (menu) menu.style.display = 'none';
+  document.getElementById('langHiBtn')?.classList.toggle('active', lang === 'hi');
+  document.getElementById('langEnBtn')?.classList.toggle('active', lang === 'en');
   if (recognition) recognition.lang = lang === 'en' ? 'en-IN' : 'hi-IN';
 }
 
