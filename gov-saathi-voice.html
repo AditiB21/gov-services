@@ -667,10 +667,10 @@ async function speak(text, onDone) {
   speaking = true;
   setMic('speaking');
 
-  // Language config: Hindi → male 'arvind', English → female 'anushka' (Indian English)
+  // Language config: Hindi → male 'arvind', English → female 'meera' (warm Indian English)
   const isEn = currentLang === 'en';
   const langCode = isEn ? 'en-IN' : 'hi-IN';
-  const speaker  = isEn ? 'anushka' : 'arvind';
+  const speaker  = isEn ? 'meera' : 'arvind';
 
   try {
     const res = await fetch(SARVAM_URL, {
