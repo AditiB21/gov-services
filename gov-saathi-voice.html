@@ -574,7 +574,7 @@ const STRINGS = {
     scheme_dropdown_lbl:'एक योजना चुनें जिसके लिए आवेदन करना है',
     scheme_dropdown_ph:'— योजना चुनें —',
     scheme_confirm_btn:'आगे बढ़ें →',
-    scheme_pick_msg:'कौन सी योजना के लिए आवेदन करना चाहेंगे? ऊपर किसी एक कार्ड पर टैप करें, या यहाँ नाम टाइप / बोलें।',
+    scheme_pick_msg:'कौन सी योजना के लिए आवेदन करना चाहेंगे? नीचे किसी एक कार्ड पर टैप करें, या यहाँ नाम टाइप / बोलें।',
     scheme_pick_speak:'कौन सी योजना के लिए आवेदन करना चाहेंगे? किसी एक को चुनें।',
     faq_card_hd:'🎧 अक्सर पूछे जाने वाले सवाल',
     faq_1_q:'नवजात / बच्चे का आधार कैसे बनाएँ?', faq_1_sub:'5 साल से कम उम्र के बच्चे का आधार',
@@ -617,7 +617,7 @@ const STRINGS = {
     scheme_dropdown_lbl:'Choose a scheme to apply for',
     scheme_dropdown_ph:'— Select a scheme —',
     scheme_confirm_btn:'Proceed →',
-    scheme_pick_msg:'Which scheme would you like to apply for? Tap a card above, or type/speak the name here.',
+    scheme_pick_msg:'Which scheme would you like to apply for? Tap a card below, or type/speak the name here.',
     scheme_pick_speak:'Which scheme would you like to apply for? Please choose one.',
     faq_card_hd:'🎧 Frequently Asked Questions',
     faq_1_q:'How to make Aadhaar for a newborn / infant?', faq_1_sub:'Aadhaar for children under 5 years',
@@ -1365,11 +1365,11 @@ function processUserTurn(said) {
       setTimeout(() => {
         hideTyping();
         addAI(T('sc_result'));
-        showSchemeResults();
         speak(T('sc_result'), () => {
           schemePhase = 'awaiting_selection';
           setTimeout(() => {
             addAI(T('scheme_pick_msg'));
+            showSchemeResults();
             speak(T('scheme_pick_speak'), () => setMic('idle'));
           }, 400);
         });
