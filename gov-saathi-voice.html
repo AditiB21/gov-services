@@ -667,29 +667,36 @@ async function speak(text, onDone) {
   speaking = true;
   setMic('speaking');
 
-  // Language config: Hindi → 'arvind' (male), English → 'pavithra' (female Indian English)
   const isEn = currentLang === 'en';
-  const langCode = isEn ? 'en-IN' : 'hi-IN';
-  const speaker  = isEn ? 'pavithra' : 'arvind';
+
+  // English  → bulbul:v3 + 'ritu' (warm female Indian English, v3 API format)
+  // Hindi    → bulbul:v1 + 'arvind' (existing working config)
+  const reqBody = isEn
+    ? JSON.stringify({
+        text,
+        target_language_code: 'en-IN',
+        speaker: 'ritu',
+        model: 'bulbul:v3',
+        pace: 1.0,
+        output_audio_codec: 'wav'
+      })
+    : JSON.stringify({
+        inputs: [text],
+        target_language_code: 'hi-IN',
+        speaker: 'arvind',
+        model: 'bulbul:v1',
+        pace: 0.95,
+        pitch: 0,
+        loudness: 1.5,
+        enable_preprocessing: true,
+        speech_sample_rate: 22050
+      });
 
   try {
     const res = await fetch(SARVAM_URL, {
       method: 'POST',
-      headers: {
-        'api-subscription-key': SARVAM_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        inputs: [text],
-        target_language_code: langCode,
-        speaker: speaker,
-        model: 'bulbul:v1',
-        pace: isEn ? 0.92 : 0.95,
-        pitch: isEn ? 0.1 : 0,
-        loudness: 1.5,
-        enable_preprocessing: true,
-        speech_sample_rate: 22050
-      })
+      headers: { 'api-subscription-key': SARVAM_KEY, 'Content-Type': 'application/json' },
+      body: reqBody
     });
 
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1973,6 +1980,387 @@ function showAadhaarCenterGuide() {
       }, 600);
     }, 16000
   );
+}
+
+// ══════════════════════════════════════
+// PAN CARD FLOW
+// ══════════════════════════════════════
+function showPanGuide(subIntent) {
+  const isCorr = subIntent === 'correction';
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">💳 PAN कार्ड — ${isCorr ? 'सुधार (Correction)' : 'नया आवेदन (New)'}</div>
+    <div class="ac-step">
+      <span class="ac-ico">💻</span>
+      <div>
+        <div class="ac-txt">ऑनलाइन आवेदन करें</div>
+        <div class="ac-sub">NSDL / UTIITSL Portal → Form 49A (नया) या Correction Form</div>
+        <span class="ac-pill free">₹107 शुल्क · भारतीय नागरिक</span>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📄</span>
+      <div>
+        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
+        <div class="ac-sub">• पहचान प्रमाण — आधार कार्ड / Voter ID / Passport</div>
+        <div class="ac-sub">• पते का प्रमाण — आधार / बिजली बिल / बैंक स्टेटमेंट</div>
+        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं की मार्कशीट</div>
+        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (रंगीन)</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">🏢</span>
+      <div>
+        <div class="ac-txt">नज़दीकी TIN Facilitation Centre</div>
+        <div class="ac-sub">NSDL TIN-FC, Hazratganj · <strong>1.5 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">⏱️</span>
+      <div>
+        <div class="ac-txt">PAN कार्ड 15–20 दिन में आता है</div>
+        <div class="ac-sub">acknowledgement number से track करें</div>
+        <span class="ac-pill free">e-PAN तुरंत मिल जाता है</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  const speech = isCorr
+    ? "PAN कार्ड में सुधार के लिए NSDL या UTIITSL पोर्टल पर Correction Form भरें। आधार, पहचान और पते का प्रमाण लगाना होगा। एक सौ सात रुपये शुल्क है। e-PAN तुरंत मिलेगा।"
+    : "नया PAN कार्ड बनाने के लिए NSDL या UTIITSL पोर्टल पर Form 49A भरें। आधार कार्ड, पते का प्रमाण, जन्म प्रमाण और पासपोर्ट साइज़ फ़ोटो लगानी होगी। एक सौ सात रुपये शुल्क है। PAN कार्ड पंद्रह से बीस दिन में आ जाता है, e-PAN तुरंत मिलता है।";
+
+  speakThen(speech, () => {
+    setTimeout(() => {
+      addAI("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?");
+      speak("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?", () => setMic('idle'));
+    }, 500);
+  }, 12000);
+}
+
+function showPanCenterGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🏢 TIN Facilitation Centre — स्टेप-बाय-स्टेप</div>
+    <div class="ac-step">
+      <span class="ac-ico">📍</span>
+      <div>
+        <div class="ac-txt">NSDL TIN-FC — Hazratganj</div>
+        <div class="ac-sub">Ground Floor, Hazratganj, Lucknow · <strong>1.5 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 साथ क्या लेकर जाएं?</div>
+    <div class="ac-step">
+      <span class="ac-ico">🪪</span>
+      <div>
+        <div class="ac-txt">पहचान प्रमाण (Original + फ़ोटोकॉपी)</div>
+        <div class="ac-sub">आधार कार्ड / Voter ID / Passport</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">🏠</span>
+      <div>
+        <div class="ac-txt">पते का प्रमाण (Original + फ़ोटोकॉपी)</div>
+        <div class="ac-sub">आधार / बिजली बिल / बैंक स्टेटमेंट</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📸</span>
+      <div>
+        <div class="ac-txt">2 पासपोर्ट साइज़ फ़ोटो (रंगीन)</div>
+        <div class="ac-sub">सफ़ेद background · हाल की खिंची हुई</div>
+      </div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">📬</span>
+      <div>
+        <div class="ac-txt">Acknowledgement slip मिलेगी</div>
+        <div class="ac-sub">₹107 शुल्क · 15–20 दिन में PAN कार्ड आ जाएगा</div>
+        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "NSDL TIN सेंटर हज़रतगंज में है — डेढ़ किलोमीटर दूर। साथ में आधार कार्ड, पते का प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। एक सौ सात रुपये शुल्क लगेगा और पंद्रह से बीस दिन में PAN कार्ड घर आ जाएगा।",
+    () => {
+      setTimeout(() => {
+        addAI("और कोई मदद चाहिए?");
+        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+      }, 600);
+    }, 10000
+  );
+}
+
+// ══════════════════════════════════════
+// PASSPORT FLOW
+// ══════════════════════════════════════
+function showPassportGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🛂 Passport — नया आवेदन / Renewal</div>
+    <div class="ac-step">
+      <span class="ac-ico">💻</span>
+      <div>
+        <div class="ac-txt">ऑनलाइन आवेदन — passportindia.gov.in</div>
+        <div class="ac-sub">Register → Apply Online → Fresh / Renewal चुनें → Appointment book करें</div>
+        <span class="ac-pill free">₹1,500 (Normal) · ₹3,500 (Tatkal)</span>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📄</span>
+      <div>
+        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
+        <div class="ac-sub">• आधार कार्ड (Original + फ़ोटोकॉपी)</div>
+        <div class="ac-sub">• पते का प्रमाण — बिजली बिल / बैंक स्टेटमेंट</div>
+        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट</div>
+        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (2 रंगीन, सफ़ेद background)</div>
+        <div class="ac-sub">• Renewal के लिए — पुराना Passport</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">🏢</span>
+      <div>
+        <div class="ac-txt">Passport Seva Kendra (PSK)</div>
+        <div class="ac-sub">PSK Lucknow, Vibhuti Khand · <strong>5.3 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">⏱️</span>
+      <div>
+        <div class="ac-txt">Normal: 30–45 दिन · Tatkal: 1–3 दिन</div>
+        <div class="ac-sub">Appointment के बाद PSK में जाना ज़रूरी है</div>
+        <span class="ac-pill free">Police Verification होती है</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "पासपोर्ट के लिए passportindia.gov.in पर जाएं, Register करें और Fresh या Renewal चुनें। Appointment book करें। " +
+    "साथ में आधार कार्ड, पते का प्रमाण, जन्म प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। Renewal के लिए पुराना पासपोर्ट भी लाएं। " +
+    "Normal पासपोर्ट के लिए डेढ़ हज़ार रुपये शुल्क है और तीस से पैंतालीस दिन लगते हैं। Tatkal में साढ़े तीन हज़ार रुपये में एक से तीन दिन में मिल जाता है।",
+    () => {
+      setTimeout(() => {
+        addAI("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?");
+        speak("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?", () => setMic('idle'));
+      }, 500);
+    }, 16000
+  );
+}
+
+function showPassportCenterGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🏢 Passport Seva Kendra — स्टेप-बाय-स्टेप</div>
+    <div class="ac-step">
+      <span class="ac-ico">📍</span>
+      <div>
+        <div class="ac-txt">PSK Lucknow — Vibhuti Khand</div>
+        <div class="ac-sub">Vibhuti Khand, Gomti Nagar, Lucknow · <strong>5.3 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे · Appointment ज़रूरी</div>
+      </div>
+    </div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 PSK पर क्या होता है?</div>
+    <div class="ac-step">
+      <span class="ac-ico">1️⃣</span>
+      <div><div class="ac-txt">Token Counter — Document Verification</div><div class="ac-sub">सभी Original दस्तावेज़ दिखाएं और फ़ोटोकॉपी जमा करें</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">2️⃣</span>
+      <div><div class="ac-txt">Photo & Biometric Capture</div><div class="ac-sub">फ़ोटो और fingerprint PSK पर ही लिए जाते हैं</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">3️⃣</span>
+      <div><div class="ac-txt">Police Verification</div><div class="ac-sub">पुलिस आपके घर verification के लिए आएगी</div></div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">📬</span>
+      <div>
+        <div class="ac-txt">Passport डाक से घर पहुँचेगा</div>
+        <div class="ac-sub">Normal: 30–45 दिन · Tatkal: 1–3 दिन</div>
+        <span class="ac-pill free">SMS पर हर update मिलेगा</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "PSK Lucknow, गोमती नगर में है — पाँच किलोमीटर दूर। वहाँ जाने से पहले passportindia.gov.in पर Appointment लेना ज़रूरी है। " +
+    "PSK पर पहले दस्तावेज़ verify होंगे, फिर फ़ोटो और fingerprint लिए जाएंगे। बाद में पुलिस घर आकर verification करेगी। Passport डाक से आएगा।",
+    () => {
+      setTimeout(() => {
+        addAI("और कोई मदद चाहिए?");
+        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+      }, 600);
+    }, 12000
+  );
+}
+
+// ══════════════════════════════════════
+// DRIVING LICENCE FLOW
+// ══════════════════════════════════════
+function showDrivingGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🚗 Driving Licence — नया आवेदन</div>
+    <div class="ac-step">
+      <span class="ac-ico">💻</span>
+      <div>
+        <div class="ac-txt">ऑनलाइन आवेदन — sarathi.parivahan.gov.in</div>
+        <div class="ac-sub">पहले Learner's Licence → फिर Driving Test → DL मिलेगा</div>
+        <span class="ac-pill free">₹200–₹500 शुल्क (state-wise)</span>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">📄</span>
+      <div>
+        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
+        <div class="ac-sub">• आधार कार्ड (पहचान + पते का प्रमाण)</div>
+        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट</div>
+        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (2 रंगीन)</div>
+        <div class="ac-sub">• Medical Certificate (Form 1A) — अगर Heavy Vehicle के लिए</div>
+      </div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">🏢</span>
+      <div>
+        <div class="ac-txt">RTO Office</div>
+        <div class="ac-sub">RTO Lucknow, Kaiserbagh · <strong>3.2 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">⏱️</span>
+      <div>
+        <div class="ac-txt">प्रक्रिया: LL → 30 दिन बाद DL Test</div>
+        <div class="ac-sub">Learner's Licence online Test · DL Test RTO पर</div>
+        <span class="ac-pill free">Age 18+ (LMV) · 16+ (Gearless)</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "Driving Licence के लिए sarathi.parivahan.gov.in पर जाएं। पहले Learner's Licence के लिए online आवेदन करें और online test दें। " +
+    "Learner's Licence मिलने के तीस दिन बाद RTO जाकर Driving Test देना होगा। " +
+    "आधार कार्ड, जन्म प्रमाण, और दो रंगीन फ़ोटो ज़रूरी हैं। उम्र कम से कम अठारह साल होनी चाहिए।",
+    () => {
+      setTimeout(() => {
+        addAI("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?");
+        speak("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?", () => setMic('idle'));
+      }, 500);
+    }, 14000
+  );
+}
+
+function showDrivingCenterGuide() {
+  const card = document.createElement('div');
+  card.className = 'action-card';
+  card.innerHTML = `
+    <div class="ac-hd">🏢 RTO Office — स्टेप-बाय-स्टेप</div>
+    <div class="ac-step">
+      <span class="ac-ico">📍</span>
+      <div>
+        <div class="ac-txt">RTO Lucknow — Kaiserbagh</div>
+        <div class="ac-sub">Regional Transport Office, Kaiserbagh, Lucknow · <strong>3.2 km</strong></div>
+        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+      </div>
+    </div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 RTO पर क्या करें?</div>
+    <div class="ac-step">
+      <span class="ac-ico">1️⃣</span>
+      <div><div class="ac-txt">Form LL-1 भरें (Learner's Licence)</div><div class="ac-sub">sarathi.parivahan.gov.in से online भी भर सकते हैं</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">2️⃣</span>
+      <div><div class="ac-txt">Document Verification + Fees जमा करें</div><div class="ac-sub">आधार, जन्म प्रमाण, फ़ोटो · ₹200–300 शुल्क</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">3️⃣</span>
+      <div><div class="ac-txt">Learner's Test दें (Written/Computer)</div><div class="ac-sub">Traffic rules पर MCQ test · RTO counter पर</div></div>
+    </div>
+    <div class="ac-step">
+      <span class="ac-ico">4️⃣</span>
+      <div><div class="ac-txt">30 दिन बाद — Driving Test appointment लें</div><div class="ac-sub">अपनी गाड़ी लेकर आएं (LMV/2W)</div></div>
+    </div>
+    <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+      <span class="ac-ico">📬</span>
+      <div>
+        <div class="ac-txt">DL डाक से घर आएगा</div>
+        <div class="ac-sub">Test pass करने के 7–15 दिन में</div>
+        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+      </div>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+
+  speakThen(
+    "RTO Lucknow, कैसरबाग में है — तीन किलोमीटर दूर। वहाँ जाकर Form LL-1 भरें, दस्तावेज़ verify करवाएं और fees जमा करें। फिर written test देना होगा। Learner's Licence मिलने के तीस दिन बाद Driving Test दें। Test pass होने के सात से पंद्रह दिन में DL घर आ जाएगा।",
+    () => {
+      setTimeout(() => {
+        addAI("और कोई मदद चाहिए?");
+        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+      }, 600);
+    }, 12000
+  );
+}
+
+// ══════════════════════════════════════
+// GENERIC SERVICE FORM OVERLAY
+// ══════════════════════════════════════
+function openSvcFormOverlay(svc) {
+  const SVC_INFO = {
+    pan:      { icon:'💳', name:'PAN Card', portal:'onlineservices.nsdl.com', url:'https://onlineservices.nsdl.com/paam/endUserRegisterContact.html', lbl:'NSDL PAN Portal' },
+    passport: { icon:'🛂', name:'Passport', portal:'passportindia.gov.in', url:'https://www.passportindia.gov.in/AppOnlineProject/welcomeLink', lbl:'Passport Seva Portal' },
+    driving:  { icon:'🚗', name:'Driving Licence', portal:'sarathi.parivahan.gov.in', url:'https://sarathi.parivahan.gov.in/', lbl:'Sarathi Parivahan Portal' },
+  };
+  const info = SVC_INFO[svc] || SVC_INFO.pan;
+
+  const msg = `${info.icon} ${info.name} के लिए आधिकारिक सरकारी पोर्टल <strong>${info.portal}</strong> खुल रहा है…`;
+  addAI(msg);
+
+  const loader = document.createElement('div');
+  loader.className = 'site-loader';
+  loader.innerHTML = `<div class="sl-ico">${info.icon}</div>
+    <div class="sl-title">${info.portal} खुल रहा है...</div>
+    <div class="sl-sub">Official Government of India Website</div>
+    <div class="sl-bar"><div class="sl-fill"></div></div>`;
+  $conv.appendChild(loader); scrollDown();
+
+  speak(`${info.name} के लिए आधिकारिक पोर्टल खुल रहा है। वहाँ आपको ${info.lbl} दिखेगा — वहीं से आवेदन करें।`, () => {});
+
+  setTimeout(() => {
+    loader.remove();
+    const linkCard = document.createElement('div');
+    linkCard.className = 'action-card';
+    linkCard.innerHTML = `
+      <div class="ac-hd">${info.icon} ${info.name} — Official Portal</div>
+      <div class="ac-step">
+        <span class="ac-ico">🌐</span>
+        <div>
+          <div class="ac-txt">${info.lbl}</div>
+          <div class="ac-sub">${info.portal}</div>
+          <button class="apply-btn-p" style="margin-top:8px;font-size:13px" onclick="window.open('${info.url}','_blank')">🔗 पोर्टल खोलें</button>
+        </div>
+      </div>
+      <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+        <span class="ac-ico">💡</span>
+        <div>
+          <div class="ac-txt">Submit आप खुद करें</div>
+          <div class="ac-sub">नागरिक साथी सुरक्षा के लिए form submit नहीं करता</div>
+        </div>
+      </div>`;
+    $conv.appendChild(linkCard); scrollDown();
+
+    setTimeout(() => {
+      addAI("और कोई मदद चाहिए?");
+      speak("और कोई मदद चाहिए?", () => setMic('idle'));
+    }, 800);
+  }, 2800);
 }
 
 function closeWebOverlay() {
