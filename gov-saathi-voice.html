@@ -633,7 +633,6 @@ const STRINGS = {
 
 function setLang(lang) {
   currentLang = lang;
-  document.getElementById('langSelect').value = lang;
   const set = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = T(key); };
   const setPH = (id, key) => { const e = document.getElementById(id); if (e) e.placeholder = T(key); };
   set('ld-tagline','tagline'); set('ld-main-title','mainActions'); set('ld-services-title','services');
