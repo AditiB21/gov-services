@@ -556,6 +556,7 @@ const SERVICE_DEMO = {
 // ══════════════════════════════════════
 let currentLang = 'hi';
 function T(k) { return (STRINGS[currentLang] || STRINGS.hi)[k] || k; }
+function msg(hi, en) { return currentLang === 'hi' ? hi : en; }
 
 
 const STRINGS = {
@@ -573,8 +574,8 @@ const STRINGS = {
     mic_listening:'🔴  सुन रहा हूँ...', mic_listening_hint:'बोलिए, मैं सुन रहा हूँ',
     mic_speaking:'🔊  बोल रहा हूँ...', mic_speaking_hint:'नागरिक साथी बोल रहा है',
     mic_loading:'⏳  ढूंढ रहा हूँ...', mic_loading_hint:'एक सेकंड...',
-    greet_default:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल पूछूँगा।',
-    greet_scheme:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।',
+    greet_default:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल।<br><br>पहला सवाल — आप मुख्य रूप से क्या काम करते हैं? खेती, नौकरी, खुद का काम, या अभी कोई काम नहीं?',
+    greet_scheme:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल।<br><br>पहला सवाल — आप मुख्य रूप से क्या काम करते हैं? खेती, नौकरी, खुद का काम, या अभी कोई काम नहीं?',
     greet_docs:'नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा और कोई गलती हो तो बताऊँगा। बताइए — किस योजना के लिए आवेदन करना चाहते हैं?',
     greet_form:'नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। बताइए — किस योजना के लिए आवेदन करना चाहते हैं?',
     greet_aadhaar:'नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?',
@@ -617,8 +618,8 @@ const STRINGS = {
     mic_listening:'🔴  Listening...', mic_listening_hint:"Speak, I'm listening",
     mic_speaking:'🔊  Speaking...', mic_speaking_hint:'Nagrik AI is speaking',
     mic_loading:'⏳  Searching...', mic_loading_hint:'One moment...',
-    greet_default:"Hello! I'm Nagrik Saathi. I'll find the best government schemes for you — just 3 quick questions.",
-    greet_scheme:"Hello! I'm Nagrik Saathi. I'll find the right government scheme for you. Let me ask a few questions first.",
+    greet_default:"Hello! I'm Nagrik Saathi. I'll find the best government schemes for you — just 3 quick questions.<br><br>First question — What do you mainly do? Farming, a job, self-employed, or currently not working?",
+    greet_scheme:"Hello! I'm Nagrik Saathi. I'll find the best government schemes for you — just 3 quick questions.<br><br>First question — What do you mainly do? Farming, a job, self-employed, or currently not working?",
     greet_docs:"Hello! I'm Nagrik Saathi. I'll check your documents and flag any issues. Tell me — which scheme are you planning to apply for?",
     greet_form:"Hello! I'm Nagrik Saathi. I'll guide you through the application with voice assistance. Which scheme do you want to apply for?",
     greet_aadhaar:"Hello! I'm here to help with your Aadhaar Card. Tell me — do you want to update it, new enrolment, or something else?",
