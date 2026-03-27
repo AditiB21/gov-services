@@ -894,7 +894,7 @@ function selectScheme(key) {
   }, 700);
 }
 
-// speakThen: speak + guaranteed onDone even if TTS callback stalls
+/// speakThen: speak + guaranteed onDone even if TTS callback stalls
 function speakThen(text, onDone, timeoutMs) {
   let fired = false;
   function finish() { if (!fired) { fired = true; onDone?.(); } }
@@ -1455,14 +1455,10 @@ function processUserTurn(said) {
       setTimeout(() => {
         hideTyping();
         addAI(T('sc_result'));
-        speak(T('sc_result'), () => {
-          schemePhase = 'awaiting_selection';
-          setTimeout(() => {
-            addAI(T('scheme_pick_msg'));
-            showSchemeResults();
-            speak(T('scheme_pick_speak'), () => setMic('idle'));
-          }, 400);
-        });
+        schemePhase = 'awaiting_selection';
+        addAI(T('scheme_pick_msg'));
+        showSchemeResults();
+        speakThen(T('sc_result'), () => setMic('idle'), 14000);
       }, 1400);
     }, 400);
   }
@@ -2821,28 +2817,25 @@ function startConv(intent) {
     turn = 0;
     setTimeout(() => {
       addAI(SC.greet);
-      speak(SC.greet, () => {
-        if (helpdeskMode) {
-          showHelpdeskFAQs();
-          if (pendingFirstMessage) {
-            const msg = pendingFirstMessage; pendingFirstMessage = null;
-            setTimeout(() => processHelpdeskQuery(msg), 400);
-          } else {
-            setMic('idle');
-          }
-        } else if (docsMode) {
-          showSchemePicker('docs');
-          setMic('idle');
-        } else if (formMode) {
-          showSchemePicker('form');
-          setMic('idle');
-        } else if (pendingFirstMessage) {
+      // Show interactive UI immediately — don't gate on TTS callback
+      if (helpdeskMode) {
+        showHelpdeskFAQs();
+      } else if (docsMode) {
+        showSchemePicker('docs');
+      } else if (formMode) {
+        showSchemePicker('form');
+      }
+      speakThen(SC.greet, () => {
+        if (helpdeskMode && pendingFirstMessage) {
+          const msg = pendingFirstMessage; pendingFirstMessage = null;
+          setTimeout(() => processHelpdeskQuery(msg), 300);
+        } else if (!helpdeskMode && !docsMode && !formMode && pendingFirstMessage) {
           const msg = pendingFirstMessage; pendingFirstMessage = null;
           setTimeout(() => processUserTurn(msg), 300);
         } else {
           setMic('idle');
         }
-      });
+      }, 12000);
     }, 380);
   }, 380);
 }
