@@ -91,6 +91,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
   display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .ai-bub{background:var(--blue-light);border-radius:18px 18px 18px 4px;
   padding:12px 15px;max-width:248px;font-size:14px;line-height:1.65;color:var(--text);font-weight:500;}
+.ai-bub.full{max-width:100%;width:100%;padding:0;background:transparent;border-radius:0;}
 
 .usr-row{display:flex;justify-content:flex-end;animation:bUp 200ms ease-out;}
 .usr-bub{background:var(--blue);color:#fff;border-radius:18px 18px 4px 18px;
@@ -681,7 +682,13 @@ const SC = {
 // ══════════════════════════════════════
 // SARVAM TTS
 // ══════════════════════════════════════
+function stripHtml(s) {
+  return s.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').trim();
+}
+
 async function speak(text, onDone) {
+  text = stripHtml(text);
+  if (!text) { onDone?.(); return; }
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   speaking = true;
   setMic('speaking');
@@ -821,15 +828,16 @@ function scrollDown() { setTimeout(() => $conv.scrollTo({ top:$conv.scrollHeight
 // CARDS
 // ══════════════════════════════════════
 function showSchemeResults() {
-  const c = document.createElement('div');
-  c.className = 'scheme-results';
   const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
     `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')"><div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${s.sector}</span></div><div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${s.benefit}</div><div class="smc-ministry">${s.ministry}</div></div><span class="smc-arr">›</span></div>`
   ).join('');
-  c.innerHTML = `<div class="sr-hd">${T('scheme_results_hd')}</div><div class="scheme-menu-list">${cardsHtml}</div><div class="scheme-menu-hint">${T('scheme_menu_hint')}</div>`;
-  $conv.appendChild(c);
+  const html = `<div class="scheme-results"><div class="sr-hd">${T('scheme_results_hd')}</div><div class="scheme-menu-list">${cardsHtml}</div><div class="scheme-menu-hint">${T('scheme_menu_hint')}</div></div>`;
+  const row = document.createElement('div');
+  row.className = 'ai-row';
+  row.innerHTML = `<div class="ai-av">🏛️</div><div class="ai-bub full">${html}</div>`;
+  $conv.appendChild(row);
   scrollDown();
-  setTimeout(scrollDown, 200);
+  setTimeout(scrollDown, 150);
 }
 
 function selectSchemeFromMenu(key) {
@@ -912,13 +920,13 @@ function showSchemePicker(mode) {
      </div>`
   ).join('');
 
-  const c = document.createElement('div');
-  c.className = 'scheme-results';
-  c.innerHTML = `
-    <div class="sr-hd">${hd}</div>
-    <div class="scheme-menu-list">${cardsHtml}</div>
-    <div class="scheme-menu-hint">${hint}</div>`;
-  $conv.appendChild(c); scrollDown();
+  const html = `<div class="scheme-results"><div class="sr-hd">${hd}</div><div class="scheme-menu-list">${cardsHtml}</div><div class="scheme-menu-hint">${hint}</div></div>`;
+  const row = document.createElement('div');
+  row.className = 'ai-row';
+  row.innerHTML = `<div class="ai-av">🏛️</div><div class="ai-bub full">${html}</div>`;
+  $conv.appendChild(row);
+  scrollDown();
+  setTimeout(scrollDown, 150);
 }
 
 function confirmModeScheme(mode, key) {
