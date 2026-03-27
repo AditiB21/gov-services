@@ -870,8 +870,9 @@ function processSchemeSelection(text) {
     schemePhase = null;
     selectScheme(key);
   } else {
-    addAI("कृपया एक योजना बताएं — <b>PM Kisan</b> (खेती), <b>Ayushman Bharat</b> (स्वास्थ्य), <b>PM Awas</b> (आवास), या <b>PM Vishwakarma</b> (आजीविका)।");
-    speak("कृपया एक योजना चुनें।", () => setMic('idle'));
+    addAI(msg("कृपया एक योजना बताएं — <b>PM Kisan</b> (खेती), <b>Ayushman Bharat</b> (स्वास्थ्य), <b>PM Awas</b> (आवास), या <b>PM Vishwakarma</b> (आजीविका)।",
+             "Please name a scheme — <b>PM Kisan</b> (farming), <b>Ayushman Bharat</b> (health), <b>PM Awas</b> (housing), or <b>PM Vishwakarma</b> (livelihood)."));
+    speak(msg("कृपया एक योजना चुनें।", "Please choose a scheme."), () => setMic('idle'));
   }
 }
 
@@ -1048,14 +1049,19 @@ function verifyDocs() {
       speakThen(resultSpeech, () => {
         // ── Step 2: explain correction is free ──
         setTimeout(() => {
-          addAI("खतौनी में नाम की यह गलती <strong>बिल्कुल मुफ़्त</strong> में ठीक होती है — बस ७ दिन लगते हैं।");
+          addAI(msg(
+            "खतौनी में नाम की यह गलती <strong>बिल्कुल मुफ़्त</strong> में ठीक होती है — बस ७ दिन लगते हैं।",
+            "This name mismatch in the Khatauni can be corrected <strong>completely free</strong> — it only takes 7 days."
+          ));
           speak(
-            "अच्छी बात यह है कि यह गलती बिल्कुल मुफ़्त में ठीक होती है — कोई पैसा नहीं लगता। बस सात दिन का काम है।",
+            msg("अच्छी बात यह है कि यह गलती बिल्कुल मुफ़्त में ठीक होती है — कोई पैसा नहीं लगता। बस सात दिन का काम है।",
+                "The good news is this can be corrected completely free — no money needed. Just 7 days."),
             () => {
-              // ── Step 3: ask about nearby office ──
               setTimeout(() => {
-                addAI("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?");
-                speak("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?", () => {
+                addAI(msg("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?",
+                         "Would you like me to show the nearest office where you can get this corrected?"));
+                speak(msg("क्या मैं आपको पास का तहसील ऑफिस बताऊँ जहाँ जाकर यह ठीक करा सकते हैं?",
+                         "Would you like me to show the nearest office for this correction?"), () => {
                   docPhase = 'awaiting_office_help';
                   setMic('idle');
                 });
@@ -1122,8 +1128,11 @@ function showNearbyOffice() {
       "नज़दीकी तहसील ऑफिस — विकास भवन, गोमती नगर — वहाँ दो चीज़ें लेकर जाएं। एक — आधार कार्ड, और दो — पुरानी खतौनी। दोनों की एक-एक फ़ोटोकॉपी भी साथ रखें। काउंटर पर पहुँचकर नाम सुधार फ़ॉर्म माँगें — वह वहीं मिलेगा। फ़ॉर्म भरकर जमा करें। इसके बाद सात से दस दिन में सही की हुई खतौनी पोस्ट से आपके घर आ जाएगी।",
       () => {
         setTimeout(() => {
-          addAI("खतौनी घर आ जाए तो उसे यहाँ अपलोड करें — मैं दोबारा जाँचूँगा।");
-          speak("खतौनी घर आ जाए तो उसे यहाँ अपलोड करें।", () => {
+          addAI(msg(
+            "खतौनी घर आ जाए तो उसे यहाँ अपलोड करें — मैं दोबारा जाँचूँगा।",
+            "Once you receive the corrected Khatauni, scan it below — I'll re-verify."
+          ));
+          speak(msg("खतौनी घर आ जाए तो उसे यहाँ अपलोड करें।", "Once you receive the corrected document, scan it below."), () => {
             showReUploadCard();
             setMic('idle');
           });
@@ -1134,17 +1143,18 @@ function showNearbyOffice() {
 }
 
 function showReUploadCard() {
+  const isHi = currentLang === 'hi';
   const c = document.createElement('div');
   c.className = 'doc-card'; c.id = 'reUploadCard';
   c.innerHTML = `
-    <div class="doc-hd" style="background:#b85e00">📤 ठीक की हुई खतौनी अपलोड करें</div>
+    <div class="doc-hd" style="background:#b85e00">${isHi ? '📤 ठीक की हुई खतौनी अपलोड करें' : '📤 Upload corrected Khatauni'}</div>
     <div class="doc-row">
       <span class="doc-ico">📜</span>
       <div class="doc-info">
-        <div class="doc-name">खतौनी (नाम सुधरा हुआ)</div>
-        <div class="doc-st" id="st-re">स्कैन करें</div>
+        <div class="doc-name">${isHi ? 'खतौनी (नाम सुधरा हुआ)' : 'Khatauni (name corrected)'}</div>
+        <div class="doc-st" id="st-re">${isHi ? 'स्कैन करें' : 'Scan'}</div>
       </div>
-      <button class="doc-btn" id="btn-re" onclick="tapReDoc()">📷 स्कैन</button>
+      <button class="doc-btn" id="btn-re" onclick="tapReDoc()">${isHi ? '📷 स्कैन' : '📷 Scan'}</button>
     </div>`;
   $conv.appendChild(c); scrollDown();
 }
@@ -1154,8 +1164,8 @@ function tapReDoc() {
   const st  = document.getElementById('st-re');
   btn.disabled = true; btn.textContent = '⏳';
   setTimeout(() => {
-    btn.className = 'doc-btn done'; btn.textContent = '✓ हो गया';
-    st.textContent = 'स्कैन हो गया'; st.className = 'doc-st ok';
+    btn.className = 'doc-btn done'; btn.textContent = currentLang === 'hi' ? '✓ हो गया' : '✓ Done';
+    st.textContent = currentLang === 'hi' ? 'स्कैन हो गया' : 'Scanned'; st.className = 'doc-st ok';
     scrollDown();
     setTimeout(showAllClearResults, 700);
   }, 800);
@@ -1274,11 +1284,11 @@ function buildResultChecklist() {
 // ══════════════════════════════════════
 // CONVERSATION TURNS
 // ══════════════════════════════════════
-const DEMO_DEFAULTS = [
-  "खेती करता हूँ",
-  "एक लाख से कम है",
-  "पाँच लोग हैं, पक्का मकान नहीं है",
-];
+function getDemoDefaults() {
+  return currentLang === 'en'
+    ? ["I do farming", "Less than ₹1 lakh per year", "5 people, no permanent house"]
+    : ["खेती करता हूँ", "एक लाख से कम है", "पाँच लोग हैं, पक्का मकान नहीं है"];
+}
 
 // ══════════════════════════════════════
 // SERVICE FLOWS (Aadhaar / Passport / PAN / Driving)
@@ -1403,8 +1413,10 @@ function showAadhaarGuide(subIntent) {
 
   speakThen(speech, () => {
     setTimeout(() => {
-      addAI("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?");
-      speak("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?", () => setMic('idle'));
+      addAI(msg("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?",
+               "Would you prefer to update Aadhaar online, or visit an Aadhaar centre?"));
+      speak(msg("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?",
+               "Would you prefer to update online, or visit a centre?"), () => setMic('idle'));
     }, 500);
   }, 14000);
 }
@@ -1415,22 +1427,13 @@ function showAadhaarGuide(subIntent) {
 function processUserTurn(said) {
   hideListening();
   listening = false;
-  const text = (said && said.trim()) ? said.trim() : DEMO_DEFAULTS[turn];
+  const text = (said && said.trim()) ? said.trim() : getDemoDefaults()[turn];
   addUser(text);
   const t = turn;
   turn++;
 
   if (t === 0) {
-    setTimeout(() => {
-      showTyping();
-      setTimeout(() => {
-        hideTyping();
-        addAI(T('sc_q1'));
-        speak(T('sc_q1'), () => setMic('idle'));
-      }, 700);
-    }, 350);
-
-  } else if (t === 1) {
+    // User answered Q1 (greeting asked "what do you do?") → ask Q2 (income)
     setTimeout(() => {
       showTyping();
       setTimeout(() => {
@@ -1440,7 +1443,8 @@ function processUserTurn(said) {
       }, 700);
     }, 350);
 
-  } else if (t === 2) {
+  } else if (t === 1) {
+    // User answered Q2 (income) → ask Q3 (family/house)
     setTimeout(() => {
       showTyping();
       setTimeout(() => {
@@ -1450,7 +1454,8 @@ function processUserTurn(said) {
       }, 700);
     }, 350);
 
-  } else if (t === 3) {
+  } else if (t === 2) {
+    // User answered Q3 → show scheme results
     setTimeout(() => {
       showTyping(); setMic('loading');
       setTimeout(() => {
@@ -1579,7 +1584,7 @@ function buildApplyCTA() {
 
 function triggerNaamFix() {
   docPhase = null;
-  addUser("पहले नाम ठीक करूँगा");
+  addUser(msg("पहले नाम ठीक करूँगा", "Fix the name first"));
   showNaamFix();
 }
 
@@ -1588,16 +1593,20 @@ function startFormFlow() {
   activeForm = getActiveForm();
   document.querySelectorAll('.apply-btn-p,.apply-btn-s').forEach(b => b.disabled = true);
 
-  addAI(`ज़रूर! मैं आपको अभी <strong>${scheme.name} की आधिकारिक सरकारी वेबसाइट</strong> पर ले जाता हूँ।<br><br>आपने जो जानकारी दी — उससे मैंने सभी ज़रूरी खाने पहले से भर दिए हैं।`);
+  addAI(msg(
+    `ज़रूर! मैं आपको अभी <strong>${scheme.name} की आधिकारिक सरकारी वेबसाइट</strong> पर ले जाता हूँ।<br><br>आपने जो जानकारी दी — उससे मैंने सभी ज़रूरी खाने पहले से भर दिए हैं।`,
+    `Sure! I'll take you to the <strong>official ${scheme.name} government portal</strong>.<br><br>I've pre-filled all the required fields based on your information.`
+  ));
 
   speak(
-    `ज़रूर! मैं आपको अभी ${scheme.name} की आधिकारिक सरकारी वेबसाइट पर ले जाता हूँ। सभी ज़रूरी खाने पहले से भरे हैं। हम साथ में एक-एक खाना देखेंगे।`,
+    msg(`ज़रूर! मैं आपको अभी ${scheme.name} की आधिकारिक सरकारी वेबसाइट पर ले जाता हूँ। सभी ज़रूरी खाने पहले से भरे हैं। हम साथ में एक-एक खाना देखेंगे।`,
+        `Sure! I'll take you to the official ${scheme.name} government portal. All required fields are pre-filled. We'll go through each one together.`),
     () => {
       setTimeout(() => {
         const loader = document.createElement('div');
         loader.className = 'site-loader';
         loader.innerHTML = `<div class="sl-ico">🌐</div>
-          <div class="sl-title">${scheme.portal} खुल रहा है...</div>
+          <div class="sl-title">${scheme.portal} ${msg('खुल रहा है...', 'loading...')}</div>
           <div class="sl-sub">Official Government of India Website</div>
           <div class="sl-bar"><div class="sl-fill"></div></div>`;
         $conv.appendChild(loader); scrollDown();
@@ -1819,8 +1828,14 @@ let uidaiFieldIdx = 0;
 
 function openAadhaarOnlineOverlay() {
   uidaiFieldIdx = 0;
-  addAI("ज़रूर! मैं आपको <strong>UIDAI की आधिकारिक वेबसाइट</strong> पर ले जाता हूँ — सभी ज़रूरी खाने पहले से भरे हैं।");
-  speak("ज़रूर! मैं आपको UIDAI की आधिकारिक वेबसाइट पर ले जाता हूँ। आपके सभी ज़रूरी खाने पहले से भरे हैं।", () => {
+  addAI(msg(
+    "ज़रूर! मैं आपको <strong>UIDAI की आधिकारिक वेबसाइट</strong> पर ले जाता हूँ — सभी ज़रूरी खाने पहले से भरे हैं।",
+    "Sure! I'll take you to the <strong>official UIDAI website</strong> — all required fields are pre-filled."
+  ));
+  speak(msg(
+    "ज़रूर! मैं आपको UIDAI की आधिकारिक वेबसाइट पर ले जाता हूँ। आपके सभी ज़रूरी खाने पहले से भरे हैं।",
+    "Sure! I'll take you to the official UIDAI website. All required fields are pre-filled."
+  ), () => {
     setTimeout(() => {
       const loader = document.createElement('div');
       loader.className = 'site-loader';
@@ -2062,8 +2077,8 @@ function showAadhaarCenterGuide() {
     "इसके बाद URN नंबर मिलेगा — इससे आप status track कर सकते हैं। पचास रुपये शुल्क लगेगा और नब्बे दिन में अपडेट हो जाएगा।",
     () => {
       setTimeout(() => {
-        addAI("और कोई मदद चाहिए? या PM Kisan जैसी कोई योजना देखनी है?");
-        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+        addAI(msg("और कोई मदद चाहिए? या PM Kisan जैसी कोई योजना देखनी है?", "Need any more help?"));
+        speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
       }, 600);
     }, 16000
   );
@@ -2120,8 +2135,10 @@ function showPanGuide(subIntent) {
 
   speakThen(speech, () => {
     setTimeout(() => {
-      addAI("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?");
-      speak("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?", () => setMic('idle'));
+      addAI(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?",
+               "Would you prefer to apply online, or visit a TIN Facilitation Centre?"));
+      speak(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?",
+               "Would you prefer to apply online, or visit a TIN Facilitation Centre?"), () => setMic('idle'));
     }, 500);
   }, 12000);
 }
@@ -2175,8 +2192,8 @@ function showPanCenterGuide() {
     "NSDL TIN सेंटर हज़रतगंज में है — डेढ़ किलोमीटर दूर। साथ में आधार कार्ड, पते का प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। एक सौ सात रुपये शुल्क लगेगा और पंद्रह से बीस दिन में PAN कार्ड घर आ जाएगा।",
     () => {
       setTimeout(() => {
-        addAI("और कोई मदद चाहिए?");
-        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+        addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
+        speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
       }, 600);
     }, 10000
   );
@@ -2233,8 +2250,10 @@ function showPassportGuide() {
     "Normal पासपोर्ट के लिए डेढ़ हज़ार रुपये शुल्क है और तीस से पैंतालीस दिन लगते हैं। Tatkal में साढ़े तीन हज़ार रुपये में एक से तीन दिन में मिल जाता है।",
     () => {
       setTimeout(() => {
-        addAI("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?");
-        speak("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?", () => setMic('idle'));
+        addAI(msg("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?",
+                 "Would you like to book an online appointment, or need info about the PSK centre?"));
+        speak(msg("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?",
+                 "Would you like to book an online appointment, or need PSK centre details?"), () => setMic('idle'));
       }, 500);
     }, 16000
   );
@@ -2281,8 +2300,8 @@ function showPassportCenterGuide() {
     "PSK पर पहले दस्तावेज़ verify होंगे, फिर फ़ोटो और fingerprint लिए जाएंगे। बाद में पुलिस घर आकर verification करेगी। Passport डाक से आएगा।",
     () => {
       setTimeout(() => {
-        addAI("और कोई मदद चाहिए?");
-        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+        addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
+        speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
       }, 600);
     }, 12000
   );
@@ -2338,8 +2357,10 @@ function showDrivingGuide() {
     "आधार कार्ड, जन्म प्रमाण, और दो रंगीन फ़ोटो ज़रूरी हैं। उम्र कम से कम अठारह साल होनी चाहिए।",
     () => {
       setTimeout(() => {
-        addAI("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?");
-        speak("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?", () => setMic('idle'));
+        addAI(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?",
+                 "Would you prefer to apply online, or need details about the RTO Office?"));
+        speak(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?",
+                 "Would you prefer to apply online, or need RTO Office details?"), () => setMic('idle'));
       }, 500);
     }, 14000
   );
@@ -2389,8 +2410,8 @@ function showDrivingCenterGuide() {
     "RTO Lucknow, कैसरबाग में है — तीन किलोमीटर दूर। वहाँ जाकर Form LL-1 भरें, दस्तावेज़ verify करवाएं और fees जमा करें। फिर written test देना होगा। Learner's Licence मिलने के तीस दिन बाद Driving Test दें। Test pass होने के सात से पंद्रह दिन में DL घर आ जाएगा।",
     () => {
       setTimeout(() => {
-        addAI("और कोई मदद चाहिए?");
-        speak("और कोई मदद चाहिए?", () => setMic('idle'));
+        addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
+        speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
       }, 600);
     }, 12000
   );
@@ -2444,8 +2465,8 @@ function openSvcFormOverlay(svc) {
     $conv.appendChild(linkCard); scrollDown();
 
     setTimeout(() => {
-      addAI("और कोई मदद चाहिए?");
-      speak("और कोई मदद चाहिए?", () => setMic('idle'));
+      addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
+      speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
     }, 800);
   }, 2800);
 }
@@ -2460,7 +2481,8 @@ function closeWebOverlay() {
 }
 
 function openOfficialSite() {
-  addAI("pmkisan.gov.in खुल रही है — Submit आप खुद करें। शुभकामनाएं! 🌾");
+  addAI(msg("pmkisan.gov.in खुल रही है — Submit आप खुद करें। शुभकामनाएं! 🌾",
+           "Opening pmkisan.gov.in — please submit the form yourself. Best of luck! 🌾"));
   window.open('https://pmkisan.gov.in', '_blank');
 }
 
@@ -2484,13 +2506,13 @@ function onMicTap() {
   }
   if (docPhase === 'awaiting_office_help') {
     docPhase = null;
-    addUser("हाँ, बताओ");
+    addUser(msg("हाँ, बताओ", "Yes, show me"));
     showNearbyOffice();
     return;
   }
   if (docPhase === 'awaiting_form_help') {
     docPhase = null;
-    addUser("हाँ, मदद चाहिए");
+    addUser(msg("हाँ, मदद चाहिए", "Yes, help me"));
     startFormFlow();
     return;
   }
@@ -2507,7 +2529,7 @@ function onMicTap() {
   if (serviceIntent && serviceTurn < 2) { startListening(); return; }
   if (serviceIntent) return;
   if (schemePhase === 'awaiting_selection') { startListening(); return; }
-  if (turn > 3) return;
+  if (turn > 2) return;
   startListening();
 }
 
@@ -2612,7 +2634,7 @@ function handleChatText(text) {
   if (schemePhase === 'awaiting_selection') { processSchemeSelection(text); return; }
   if (serviceIntent && serviceTurn < 2) { processServiceTurn(text); return; }
   if (serviceIntent) return;
-  if (turn <= 3) { processUserTurn(text); return; }
+  if (turn <= 2) { processUserTurn(text); return; }
 }
 
 // ══════════════════════════════════════
