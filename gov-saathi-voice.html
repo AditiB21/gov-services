@@ -320,6 +320,20 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .scheme-confirm-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--pill);padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'JioType',sans-serif;margin-top:10px;}
 .scheme-confirm-btn:disabled{opacity:.4;cursor:default;}
 
+/* ════════ SCHEME MENU (tappable cards) ════════ */
+.scheme-menu-list{display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px;}
+.scheme-menu-card{border-radius:12px;border:1.5px solid var(--stroke);padding:11px 13px;background:#fff;cursor:pointer;transition:all 140ms;display:flex;align-items:center;gap:12px;}
+.scheme-menu-card:active{transform:scale(.98);}
+.smc-left{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
+.smc-ico{font-size:24px;}
+.smc-sector{font-size:9px;font-weight:700;color:#fff;padding:2px 6px;border-radius:20px;white-space:nowrap;}
+.smc-body{flex:1;min-width:0;}
+.smc-name{font-size:12px;font-weight:700;color:var(--text);line-height:1.3;}
+.smc-benefit{font-size:12px;font-weight:700;color:var(--blue);margin-top:2px;}
+.smc-ministry{font-size:10px;color:var(--text2);margin-top:2px;}
+.smc-arr{font-size:18px;color:var(--text2);flex-shrink:0;}
+.scheme-menu-hint{font-size:11px;color:var(--text2);text-align:center;padding:0 14px 10px;}
+
 /* ════════ UNIFIED INPUT BAR ════════ */
 .unified-box{background:#fff;border-radius:18px;padding:12px 14px 10px;margin:0;box-shadow:0 1px 6px rgba(0,0,0,.08);}
 .unified-input-wrap{display:flex;align-items:center;gap:8px;}
@@ -573,6 +587,7 @@ const STRINGS = {
     sc_q3:'एक आखिरी सवाल — परिवार में कितने लोग हैं? और क्या अभी पक्का मकान है?',
     sc_result:'बहुत बढ़िया! आपकी जानकारी के आधार पर मुझे ४ योजनाएँ मिली हैं — खेती, स्वास्थ्य, आवास, और आजीविका। नीचे देखें और जो योजना चाहिए उसे चुनें।',
     scheme_results_hd:'✦ आपके लिए ४ योजनाएँ मिलीं',
+    scheme_menu_hint:'किसी एक योजना पर टैप करें → दस्तावेज़ स्कैन → आवेदन',
     scheme_dropdown_lbl:'एक योजना चुनें जिसके लिए आवेदन करना है',
     scheme_dropdown_ph:'— योजना चुनें —',
     scheme_confirm_btn:'आगे बढ़ें →',
@@ -616,6 +631,7 @@ const STRINGS = {
     sc_q3:'One last question — How many people are in your family? And do you currently have a permanent (pucca) house?',
     sc_result:"Excellent! Based on your information, I found 4 eligible schemes for you — farming, health, housing, and livelihood. See below and choose the scheme you'd like to apply for.",
     scheme_results_hd:'✦ 4 Schemes Found For You',
+    scheme_menu_hint:'Tap a scheme → Scan documents → Apply',
     scheme_dropdown_lbl:'Choose a scheme to apply for',
     scheme_dropdown_ph:'— Select a scheme —',
     scheme_confirm_btn:'Proceed →',
@@ -806,32 +822,33 @@ function scrollDown() { setTimeout(() => $conv.scrollTo({ top:$conv.scrollHeight
 function showSchemeResults() {
   const c = document.createElement('div');
   c.className = 'scheme-results';
-  const chipsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<div class="scheme-chip-el" style="background:${s.color}"><span>${s.icon}</span><div>${s.name}<br><span style="font-weight:400;opacity:.85">${s.sector}</span></div></div>`
-  ).join('');
-  const optionsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<option value="${key}">${s.icon} ${s.name} — ${s.benefit}</option>`
+  const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
+    `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')">
+       <div class="smc-left">
+         <span class="smc-ico">${s.icon}</span>
+         <span class="smc-sector" style="background:${s.color}">${s.sector}</span>
+       </div>
+       <div class="smc-body">
+         <div class="smc-name">${s.name}</div>
+         <div class="smc-benefit">${s.benefit}</div>
+         <div class="smc-ministry">${s.ministry}</div>
+       </div>
+       <span class="smc-arr">›</span>
+     </div>`
   ).join('');
   c.innerHTML = `
     <div class="sr-hd">${T('scheme_results_hd')}</div>
-    <div class="scheme-chips">${chipsHtml}</div>
-    <div class="scheme-dropdown-wrap">
-      <div class="scheme-dropdown-lbl">${T('scheme_dropdown_lbl')}</div>
-      <select class="scheme-select" id="schemeDropdown" onchange="document.getElementById('schemeConfirmBtn').disabled=!this.value">
-        <option value="">${T('scheme_dropdown_ph')}</option>
-        ${optionsHtml}
-      </select>
-      <button class="scheme-confirm-btn" id="schemeConfirmBtn" disabled onclick="confirmSchemeSelection()">${T('scheme_confirm_btn')}</button>
-    </div>`;
+    <div class="scheme-menu-list">${cardsHtml}</div>
+    <div class="scheme-menu-hint">${T('scheme_menu_hint')}</div>`;
   $conv.appendChild(c); scrollDown();
 }
 
-function confirmSchemeSelection() {
-  const sel = document.getElementById('schemeDropdown');
-  if (!sel || !sel.value) return;
-  const key = sel.value;
-  document.getElementById('schemeConfirmBtn').disabled = true;
-  sel.disabled = true;
+function selectSchemeFromMenu(key) {
+  // Disable all cards so user can't tap twice
+  document.querySelectorAll('.scheme-menu-card').forEach(card => {
+    card.style.pointerEvents = 'none';
+    card.style.opacity = card.id === 'smc-' + key ? '1' : '0.35';
+  });
   selectScheme(key);
 }
 
@@ -862,13 +879,18 @@ function selectScheme(key) {
   schemePhase = null;
   const s = SCHEMES[key];
   document.querySelectorAll('.sr-btn-sel').forEach(b => b.disabled = true);
-  addUser(`${s.icon} ${s.name} — Documents देखें`);
+  addUser(`${s.icon} ${s.name}`);
   showTyping(); setMic('loading');
   setTimeout(() => {
     hideTyping();
-    addAI(s.docsText);
+    const isHi = currentLang === 'hi';
+    const docNames = s.docs.map(([,n]) => n).join(', ');
+    const msg = isHi
+      ? s.docsText
+      : `For ${s.name}, you'll need: ${docNames}. Please scan each document below, then tap Verify — I'll check them for any issues.`;
+    addAI(msg);
     showDocCard();
-    speak(s.docsText, () => setMic('idle'));
+    speak(msg, () => setMic('idle'));
   }, 700);
 }
 
@@ -1139,71 +1161,61 @@ function tapReDoc() {
 }
 
 function showAllClearResults() {
-  addUser("हो गया");
+  const isHi = currentLang === 'hi';
+  addUser(isHi ? 'हो गया' : 'Done');
   showTyping(); setMic('loading');
   setTimeout(() => {
     hideTyping();
-    // All-clear checklist
+    const scheme = SCHEMES[selectedScheme || 'kisan'];
     const cl = document.createElement('div');
     cl.className = 'result-cl';
-    cl.innerHTML = `
-      <div class="rcl-hd" style="background:var(--green)">✅ PM Kisan — सभी दस्तावेज़ सही हैं</div>
-      <div class="rcl-row">
-        <span class="rcl-ico">✅</span>
-        <div><div class="rcl-name">आधार कार्ड</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
-      </div>
-      <div class="rcl-row">
-        <span class="rcl-ico">✅</span>
-        <div><div class="rcl-name">खतौनी</div><div class="rcl-msg">नाम सुधरा — अब बिल्कुल ठीक है</div></div>
-      </div>
-      <div class="rcl-row">
-        <span class="rcl-ico">✅</span>
-        <div><div class="rcl-name">बैंक पासबुक</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
-      </div>`;
+    const allClearHd   = isHi ? `✅ ${scheme.name} — सभी दस्तावेज़ सही हैं` : `✅ ${scheme.name} — All documents verified`;
+    const okMsg        = isHi ? 'बिल्कुल ठीक है' : 'Looks good';
+    const fixedMsg     = isHi ? 'नाम सुधरा — अब बिल्कुल ठीक है' : 'Name corrected — now looks good';
+    cl.innerHTML = `<div class="rcl-hd" style="background:var(--green)">${allClearHd}</div>` +
+      scheme.docs.map(([,name], i) => `
+        <div class="rcl-row">
+          <span class="rcl-ico">✅</span>
+          <div><div class="rcl-name">${name}</div><div class="rcl-msg">${i === 1 && (!selectedScheme || selectedScheme === 'kisan') ? fixedMsg : okMsg}</div></div>
+        </div>`).join('');
     $conv.appendChild(cl); scrollDown();
 
-    speakThen(
-      "बहुत बढ़िया! अब तीनों दस्तावेज़ बिल्कुल सही हैं। आधार कार्ड — ठीक। खतौनी — ठीक। बैंक पासबुक — ठीक।",
-      () => {
-        setTimeout(() => {
-          addAI("क्या आपको PM Kisan का फ़ॉर्म भरने में मदद चाहिए?");
-          speak("क्या आपको PM Kisan का फ़ॉर्म भरने में मदद चाहिए?", () => {
-            docPhase = 'awaiting_form_help';
-            setMic('idle');
-          });
-        }, 600);
-      }, 8000
-    );
+    const allClearSpeech = isHi
+      ? `बहुत बढ़िया! सभी दस्तावेज़ सही हैं। अब ${scheme.name} का फ़ॉर्म भरते हैं।`
+      : `All documents look great! Let's now fill the ${scheme.name} application form.`;
+    speakThen(allClearSpeech, () => {
+      setTimeout(() => startFormFlow(), 700);
+    }, 6000);
   }, 1200);
 }
 
 function allClearVerifyResult() {
+  const isHi = currentLang === 'hi';
   const scheme = SCHEMES[selectedScheme];
   const cl = document.createElement('div');
   cl.className = 'result-cl';
-  cl.innerHTML = `<div class="rcl-hd" style="background:var(--green)">✅ ${scheme.name} — सभी दस्तावेज़ सही हैं</div>` +
+  const hd  = isHi ? `✅ ${scheme.name} — सभी दस्तावेज़ सही हैं` : `✅ ${scheme.name} — All documents verified`;
+  const okMsg = isHi ? 'बिल्कुल ठीक है' : 'Looks good';
+  cl.innerHTML = `<div class="rcl-hd" style="background:var(--green)">${hd}</div>` +
     scheme.docs.map(([,name]) => `
       <div class="rcl-row">
         <span class="rcl-ico">✅</span>
-        <div><div class="rcl-name">${name}</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+        <div><div class="rcl-name">${name}</div><div class="rcl-msg">${okMsg}</div></div>
       </div>`).join('');
   $conv.appendChild(cl); scrollDown();
-  speakThen(
-    `बहुत बढ़िया! ${scheme.name} के लिए सभी दस्तावेज़ सही हैं। क्या आपको फ़ॉर्म भरने में मदद चाहिए?`,
-    () => {
-      setTimeout(() => {
-        addAI(`क्या आपको <strong>${scheme.name}</strong> का फ़ॉर्म भरने में मदद चाहिए?`);
-        speak(`क्या आपको ${scheme.name} का फ़ॉर्म भरने में मदद चाहिए?`, () => {
-          docPhase = 'awaiting_form_help'; setMic('idle');
-        });
-      }, 500);
-    }, 10000
-  );
+
+  const speech = isHi
+    ? `बहुत बढ़िया! ${scheme.name} के सभी दस्तावेज़ सही हैं। अब फ़ॉर्म भरते हैं।`
+    : `All documents verified for ${scheme.name}. Let's now fill the application form.`;
+  speakThen(speech, () => {
+    setTimeout(() => startFormFlow(), 700);
+  }, 8000);
 }
 
 function buildScanCard() {
   const scheme = SCHEMES[selectedScheme || 'kisan'];
-  const docs = scheme.docs.map(([,name]) => name + ' जाँच रहा हूँ...');
+  const suffix = currentLang === 'hi' ? ' जाँच रहा हूँ...' : ' checking...';
+  const docs = scheme.docs.map(([,name]) => name + suffix);
   const card = document.createElement('div');
   card.className = 'scan-card';
   card.id = 'scanCard';
