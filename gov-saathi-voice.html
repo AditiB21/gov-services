@@ -545,12 +545,19 @@ let docUploaded  = {};
 
 const SERVICE_INTENTS = ['aadhaar','passport','pan','driving'];
 
-const SERVICE_DEMO = {
-  aadhaar: ["आधार अपडेट करना है", "हाँ, नाम और पता दोनों बदलने हैं"],
-  passport:["नया पासपोर्ट बनाना है", "ऑनलाइन करना है"],
-  pan:     ["नया PAN card चाहिए", "ऑनलाइन करना है"],
-  driving: ["नया लाइसेंस बनाना है", "ऑनलाइन करना है"],
-};
+function getServiceDemo() {
+  return currentLang === 'en' ? {
+    aadhaar: ["I want to update my Aadhaar", "Yes, I want to update both name and address"],
+    passport: ["I want a new passport", "I want to apply online"],
+    pan: ["I need a new PAN card", "I want to apply online"],
+    driving: ["I want a new driving licence", "I want to apply online"],
+  } : {
+    aadhaar: ["आधार अपडेट करना है", "हाँ, नाम और पता दोनों बदलने हैं"],
+    passport: ["नया पासपोर्ट बनाना है", "ऑनलाइन करना है"],
+    pan: ["नया PAN card चाहिए", "ऑनलाइन करना है"],
+    driving: ["नया लाइसेंस बनाना है", "ऑनलाइन करना है"],
+  };
+}
 
 // ══════════════════════════════════════
 // LANGUAGE STRINGS
@@ -1028,10 +1035,14 @@ function verifyDocs() {
       const cl = buildResultChecklist();
       $conv.appendChild(cl); scrollDown();
 
-      const resultSpeech =
+      const resultSpeech = msg(
         "आधार कार्ड — बिल्कुल ठीक है। " +
         "खतौनी में एक समस्या है — नाम में अंतर है। रमेश कुमा लिखा है, जबकि आधार में रमेश कुमार होना चाहिए। " +
-        "बैंक पासबुक — ठीक है।";
+        "बैंक पासबुक — ठीक है।",
+        "Aadhaar Card — looks good. " +
+        "There is an issue in the Khatauni — name mismatch. It says Ramesh Kuma, but Aadhaar shows Ramesh Kumar. " +
+        "Bank Passbook — looks good."
+      );
 
       speakThen(resultSpeech, () => {
         // ── Step 2: explain correction is free ──
@@ -1062,6 +1073,7 @@ function verifyDocs() {
 }
 
 function showNearbyOffice() {
+  const isHi = currentLang === 'hi';
   showTyping(); setMic('loading');
   setTimeout(() => {
     hideTyping();
@@ -1070,49 +1082,52 @@ function showNearbyOffice() {
     const card = document.createElement('div');
     card.className = 'action-card';
     card.innerHTML = `
-      <div class="ac-hd">📍 नज़दीकी तहसील ऑफिस</div>
+      <div class="ac-hd">📍 ${isHi ? 'नज़दीकी तहसील ऑफिस' : 'Nearest Tehsil Office'}</div>
       <div class="ac-step">
         <span class="ac-ico">🏢</span>
         <div>
           <div class="ac-txt">तहसील कार्यालय, लखनऊ सदर</div>
-          <div class="ac-sub">विकास भवन, गोमती नगर, लखनऊ · 2.4 km दूर</div>
-          <div class="ac-sub" style="margin-top:3px;">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+          <div class="ac-sub">${isHi ? 'विकास भवन, गोमती नगर, लखनऊ · 2.4 km दूर' : 'Vikas Bhawan, Gomti Nagar, Lucknow · 2.4 km away'}</div>
+          <div class="ac-sub" style="margin-top:3px;">⏰ ${isHi ? 'सोम–शनि, सुबह 10 से शाम 5 बजे' : 'Mon–Sat, 10 AM to 5 PM'}</div>
         </div>
       </div>
-      <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 आपको क्या लेकर जाना है?</div>
+      <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 ${isHi ? 'आपको क्या लेकर जाना है?' : 'What to carry?'}</div>
       <div class="ac-step">
         <span class="ac-ico">🪪</span>
         <div>
-          <div class="ac-txt">आधार कार्ड</div>
-          <div class="ac-sub">Original + एक फ़ोटोकॉपी</div>
+          <div class="ac-txt">${isHi ? 'आधार कार्ड' : 'Aadhaar Card'}</div>
+          <div class="ac-sub">${isHi ? 'Original + एक फ़ोटोकॉपी' : 'Original + one photocopy'}</div>
         </div>
       </div>
       <div class="ac-step">
         <span class="ac-ico">📜</span>
         <div>
-          <div class="ac-txt">पुरानी खतौनी</div>
-          <div class="ac-sub">Original + एक फ़ोटोकॉपी</div>
+          <div class="ac-txt">${isHi ? 'पुरानी खतौनी' : 'Old Khatauni (Land Record)'}</div>
+          <div class="ac-sub">${isHi ? 'Original + एक फ़ोटोकॉपी' : 'Original + one photocopy'}</div>
         </div>
       </div>
       <div class="ac-step">
         <span class="ac-ico">📝</span>
         <div>
-          <div class="ac-txt">काउंटर पर नाम सुधार फ़ॉर्म भरें और जमा करें</div>
-          <div class="ac-sub">फ़ॉर्म वहीं मिलेगा — दोनों की एक-एक फ़ोटोकॉपी साथ दें</div>
-          <span class="ac-pill free">बिल्कुल मुफ़्त · कोई फ़ीस नहीं</span>
+          <div class="ac-txt">${isHi ? 'काउंटर पर नाम सुधार फ़ॉर्म भरें और जमा करें' : 'Fill and submit name correction form at the counter'}</div>
+          <div class="ac-sub">${isHi ? 'फ़ॉर्म वहीं मिलेगा — दोनों की एक-एक फ़ोटोकॉपी साथ दें' : 'Form available at counter — carry one photocopy of each'}</div>
+          <span class="ac-pill free">${isHi ? 'बिल्कुल मुफ़्त · कोई फ़ीस नहीं' : 'Completely free · No fee'}</span>
         </div>
       </div>
       <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
         <span class="ac-ico">📬</span>
         <div>
-          <div class="ac-txt">सही खतौनी घर पर पोस्ट से आ जाएगी</div>
-          <div class="ac-sub">फ़ॉर्म जमा होने के ७–१० दिन में डिलीवरी</div>
+          <div class="ac-txt">${isHi ? 'सही खतौनी घर पर पोस्ट से आ जाएगी' : 'Corrected Khatauni will be posted to your home'}</div>
+          <div class="ac-sub">${isHi ? 'फ़ॉर्म जमा होने के ७–१० दिन में डिलीवरी' : 'Delivery within 7–10 days of form submission'}</div>
         </div>
       </div>`;
     $conv.appendChild(card); scrollDown();
 
     speakThen(
-      "नज़दीकी तहसील ऑफिस — विकास भवन, गोमती नगर — वहाँ दो चीज़ें लेकर जाएं। एक — आधार कार्ड, और दो — पुरानी खतौनी। दोनों की एक-एक फ़ोटोकॉपी भी साथ रखें। काउंटर पर पहुँचकर नाम सुधार फ़ॉर्म माँगें — वह वहीं मिलेगा। फ़ॉर्म भरकर जमा करें। इसके बाद सात से दस दिन में सही की हुई खतौनी पोस्ट से आपके घर आ जाएगी।",
+      msg(
+        "नज़दीकी तहसील ऑफिस — विकास भवन, गोमती नगर — वहाँ दो चीज़ें लेकर जाएं। एक — आधार कार्ड, और दो — पुरानी खतौनी। दोनों की एक-एक फ़ोटोकॉपी भी साथ रखें। काउंटर पर पहुँचकर नाम सुधार फ़ॉर्म माँगें — वह वहीं मिलेगा। फ़ॉर्म भरकर जमा करें। इसके बाद सात से दस दिन में सही की हुई खतौनी पोस्ट से आपके घर आ जाएगी।",
+        "The nearest Tehsil Office — Vikas Bhawan, Gomti Nagar — carry two things there. One — Aadhaar card, and two — old Khatauni. Keep a photocopy of both. At the counter ask for the name correction form — it is available there. Fill and submit the form. After that, the corrected Khatauni will be posted to your home in 7 to 10 days."
+      ),
       () => {
         setTimeout(() => {
           addAI(msg(
@@ -1246,24 +1261,25 @@ function animateScan(card, onDone) {
 }
 
 function buildResultChecklist() {
+  const isHi = currentLang === 'hi';
   const cl = document.createElement('div');
   cl.className = 'result-cl';
   cl.innerHTML = `
-    <div class="rcl-hd">📋 PM Kisan — दस्तावेज़ जाँच</div>
+    <div class="rcl-hd">📋 PM Kisan — ${isHi ? 'दस्तावेज़ जाँच' : 'Document Check'}</div>
     <div class="rcl-row">
       <span class="rcl-ico">✅</span>
-      <div><div class="rcl-name">आधार कार्ड</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+      <div><div class="rcl-name">${isHi ? 'आधार कार्ड' : 'Aadhaar Card'}</div><div class="rcl-msg">${isHi ? 'बिल्कुल ठीक है' : 'Looks good'}</div></div>
     </div>
     <div class="rcl-row warn">
       <span class="rcl-ico">⚠️</span>
       <div>
-        <div class="rcl-name">खतौनी</div>
-        <div class="rcl-msg">नाम में अंतर: "Ramesh Kuma" vs "Ramesh Kumar"</div>
+        <div class="rcl-name">${isHi ? 'खतौनी' : 'Khatauni'}</div>
+        <div class="rcl-msg">${isHi ? 'नाम में अंतर: "Ramesh Kuma" vs "Ramesh Kumar"' : 'Name mismatch: "Ramesh Kuma" vs "Ramesh Kumar"'}</div>
       </div>
     </div>
     <div class="rcl-row">
       <span class="rcl-ico">✅</span>
-      <div><div class="rcl-name">बैंक पासबुक</div><div class="rcl-msg">बिल्कुल ठीक है</div></div>
+      <div><div class="rcl-name">${isHi ? 'बैंक पासबुक' : 'Bank Passbook'}</div><div class="rcl-msg">${isHi ? 'बिल्कुल ठीक है' : 'Looks good'}</div></div>
     </div>`;
   return cl;
 }
@@ -1283,7 +1299,7 @@ function getDemoDefaults() {
 function processServiceTurn(said) {
   hideListening();
   listening = false;
-  const demos = SERVICE_DEMO[serviceIntent] || [];
+  const demos = getServiceDemo()[serviceIntent] || [];
   const text  = (said && said.trim()) ? said.trim() : (demos[serviceTurn] || 'हाँ');
   addUser(text);
   const t = serviceTurn;
@@ -1345,58 +1361,66 @@ function processServiceTurn(said) {
 }
 
 function showAadhaarGuide(subIntent) {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🪪 आधार अपडेट — पूरी जानकारी</div>
+    <div class="ac-hd">🪪 ${isHi ? 'आधार अपडेट — पूरी जानकारी' : 'Aadhaar Update — Complete Guide'}</div>
 
     <div class="ac-step">
       <span class="ac-ico">💻</span>
       <div>
-        <div class="ac-txt">ऑनलाइन अपडेट करें</div>
-        <div class="ac-sub">myaadhaar.uidai.gov.in → "Update Aadhaar" → नाम / पता / मोबाइल</div>
-        <span class="ac-pill free">₹50 शुल्क · घर बैठे</span>
+        <div class="ac-txt">${isHi ? 'ऑनलाइन अपडेट करें' : 'Update Online'}</div>
+        <div class="ac-sub">myaadhaar.uidai.gov.in → "Update Aadhaar" → ${isHi ? 'नाम / पता / मोबाइल' : 'Name / Address / Mobile'}</div>
+        <span class="ac-pill free">${isHi ? '₹50 शुल्क · घर बैठे' : '₹50 fee · From home'}</span>
       </div>
     </div>
 
     <div class="ac-step">
       <span class="ac-ico">🏢</span>
       <div>
-        <div class="ac-txt">नज़दीकी आधार सेंटर जाएं</div>
+        <div class="ac-txt">${isHi ? 'नज़दीकी आधार सेंटर जाएं' : 'Visit Nearest Aadhaar Centre'}</div>
         <div class="ac-sub">India Post, Hazratganj · 1.2 km</div>
         <div class="ac-sub" style="margin-top:2px">CSC Centre, Gomti Nagar · 2.1 km</div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 9 से शाम 5 बजे' : 'Mon–Sat, 9 AM to 5 PM'}</div>
       </div>
     </div>
 
     <div class="ac-step">
       <span class="ac-ico">📄</span>
       <div>
-        <div class="ac-txt">साथ लेकर जाएं</div>
-        <div class="ac-sub">• आधार कार्ड (Original)</div>
-        <div class="ac-sub">• पहचान प्रमाण — PAN / Voter ID / Passport</div>
-        <div class="ac-sub">• पते का प्रमाण — बिजली बिल / राशन कार्ड (अगर पता बदलना है)</div>
+        <div class="ac-txt">${isHi ? 'साथ लेकर जाएं' : 'Documents to Carry'}</div>
+        <div class="ac-sub">• ${isHi ? 'आधार कार्ड (Original)' : 'Aadhaar Card (Original)'}</div>
+        <div class="ac-sub">• ${isHi ? 'पहचान प्रमाण — PAN / Voter ID / Passport' : 'Identity Proof — PAN / Voter ID / Passport'}</div>
+        <div class="ac-sub">• ${isHi ? 'पते का प्रमाण — बिजली बिल / राशन कार्ड (अगर पता बदलना है)' : 'Address Proof — Electricity bill / Ration Card (if changing address)'}</div>
       </div>
     </div>
 
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">⏱️</span>
       <div>
-        <div class="ac-txt">अपडेट ९० दिनों में हो जाता है</div>
-        <div class="ac-sub">SMS और UIDAI website पर status track करें</div>
-        <span class="ac-pill free">₹50 शुल्क · कोई एजेंट ज़रूरी नहीं</span>
+        <div class="ac-txt">${isHi ? 'अपडेट ९० दिनों में हो जाता है' : 'Update done in 90 days'}</div>
+        <div class="ac-sub">${isHi ? 'SMS और UIDAI website पर status track करें' : 'Track status via SMS and UIDAI website'}</div>
+        <span class="ac-pill free">${isHi ? '₹50 शुल्क · कोई एजेंट ज़रूरी नहीं' : '₹50 fee · No agent needed'}</span>
       </div>
     </div>`;
   $conv.appendChild(card);
   scrollDown();
 
-  const speech =
+  const speech = msg(
     "आधार अपडेट करने के दो तरीके हैं। " +
     "पहला — ऑनलाइन। myaadhaar.uidai.gov.in पर जाएं, Update Aadhaar पर क्लिक करें। नाम, पता, मोबाइल नंबर — सब कुछ घर बैठे बदल सकते हैं। बस पचास रुपये लगते हैं। " +
     "दूसरा — नज़दीकी आधार सेंटर। आपके पास इंडिया पोस्ट हज़रतगंज और गोमती नगर CSC सेंटर है। " +
     "साथ में आधार कार्ड और एक पहचान प्रमाण लेकर जाएं — PAN कार्ड, वोटर ID, या पासपोर्ट। " +
     "अगर पता बदलना है तो बिजली बिल या राशन कार्ड भी लाएं। " +
-    "अपडेट नब्बे दिनों में हो जाता है।";
+    "अपडेट नब्बे दिनों में हो जाता है।",
+    "There are two ways to update Aadhaar. " +
+    "First — Online. Visit myaadhaar.uidai.gov.in, click Update Aadhaar. You can change name, address, mobile number from home. Just ₹50 fee. " +
+    "Second — Nearest Aadhaar Centre. India Post Hazratganj and CSC Centre Gomti Nagar are nearby. " +
+    "Carry Aadhaar card and one identity proof — PAN card, Voter ID, or Passport. " +
+    "If changing address, also bring electricity bill or ration card. " +
+    "Update is done within 90 days."
+  );
 
   speakThen(speech, () => {
     setTimeout(() => {
@@ -1881,7 +1905,7 @@ function openAadhaarOnlineOverlay() {
       const loader = document.createElement('div');
       loader.className = 'site-loader';
       loader.innerHTML = `<div class="sl-ico">🌐</div>
-        <div class="sl-title">myaadhaar.uidai.gov.in खुल रहा है...</div>
+        <div class="sl-title">${msg('myaadhaar.uidai.gov.in खुल रहा है...', 'Opening myaadhaar.uidai.gov.in...')}</div>
         <div class="sl-sub">UIDAI — Unique Identification Authority of India</div>
         <div class="sl-bar"><div class="sl-fill"></div></div>`;
       $conv.appendChild(loader); scrollDown();
@@ -1915,7 +1939,7 @@ function showUidaiFormOverlay() {
       <div>
         <div class="wob-step-tag">STEP 1 OF 2 — Identity Verification</div>
         <div class="wob-form-hd">Aadhaar Update Request</div>
-        <div class="wob-form-sub">आधार अपडेट के लिए नीचे जानकारी भरें · शुल्क: ₹50</div>
+        <div class="wob-form-sub">${msg('आधार अपडेट के लिए नीचे जानकारी भरें · शुल्क: ₹50', 'Fill in details below for Aadhaar update · Fee: ₹50')}</div>
       </div>
       ${UIDAI_FORM.map((f,i) => `
         <div class="wob-field" id="wuf-${i}">
@@ -1928,10 +1952,10 @@ function showUidaiFormOverlay() {
     <div class="wob-voice-strip">
       <div class="wob-voice-av">🏛️</div>
       <div class="wob-voice-info">
-        <div class="wob-voice-status">🔊 आवाज़ से गाइड हो रहा हूँ</div>
-        <div class="wob-voice-text" id="wobVoiceTxt">एक पल...</div>
+        <div class="wob-voice-status">🔊 ${msg('आवाज़ से गाइड हो रहा हूँ', 'Guiding you by voice')}</div>
+        <div class="wob-voice-text" id="wobVoiceTxt">${msg('एक पल...', 'One moment...')}</div>
       </div>
-      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceUidaiField()" disabled>अगला →</button>
+      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceUidaiField()" disabled>${msg('अगला →', 'Next →')}</button>
     </div>
     <div style="padding:0 14px 14px;background:#fff;">
       <div class="unified-box" style="width:100%">
@@ -2015,13 +2039,16 @@ function showUidaiFormReview() {
     if (row) row.className = 'wob-field done';
   });
   const vtxt = document.getElementById('wobVoiceTxt');
-  if (vtxt) vtxt.textContent = 'सभी खाने भरे। Submit करके ₹50 पेमेंट करें।';
+  if (vtxt) vtxt.textContent = msg('सभी खाने भरे। Submit करके ₹50 पेमेंट करें।', 'All fields filled. Submit and pay ₹50.');
   const btn = document.getElementById('wobNextBtn');
-  if (btn) { btn.textContent = '✅ Submit करें'; btn.disabled = false; btn.onclick = showUidaiSubmitConfirm; }
+  if (btn) { btn.textContent = msg('✅ Submit करें', '✅ Submit'); btn.disabled = false; btn.onclick = showUidaiSubmitConfirm; }
   const body = document.getElementById('wobBody');
   if (body) body.scrollTo({ top:0, behavior:'smooth' });
   speakThen(
-    "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे देख लीजिए। सब ठीक लगे तो Submit दबाइए — इसके बाद पचास रुपये का payment होगा और OTP आएगा।",
+    msg(
+      "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे देख लीजिए। सब ठीक लगे तो Submit दबाइए — इसके बाद पचास रुपये का payment होगा और OTP आएगा।",
+      "Great! All fields are filled correctly. Please review from top to bottom. If everything looks good, press Submit — then you will make a ₹50 payment and verify an OTP."
+    ),
     () => setMic('idle'), 14000
   );
 }
@@ -2031,14 +2058,15 @@ function showUidaiSubmitConfirm() {
   setTimeout(() => {
     const card = document.createElement('div');
     card.className = 'submit-ready';
+    const _isHi = currentLang === 'hi';
     card.innerHTML = `
       <div class="sr-ico">✅</div>
-      <div class="sr-title">आधार अपडेट रिक्वेस्ट तैयार!</div>
-      <div class="sr-msg">UIDAI वेबसाइट पर Submit करें → ₹50 payment करें → OTP verify करें → अपडेट ९० दिन में हो जाएगा।</div>
-      <div class="sr-warn">⚠️ Submit और payment आपको खुद करना है।</div>
+      <div class="sr-title">${_isHi ? 'आधार अपडेट रिक्वेस्ट तैयार!' : 'Aadhaar Update Request Ready!'}</div>
+      <div class="sr-msg">${_isHi ? 'UIDAI वेबसाइट पर Submit करें → ₹50 payment करें → OTP verify करें → अपडेट ९० दिन में हो जाएगा।' : 'Submit on UIDAI website → Pay ₹50 → Verify OTP → Update done in 90 days.'}</div>
+      <div class="sr-warn">⚠️ ${_isHi ? 'Submit और payment आपको खुद करना है।' : 'You must submit and make the payment yourself.'}</div>
       <button class="sr-btn" onclick="window.open('https://myaadhaar.uidai.gov.in','_blank')">🌐 myaadhaar.uidai.gov.in →</button>`;
     $conv.appendChild(card); scrollDown();
-    speak("आधार अपडेट रिक्वेस्ट तैयार है। UIDAI वेबसाइट पर submit करें, पचास रुपये payment करें, OTP verify करें — बस काम हो जाएगा! नब्बे दिन में अपडेट आ जाएगा।", () => setMic('idle'));
+    speak(msg("आधार अपडेट रिक्वेस्ट तैयार है। UIDAI वेबसाइट पर submit करें, पचास रुपये payment करें, OTP verify करें — बस काम हो जाएगा! नब्बे दिन में अपडेट आ जाएगा।", "Your Aadhaar update request is ready. Submit on the UIDAI website, pay ₹50, verify OTP — and you're done! Update will come in 90 days."), () => setMic('idle'));
   }, 400);
 }
 
@@ -2046,16 +2074,17 @@ function showUidaiSubmitConfirm() {
 // AADHAAR CENTER GUIDE
 // ══════════════════════════════════════
 function showAadhaarCenterGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🏢 नज़दीकी आधार सेंटर — स्टेप-बाय-स्टेप</div>
+    <div class="ac-hd">🏢 ${isHi ? 'नज़दीकी आधार सेंटर — स्टेप-बाय-स्टेप' : 'Nearest Aadhaar Centre — Step by Step'}</div>
     <div class="ac-step">
       <span class="ac-ico">📍</span>
       <div>
         <div class="ac-txt">India Post — Hazratganj</div>
         <div class="ac-sub">Hazratganj Post Office, Lucknow · <strong>1.2 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 9 से शाम 5 बजे' : 'Mon–Sat, 9 AM to 5 PM'}</div>
       </div>
     </div>
     <div class="ac-step">
@@ -2063,59 +2092,65 @@ function showAadhaarCenterGuide() {
       <div>
         <div class="ac-txt">CSC Centre — Gomti Nagar</div>
         <div class="ac-sub">Common Service Centre, Gomti Nagar · <strong>2.1 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 6 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 9 से शाम 6 बजे' : 'Mon–Sat, 9 AM to 6 PM'}</div>
       </div>
     </div>
-    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 साथ क्या लेकर जाएं?</div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 ${isHi ? 'साथ क्या लेकर जाएं?' : 'What to Carry?'}</div>
     <div class="ac-step">
       <span class="ac-ico">🪪</span>
       <div>
-        <div class="ac-txt">आधार कार्ड — Original</div>
-        <div class="ac-sub">Original दिखाएं + एक फ़ोटोकॉपी दें</div>
+        <div class="ac-txt">${isHi ? 'आधार कार्ड — Original' : 'Aadhaar Card — Original'}</div>
+        <div class="ac-sub">${isHi ? 'Original दिखाएं + एक फ़ोटोकॉपी दें' : 'Show Original + provide one photocopy'}</div>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">📄</span>
       <div>
-        <div class="ac-txt">पहचान प्रमाण</div>
-        <div class="ac-sub">PAN कार्ड / वोटर ID / पासपोर्ट — Original + फ़ोटोकॉपी</div>
+        <div class="ac-txt">${isHi ? 'पहचान प्रमाण' : 'Identity Proof'}</div>
+        <div class="ac-sub">${isHi ? 'PAN कार्ड / वोटर ID / पासपोर्ट — Original + फ़ोटोकॉपी' : 'PAN Card / Voter ID / Passport — Original + photocopy'}</div>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">🏠</span>
       <div>
-        <div class="ac-txt">पते का प्रमाण (अगर पता बदलना है)</div>
-        <div class="ac-sub">बिजली बिल / राशन कार्ड / बैंक स्टेटमेंट</div>
+        <div class="ac-txt">${isHi ? 'पते का प्रमाण (अगर पता बदलना है)' : 'Address Proof (if changing address)'}</div>
+        <div class="ac-sub">${isHi ? 'बिजली बिल / राशन कार्ड / बैंक स्टेटमेंट' : 'Electricity bill / Ration Card / Bank Statement'}</div>
       </div>
     </div>
-    <div class="ac-hd" style="background:#1a6b3c;border-radius:0;margin-top:0">🪜 काउंटर पर क्या करें?</div>
+    <div class="ac-hd" style="background:#1a6b3c;border-radius:0;margin-top:0">🪜 ${isHi ? 'काउंटर पर क्या करें?' : 'What to do at the Counter?'}</div>
     <div class="ac-step">
       <span class="ac-ico">1️⃣</span>
-      <div><div class="ac-txt">Counter पर जाकर बोलें — "Aadhaar Update"</div><div class="ac-sub">Token लें और नंबर आने पर काउंटर पर जाएं</div></div>
+      <div><div class="ac-txt">${isHi ? 'Counter पर जाकर बोलें — "Aadhaar Update"' : 'Go to counter and say — "Aadhaar Update"'}</div><div class="ac-sub">${isHi ? 'Token लें और नंबर आने पर काउंटर पर जाएं' : 'Take a token and go to counter when your number is called'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">2️⃣</span>
-      <div><div class="ac-txt">Operator को बताएं क्या बदलना है</div><div class="ac-sub">नाम / पता / मोबाइल — बोलकर बताएं</div></div>
+      <div><div class="ac-txt">${isHi ? 'Operator को बताएं क्या बदलना है' : 'Tell the Operator what to change'}</div><div class="ac-sub">${isHi ? 'नाम / पता / मोबाइल — बोलकर बताएं' : 'Name / Address / Mobile — say it aloud'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">3️⃣</span>
-      <div><div class="ac-txt">Biometric verification देना होगा</div><div class="ac-sub">अंगूठा या आँख की scan — मशीन पर करनी होगी</div></div>
+      <div><div class="ac-txt">${isHi ? 'Biometric verification देना होगा' : 'Biometric verification required'}</div><div class="ac-sub">${isHi ? 'अंगूठा या आँख की scan — मशीन पर करनी होगी' : 'Fingerprint or iris scan — done on the machine'}</div></div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">📬</span>
       <div>
-        <div class="ac-txt">URN नंबर मिलेगा — इससे status track करें</div>
-        <div class="ac-sub">₹50 शुल्क · अपडेट ९० दिन में हो जाता है</div>
-        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+        <div class="ac-txt">${isHi ? 'URN नंबर मिलेगा — इससे status track करें' : 'You will get a URN number — use it to track status'}</div>
+        <div class="ac-sub">${isHi ? '₹50 शुल्क · अपडेट ९० दिन में हो जाता है' : '₹50 fee · Update done in 90 days'}</div>
+        <span class="ac-pill free">${isHi ? 'SMS पर status update मिलेगा' : 'Status updates via SMS'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "आपके पास दो नज़दीकी सेंटर हैं। इंडिया पोस्ट हज़रतगंज — सिर्फ़ डेढ़ किलोमीटर दूर। और CSC सेंटर, गोमती नगर — दो किलोमीटर। " +
-    "साथ में आधार कार्ड और एक पहचान प्रमाण लेकर जाएं — PAN कार्ड या वोटर ID। दोनों की फ़ोटोकॉपी भी रखें। " +
-    "काउंटर पर पहुँचकर बोलें — आधार अपडेट चाहिए। Operator form भरेगा, आपको biometric scan देनी होगी। " +
-    "इसके बाद URN नंबर मिलेगा — इससे आप status track कर सकते हैं। पचास रुपये शुल्क लगेगा और नब्बे दिन में अपडेट हो जाएगा।",
+    msg(
+      "आपके पास दो नज़दीकी सेंटर हैं। इंडिया पोस्ट हज़रतगंज — सिर्फ़ डेढ़ किलोमीटर दूर। और CSC सेंटर, गोमती नगर — दो किलोमीटर। " +
+      "साथ में आधार कार्ड और एक पहचान प्रमाण लेकर जाएं — PAN कार्ड या वोटर ID। दोनों की फ़ोटोकॉपी भी रखें। " +
+      "काउंटर पर पहुँचकर बोलें — आधार अपडेट चाहिए। Operator form भरेगा, आपको biometric scan देनी होगी। " +
+      "इसके बाद URN नंबर मिलेगा — इससे आप status track कर सकते हैं। पचास रुपये शुल्क लगेगा और नब्बे दिन में अपडेट हो जाएगा।",
+      "You have two nearby centres. India Post Hazratganj — just 1.2 km away. And CSC Centre, Gomti Nagar — 2.1 km. " +
+      "Carry your Aadhaar card and one identity proof — PAN card or Voter ID. Keep a photocopy of both. " +
+      "At the counter say — I want Aadhaar update. The operator will fill the form and you will need to give a biometric scan. " +
+      "You will receive a URN number — use it to track status. ₹50 fee and update done in 90 days."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("और कोई मदद चाहिए? या PM Kisan जैसी कोई योजना देखनी है?", "Need any more help?"));
@@ -2129,50 +2164,57 @@ function showAadhaarCenterGuide() {
 // PAN CARD FLOW
 // ══════════════════════════════════════
 function showPanGuide(subIntent) {
+  const isHi = currentLang === 'hi';
   const isCorr = subIntent === 'correction';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">💳 PAN कार्ड — ${isCorr ? 'सुधार (Correction)' : 'नया आवेदन (New)'}</div>
+    <div class="ac-hd">💳 ${isHi ? `PAN कार्ड — ${isCorr ? 'सुधार (Correction)' : 'नया आवेदन (New)'}` : `PAN Card — ${isCorr ? 'Correction' : 'New Application'}`}</div>
     <div class="ac-step">
       <span class="ac-ico">💻</span>
       <div>
-        <div class="ac-txt">ऑनलाइन आवेदन करें</div>
-        <div class="ac-sub">NSDL / UTIITSL Portal → Form 49A (नया) या Correction Form</div>
-        <span class="ac-pill free">₹107 शुल्क · भारतीय नागरिक</span>
+        <div class="ac-txt">${isHi ? 'ऑनलाइन आवेदन करें' : 'Apply Online'}</div>
+        <div class="ac-sub">NSDL / UTIITSL Portal → ${isHi ? `Form 49A (नया) या Correction Form` : 'Form 49A (New) or Correction Form'}</div>
+        <span class="ac-pill free">${isHi ? '₹107 शुल्क · भारतीय नागरिक' : '₹107 fee · Indian Citizen'}</span>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">📄</span>
       <div>
-        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
-        <div class="ac-sub">• पहचान प्रमाण — आधार कार्ड / Voter ID / Passport</div>
-        <div class="ac-sub">• पते का प्रमाण — आधार / बिजली बिल / बैंक स्टेटमेंट</div>
-        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं की मार्कशीट</div>
-        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (रंगीन)</div>
+        <div class="ac-txt">${isHi ? 'ज़रूरी दस्तावेज़' : 'Required Documents'}</div>
+        <div class="ac-sub">• ${isHi ? 'पहचान प्रमाण — आधार कार्ड / Voter ID / Passport' : 'Identity Proof — Aadhaar Card / Voter ID / Passport'}</div>
+        <div class="ac-sub">• ${isHi ? 'पते का प्रमाण — आधार / बिजली बिल / बैंक स्टेटमेंट' : 'Address Proof — Aadhaar / Electricity bill / Bank Statement'}</div>
+        <div class="ac-sub">• ${isHi ? 'जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं की मार्कशीट' : 'Birth Proof — Birth Certificate / Class 10 Marksheet'}</div>
+        <div class="ac-sub">• ${isHi ? 'पासपोर्ट साइज़ फ़ोटो (रंगीन)' : 'Passport size photo (colour)'}</div>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">🏢</span>
       <div>
-        <div class="ac-txt">नज़दीकी TIN Facilitation Centre</div>
+        <div class="ac-txt">${isHi ? 'नज़दीकी TIN Facilitation Centre' : 'Nearest TIN Facilitation Centre'}</div>
         <div class="ac-sub">NSDL TIN-FC, Hazratganj · <strong>1.5 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 10 से शाम 5 बजे' : 'Mon–Sat, 10 AM to 5 PM'}</div>
       </div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">⏱️</span>
       <div>
-        <div class="ac-txt">PAN कार्ड 15–20 दिन में आता है</div>
-        <div class="ac-sub">acknowledgement number से track करें</div>
-        <span class="ac-pill free">e-PAN तुरंत मिल जाता है</span>
+        <div class="ac-txt">${isHi ? 'PAN कार्ड 15–20 दिन में आता है' : 'PAN Card arrives in 15–20 days'}</div>
+        <div class="ac-sub">${isHi ? 'acknowledgement number से track करें' : 'Track via acknowledgement number'}</div>
+        <span class="ac-pill free">${isHi ? 'e-PAN तुरंत मिल जाता है' : 'e-PAN received instantly'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   const speech = isCorr
-    ? "PAN कार्ड में सुधार के लिए NSDL या UTIITSL पोर्टल पर Correction Form भरें। आधार, पहचान और पते का प्रमाण लगाना होगा। एक सौ सात रुपये शुल्क है। e-PAN तुरंत मिलेगा।"
-    : "नया PAN कार्ड बनाने के लिए NSDL या UTIITSL पोर्टल पर Form 49A भरें। आधार कार्ड, पते का प्रमाण, जन्म प्रमाण और पासपोर्ट साइज़ फ़ोटो लगानी होगी। एक सौ सात रुपये शुल्क है। PAN कार्ड पंद्रह से बीस दिन में आ जाता है, e-PAN तुरंत मिलता है।";
+    ? msg(
+        "PAN कार्ड में सुधार के लिए NSDL या UTIITSL पोर्टल पर Correction Form भरें। आधार, पहचान और पते का प्रमाण लगाना होगा। एक सौ सात रुपये शुल्क है। e-PAN तुरंत मिलेगा।",
+        "To correct a PAN card, fill the Correction Form on NSDL or UTIITSL portal. You will need Aadhaar, identity proof and address proof. Fee is ₹107. e-PAN is received instantly."
+      )
+    : msg(
+        "नया PAN कार्ड बनाने के लिए NSDL या UTIITSL पोर्टल पर Form 49A भरें। आधार कार्ड, पते का प्रमाण, जन्म प्रमाण और पासपोर्ट साइज़ फ़ोटो लगानी होगी। एक सौ सात रुपये शुल्क है। PAN कार्ड पंद्रह से बीस दिन में आ जाता है, e-PAN तुरंत मिलता है।",
+        "To apply for a new PAN card, fill Form 49A on NSDL or UTIITSL portal. You will need Aadhaar card, address proof, birth proof and passport size photo. Fee is ₹107. PAN card arrives in 15 to 20 days, e-PAN is received instantly."
+      );
 
   speakThen(speech, () => {
     setTimeout(() => {
@@ -2185,52 +2227,56 @@ function showPanGuide(subIntent) {
 }
 
 function showPanCenterGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🏢 TIN Facilitation Centre — स्टेप-बाय-स्टेप</div>
+    <div class="ac-hd">🏢 ${isHi ? 'TIN Facilitation Centre — स्टेप-बाय-स्टेप' : 'TIN Facilitation Centre — Step by Step'}</div>
     <div class="ac-step">
       <span class="ac-ico">📍</span>
       <div>
         <div class="ac-txt">NSDL TIN-FC — Hazratganj</div>
         <div class="ac-sub">Ground Floor, Hazratganj, Lucknow · <strong>1.5 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 10 से शाम 5 बजे' : 'Mon–Sat, 10 AM to 5 PM'}</div>
       </div>
     </div>
-    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 साथ क्या लेकर जाएं?</div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">📋 ${isHi ? 'साथ क्या लेकर जाएं?' : 'What to Carry?'}</div>
     <div class="ac-step">
       <span class="ac-ico">🪪</span>
       <div>
-        <div class="ac-txt">पहचान प्रमाण (Original + फ़ोटोकॉपी)</div>
-        <div class="ac-sub">आधार कार्ड / Voter ID / Passport</div>
+        <div class="ac-txt">${isHi ? 'पहचान प्रमाण (Original + फ़ोटोकॉपी)' : 'Identity Proof (Original + photocopy)'}</div>
+        <div class="ac-sub">${isHi ? 'आधार कार्ड / Voter ID / Passport' : 'Aadhaar Card / Voter ID / Passport'}</div>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">🏠</span>
       <div>
-        <div class="ac-txt">पते का प्रमाण (Original + फ़ोटोकॉपी)</div>
-        <div class="ac-sub">आधार / बिजली बिल / बैंक स्टेटमेंट</div>
+        <div class="ac-txt">${isHi ? 'पते का प्रमाण (Original + फ़ोटोकॉपी)' : 'Address Proof (Original + photocopy)'}</div>
+        <div class="ac-sub">${isHi ? 'आधार / बिजली बिल / बैंक स्टेटमेंट' : 'Aadhaar / Electricity bill / Bank Statement'}</div>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">📸</span>
       <div>
-        <div class="ac-txt">2 पासपोर्ट साइज़ फ़ोटो (रंगीन)</div>
-        <div class="ac-sub">सफ़ेद background · हाल की खिंची हुई</div>
+        <div class="ac-txt">${isHi ? '2 पासपोर्ट साइज़ फ़ोटो (रंगीन)' : '2 passport size photos (colour)'}</div>
+        <div class="ac-sub">${isHi ? 'सफ़ेद background · हाल की खिंची हुई' : 'White background · recently taken'}</div>
       </div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">📬</span>
       <div>
-        <div class="ac-txt">Acknowledgement slip मिलेगी</div>
-        <div class="ac-sub">₹107 शुल्क · 15–20 दिन में PAN कार्ड आ जाएगा</div>
-        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+        <div class="ac-txt">${isHi ? 'Acknowledgement slip मिलेगी' : 'You will receive an Acknowledgement slip'}</div>
+        <div class="ac-sub">${isHi ? '₹107 शुल्क · 15–20 दिन में PAN कार्ड आ जाएगा' : '₹107 fee · PAN Card arrives in 15–20 days'}</div>
+        <span class="ac-pill free">${isHi ? 'SMS पर status update मिलेगा' : 'Status updates via SMS'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "NSDL TIN सेंटर हज़रतगंज में है — डेढ़ किलोमीटर दूर। साथ में आधार कार्ड, पते का प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। एक सौ सात रुपये शुल्क लगेगा और पंद्रह से बीस दिन में PAN कार्ड घर आ जाएगा।",
+    msg(
+      "NSDL TIN सेंटर हज़रतगंज में है — डेढ़ किलोमीटर दूर। साथ में आधार कार्ड, पते का प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। एक सौ सात रुपये शुल्क लगेगा और पंद्रह से बीस दिन में PAN कार्ड घर आ जाएगा।",
+      "NSDL TIN Centre is in Hazratganj — 1.5 km away. Carry Aadhaar card, address proof, and two colour photos. Fee is ₹107 and PAN card will arrive home in 15 to 20 days."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
@@ -2244,27 +2290,28 @@ function showPanCenterGuide() {
 // PASSPORT FLOW
 // ══════════════════════════════════════
 function showPassportGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🛂 Passport — नया आवेदन / Renewal</div>
+    <div class="ac-hd">🛂 ${isHi ? 'Passport — नया आवेदन / Renewal' : 'Passport — New Application / Renewal'}</div>
     <div class="ac-step">
       <span class="ac-ico">💻</span>
       <div>
-        <div class="ac-txt">ऑनलाइन आवेदन — passportindia.gov.in</div>
-        <div class="ac-sub">Register → Apply Online → Fresh / Renewal चुनें → Appointment book करें</div>
+        <div class="ac-txt">${isHi ? 'ऑनलाइन आवेदन — passportindia.gov.in' : 'Apply Online — passportindia.gov.in'}</div>
+        <div class="ac-sub">Register → Apply Online → ${isHi ? 'Fresh / Renewal चुनें → Appointment book करें' : 'Select Fresh / Renewal → Book Appointment'}</div>
         <span class="ac-pill free">₹1,500 (Normal) · ₹3,500 (Tatkal)</span>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">📄</span>
       <div>
-        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
-        <div class="ac-sub">• आधार कार्ड (Original + फ़ोटोकॉपी)</div>
-        <div class="ac-sub">• पते का प्रमाण — बिजली बिल / बैंक स्टेटमेंट</div>
-        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट</div>
-        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (2 रंगीन, सफ़ेद background)</div>
-        <div class="ac-sub">• Renewal के लिए — पुराना Passport</div>
+        <div class="ac-txt">${isHi ? 'ज़रूरी दस्तावेज़' : 'Required Documents'}</div>
+        <div class="ac-sub">• ${isHi ? 'आधार कार्ड (Original + फ़ोटोकॉपी)' : 'Aadhaar Card (Original + photocopy)'}</div>
+        <div class="ac-sub">• ${isHi ? 'पते का प्रमाण — बिजली बिल / बैंक स्टेटमेंट' : 'Address Proof — Electricity bill / Bank Statement'}</div>
+        <div class="ac-sub">• ${isHi ? 'जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट' : 'Birth Proof — Birth Certificate / Class 10 Marksheet'}</div>
+        <div class="ac-sub">• ${isHi ? 'पासपोर्ट साइज़ फ़ोटो (2 रंगीन, सफ़ेद background)' : 'Passport size photo (2 colour, white background)'}</div>
+        <div class="ac-sub">• ${isHi ? 'Renewal के लिए — पुराना Passport' : 'For Renewal — Old Passport'}</div>
       </div>
     </div>
     <div class="ac-step">
@@ -2272,23 +2319,28 @@ function showPassportGuide() {
       <div>
         <div class="ac-txt">Passport Seva Kendra (PSK)</div>
         <div class="ac-sub">PSK Lucknow, Vibhuti Khand · <strong>5.3 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 9 से शाम 5 बजे' : 'Mon–Sat, 9 AM to 5 PM'}</div>
       </div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">⏱️</span>
       <div>
-        <div class="ac-txt">Normal: 30–45 दिन · Tatkal: 1–3 दिन</div>
-        <div class="ac-sub">Appointment के बाद PSK में जाना ज़रूरी है</div>
-        <span class="ac-pill free">Police Verification होती है</span>
+        <div class="ac-txt">${isHi ? 'Normal: 30–45 दिन · Tatkal: 1–3 दिन' : 'Normal: 30–45 days · Tatkal: 1–3 days'}</div>
+        <div class="ac-sub">${isHi ? 'Appointment के बाद PSK में जाना ज़रूरी है' : 'Visit to PSK is required after booking Appointment'}</div>
+        <span class="ac-pill free">${isHi ? 'Police Verification होती है' : 'Police Verification is conducted'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "पासपोर्ट के लिए passportindia.gov.in पर जाएं, Register करें और Fresh या Renewal चुनें। Appointment book करें। " +
-    "साथ में आधार कार्ड, पते का प्रमाण, जन्म प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। Renewal के लिए पुराना पासपोर्ट भी लाएं। " +
-    "Normal पासपोर्ट के लिए डेढ़ हज़ार रुपये शुल्क है और तीस से पैंतालीस दिन लगते हैं। Tatkal में साढ़े तीन हज़ार रुपये में एक से तीन दिन में मिल जाता है।",
+    msg(
+      "पासपोर्ट के लिए passportindia.gov.in पर जाएं, Register करें और Fresh या Renewal चुनें। Appointment book करें। " +
+      "साथ में आधार कार्ड, पते का प्रमाण, जन्म प्रमाण, और दो रंगीन फ़ोटो लेकर जाएं। Renewal के लिए पुराना पासपोर्ट भी लाएं। " +
+      "Normal पासपोर्ट के लिए डेढ़ हज़ार रुपये शुल्क है और तीस से पैंतालीस दिन लगते हैं। Tatkal में साढ़े तीन हज़ार रुपये में एक से तीन दिन में मिल जाता है।",
+      "For a passport, visit passportindia.gov.in, register and choose Fresh or Renewal. Book an appointment. " +
+      "Carry Aadhaar card, address proof, birth proof, and two colour photos. For Renewal, also bring old passport. " +
+      "Normal passport fee is ₹1,500 and takes 30 to 45 days. Tatkal costs ₹3,500 and is available in 1 to 3 days."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?",
@@ -2301,44 +2353,49 @@ function showPassportGuide() {
 }
 
 function showPassportCenterGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🏢 Passport Seva Kendra — स्टेप-बाय-स्टेप</div>
+    <div class="ac-hd">🏢 ${isHi ? 'Passport Seva Kendra — स्टेप-बाय-स्टेप' : 'Passport Seva Kendra — Step by Step'}</div>
     <div class="ac-step">
       <span class="ac-ico">📍</span>
       <div>
         <div class="ac-txt">PSK Lucknow — Vibhuti Khand</div>
         <div class="ac-sub">Vibhuti Khand, Gomti Nagar, Lucknow · <strong>5.3 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 9 से शाम 5 बजे · Appointment ज़रूरी</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 9 से शाम 5 बजे · Appointment ज़रूरी' : 'Mon–Sat, 9 AM to 5 PM · Appointment required'}</div>
       </div>
     </div>
-    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 PSK पर क्या होता है?</div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 ${isHi ? 'PSK पर क्या होता है?' : 'What happens at PSK?'}</div>
     <div class="ac-step">
       <span class="ac-ico">1️⃣</span>
-      <div><div class="ac-txt">Token Counter — Document Verification</div><div class="ac-sub">सभी Original दस्तावेज़ दिखाएं और फ़ोटोकॉपी जमा करें</div></div>
+      <div><div class="ac-txt">Token Counter — Document Verification</div><div class="ac-sub">${isHi ? 'सभी Original दस्तावेज़ दिखाएं और फ़ोटोकॉपी जमा करें' : 'Show all Original documents and submit photocopies'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">2️⃣</span>
-      <div><div class="ac-txt">Photo & Biometric Capture</div><div class="ac-sub">फ़ोटो और fingerprint PSK पर ही लिए जाते हैं</div></div>
+      <div><div class="ac-txt">Photo & Biometric Capture</div><div class="ac-sub">${isHi ? 'फ़ोटो और fingerprint PSK पर ही लिए जाते हैं' : 'Photo and fingerprint are taken at the PSK'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">3️⃣</span>
-      <div><div class="ac-txt">Police Verification</div><div class="ac-sub">पुलिस आपके घर verification के लिए आएगी</div></div>
+      <div><div class="ac-txt">Police Verification</div><div class="ac-sub">${isHi ? 'पुलिस आपके घर verification के लिए आएगी' : 'Police will visit your home for verification'}</div></div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">📬</span>
       <div>
-        <div class="ac-txt">Passport डाक से घर पहुँचेगा</div>
-        <div class="ac-sub">Normal: 30–45 दिन · Tatkal: 1–3 दिन</div>
-        <span class="ac-pill free">SMS पर हर update मिलेगा</span>
+        <div class="ac-txt">${isHi ? 'Passport डाक से घर पहुँचेगा' : 'Passport will be delivered by post'}</div>
+        <div class="ac-sub">${isHi ? 'Normal: 30–45 दिन · Tatkal: 1–3 दिन' : 'Normal: 30–45 days · Tatkal: 1–3 days'}</div>
+        <span class="ac-pill free">${isHi ? 'SMS पर हर update मिलेगा' : 'Every update via SMS'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "PSK Lucknow, गोमती नगर में है — पाँच किलोमीटर दूर। वहाँ जाने से पहले passportindia.gov.in पर Appointment लेना ज़रूरी है। " +
-    "PSK पर पहले दस्तावेज़ verify होंगे, फिर फ़ोटो और fingerprint लिए जाएंगे। बाद में पुलिस घर आकर verification करेगी। Passport डाक से आएगा।",
+    msg(
+      "PSK Lucknow, गोमती नगर में है — पाँच किलोमीटर दूर। वहाँ जाने से पहले passportindia.gov.in पर Appointment लेना ज़रूरी है। " +
+      "PSK पर पहले दस्तावेज़ verify होंगे, फिर फ़ोटो और fingerprint लिए जाएंगे। बाद में पुलिस घर आकर verification करेगी। Passport डाक से आएगा।",
+      "PSK Lucknow is in Gomti Nagar — 5 km away. Before visiting, you must book an Appointment on passportindia.gov.in. " +
+      "At PSK, documents will be verified first, then photo and fingerprint will be taken. Later the police will visit your home for verification. Passport will be delivered by post."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
@@ -2352,26 +2409,27 @@ function showPassportCenterGuide() {
 // DRIVING LICENCE FLOW
 // ══════════════════════════════════════
 function showDrivingGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🚗 Driving Licence — नया आवेदन</div>
+    <div class="ac-hd">🚗 ${isHi ? 'Driving Licence — नया आवेदन' : 'Driving Licence — New Application'}</div>
     <div class="ac-step">
       <span class="ac-ico">💻</span>
       <div>
-        <div class="ac-txt">ऑनलाइन आवेदन — sarathi.parivahan.gov.in</div>
-        <div class="ac-sub">पहले Learner's Licence → फिर Driving Test → DL मिलेगा</div>
-        <span class="ac-pill free">₹200–₹500 शुल्क (state-wise)</span>
+        <div class="ac-txt">${isHi ? 'ऑनलाइन आवेदन — sarathi.parivahan.gov.in' : 'Apply Online — sarathi.parivahan.gov.in'}</div>
+        <div class="ac-sub">${isHi ? "पहले Learner's Licence → फिर Driving Test → DL मिलेगा" : "First Learner's Licence → then Driving Test → get DL"}</div>
+        <span class="ac-pill free">${isHi ? '₹200–₹500 शुल्क (state-wise)' : '₹200–₹500 fee (state-wise)'}</span>
       </div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">📄</span>
       <div>
-        <div class="ac-txt">ज़रूरी दस्तावेज़</div>
-        <div class="ac-sub">• आधार कार्ड (पहचान + पते का प्रमाण)</div>
-        <div class="ac-sub">• जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट</div>
-        <div class="ac-sub">• पासपोर्ट साइज़ फ़ोटो (2 रंगीन)</div>
-        <div class="ac-sub">• Medical Certificate (Form 1A) — अगर Heavy Vehicle के लिए</div>
+        <div class="ac-txt">${isHi ? 'ज़रूरी दस्तावेज़' : 'Required Documents'}</div>
+        <div class="ac-sub">• ${isHi ? 'आधार कार्ड (पहचान + पते का प्रमाण)' : 'Aadhaar Card (identity + address proof)'}</div>
+        <div class="ac-sub">• ${isHi ? 'जन्म प्रमाण — जन्म प्रमाण पत्र / 10वीं मार्कशीट' : 'Birth Proof — Birth Certificate / Class 10 Marksheet'}</div>
+        <div class="ac-sub">• ${isHi ? 'पासपोर्ट साइज़ फ़ोटो (2 रंगीन)' : 'Passport size photo (2 colour)'}</div>
+        <div class="ac-sub">• ${isHi ? 'Medical Certificate (Form 1A) — अगर Heavy Vehicle के लिए' : 'Medical Certificate (Form 1A) — for Heavy Vehicle'}</div>
       </div>
     </div>
     <div class="ac-step">
@@ -2379,23 +2437,28 @@ function showDrivingGuide() {
       <div>
         <div class="ac-txt">RTO Office</div>
         <div class="ac-sub">RTO Lucknow, Kaiserbagh · <strong>3.2 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 10 से शाम 5 बजे' : 'Mon–Sat, 10 AM to 5 PM'}</div>
       </div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">⏱️</span>
       <div>
-        <div class="ac-txt">प्रक्रिया: LL → 30 दिन बाद DL Test</div>
-        <div class="ac-sub">Learner's Licence online Test · DL Test RTO पर</div>
+        <div class="ac-txt">${isHi ? 'प्रक्रिया: LL → 30 दिन बाद DL Test' : 'Process: LL → DL Test after 30 days'}</div>
+        <div class="ac-sub">${isHi ? "Learner's Licence online Test · DL Test RTO पर" : "Learner's Licence online Test · DL Test at RTO"}</div>
         <span class="ac-pill free">Age 18+ (LMV) · 16+ (Gearless)</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "Driving Licence के लिए sarathi.parivahan.gov.in पर जाएं। पहले Learner's Licence के लिए online आवेदन करें और online test दें। " +
-    "Learner's Licence मिलने के तीस दिन बाद RTO जाकर Driving Test देना होगा। " +
-    "आधार कार्ड, जन्म प्रमाण, और दो रंगीन फ़ोटो ज़रूरी हैं। उम्र कम से कम अठारह साल होनी चाहिए।",
+    msg(
+      "Driving Licence के लिए sarathi.parivahan.gov.in पर जाएं। पहले Learner's Licence के लिए online आवेदन करें और online test दें। " +
+      "Learner's Licence मिलने के तीस दिन बाद RTO जाकर Driving Test देना होगा। " +
+      "आधार कार्ड, जन्म प्रमाण, और दो रंगीन फ़ोटो ज़रूरी हैं। उम्र कम से कम अठारह साल होनी चाहिए।",
+      "For a Driving Licence, visit sarathi.parivahan.gov.in. First apply online for Learner's Licence and take the online test. " +
+      "30 days after getting Learner's Licence, visit RTO for the Driving Test. " +
+      "Aadhaar card, birth proof, and two colour photos are required. Minimum age is 18 years."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?",
@@ -2408,47 +2471,51 @@ function showDrivingGuide() {
 }
 
 function showDrivingCenterGuide() {
+  const isHi = currentLang === 'hi';
   const card = document.createElement('div');
   card.className = 'action-card';
   card.innerHTML = `
-    <div class="ac-hd">🏢 RTO Office — स्टेप-बाय-स्टेप</div>
+    <div class="ac-hd">🏢 ${isHi ? 'RTO Office — स्टेप-बाय-स्टेप' : 'RTO Office — Step by Step'}</div>
     <div class="ac-step">
       <span class="ac-ico">📍</span>
       <div>
         <div class="ac-txt">RTO Lucknow — Kaiserbagh</div>
         <div class="ac-sub">Regional Transport Office, Kaiserbagh, Lucknow · <strong>3.2 km</strong></div>
-        <div class="ac-sub" style="margin-top:2px">⏰ सोम–शनि, सुबह 10 से शाम 5 बजे</div>
+        <div class="ac-sub" style="margin-top:2px">⏰ ${isHi ? 'सोम–शनि, सुबह 10 से शाम 5 बजे' : 'Mon–Sat, 10 AM to 5 PM'}</div>
       </div>
     </div>
-    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 RTO पर क्या करें?</div>
+    <div class="ac-hd" style="background:var(--blue);border-radius:0;margin-top:0">🪜 ${isHi ? 'RTO पर क्या करें?' : 'What to do at RTO?'}</div>
     <div class="ac-step">
       <span class="ac-ico">1️⃣</span>
-      <div><div class="ac-txt">Form LL-1 भरें (Learner's Licence)</div><div class="ac-sub">sarathi.parivahan.gov.in से online भी भर सकते हैं</div></div>
+      <div><div class="ac-txt">${isHi ? "Form LL-1 भरें (Learner's Licence)" : "Fill Form LL-1 (Learner's Licence)"}</div><div class="ac-sub">${isHi ? 'sarathi.parivahan.gov.in से online भी भर सकते हैं' : 'Can also be filled online at sarathi.parivahan.gov.in'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">2️⃣</span>
-      <div><div class="ac-txt">Document Verification + Fees जमा करें</div><div class="ac-sub">आधार, जन्म प्रमाण, फ़ोटो · ₹200–300 शुल्क</div></div>
+      <div><div class="ac-txt">${isHi ? 'Document Verification + Fees जमा करें' : 'Document Verification + Pay Fees'}</div><div class="ac-sub">${isHi ? 'आधार, जन्म प्रमाण, फ़ोटो · ₹200–300 शुल्क' : 'Aadhaar, birth proof, photo · ₹200–300 fee'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">3️⃣</span>
-      <div><div class="ac-txt">Learner's Test दें (Written/Computer)</div><div class="ac-sub">Traffic rules पर MCQ test · RTO counter पर</div></div>
+      <div><div class="ac-txt">${isHi ? "Learner's Test दें (Written/Computer)" : "Take Learner's Test (Written/Computer)"}</div><div class="ac-sub">${isHi ? 'Traffic rules पर MCQ test · RTO counter पर' : 'MCQ test on traffic rules · at RTO counter'}</div></div>
     </div>
     <div class="ac-step">
       <span class="ac-ico">4️⃣</span>
-      <div><div class="ac-txt">30 दिन बाद — Driving Test appointment लें</div><div class="ac-sub">अपनी गाड़ी लेकर आएं (LMV/2W)</div></div>
+      <div><div class="ac-txt">${isHi ? '30 दिन बाद — Driving Test appointment लें' : 'After 30 days — Book Driving Test appointment'}</div><div class="ac-sub">${isHi ? 'अपनी गाड़ी लेकर आएं (LMV/2W)' : 'Bring your vehicle (LMV/2W)'}</div></div>
     </div>
     <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
       <span class="ac-ico">📬</span>
       <div>
-        <div class="ac-txt">DL डाक से घर आएगा</div>
-        <div class="ac-sub">Test pass करने के 7–15 दिन में</div>
-        <span class="ac-pill free">SMS पर status update मिलेगा</span>
+        <div class="ac-txt">${isHi ? 'DL डाक से घर आएगा' : 'DL will be delivered by post'}</div>
+        <div class="ac-sub">${isHi ? 'Test pass करने के 7–15 दिन में' : 'Within 7–15 days of passing the test'}</div>
+        <span class="ac-pill free">${isHi ? 'SMS पर status update मिलेगा' : 'Status updates via SMS'}</span>
       </div>
     </div>`;
   $conv.appendChild(card); scrollDown();
 
   speakThen(
-    "RTO Lucknow, कैसरबाग में है — तीन किलोमीटर दूर। वहाँ जाकर Form LL-1 भरें, दस्तावेज़ verify करवाएं और fees जमा करें। फिर written test देना होगा। Learner's Licence मिलने के तीस दिन बाद Driving Test दें। Test pass होने के सात से पंद्रह दिन में DL घर आ जाएगा।",
+    msg(
+      "RTO Lucknow, कैसरबाग में है — तीन किलोमीटर दूर। वहाँ जाकर Form LL-1 भरें, दस्तावेज़ verify करवाएं और fees जमा करें। फिर written test देना होगा। Learner's Licence मिलने के तीस दिन बाद Driving Test दें। Test pass होने के सात से पंद्रह दिन में DL घर आ जाएगा।",
+      "RTO Lucknow is in Kaiserbagh — 3 km away. Go there, fill Form LL-1, get documents verified and pay fees. Then you will take a written test. After 30 days of getting Learner's Licence, take the Driving Test. DL will arrive home in 7 to 15 days after passing the test."
+    ),
     () => {
       setTimeout(() => {
         addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
@@ -2462,6 +2529,7 @@ function showDrivingCenterGuide() {
 // GENERIC SERVICE FORM OVERLAY
 // ══════════════════════════════════════
 function openSvcFormOverlay(svc) {
+  const isHi = currentLang === 'hi';
   const SVC_INFO = {
     pan:      { icon:'💳', name:'PAN Card', portal:'onlineservices.nsdl.com', url:'https://onlineservices.nsdl.com/paam/endUserRegisterContact.html', lbl:'NSDL PAN Portal' },
     passport: { icon:'🛂', name:'Passport', portal:'passportindia.gov.in', url:'https://www.passportindia.gov.in/AppOnlineProject/welcomeLink', lbl:'Passport Seva Portal' },
@@ -2469,18 +2537,23 @@ function openSvcFormOverlay(svc) {
   };
   const info = SVC_INFO[svc] || SVC_INFO.pan;
 
-  const msg = `${info.icon} ${info.name} के लिए आधिकारिक सरकारी पोर्टल <strong>${info.portal}</strong> खुल रहा है…`;
-  addAI(msg);
+  const openMsg = isHi
+    ? `${info.icon} ${info.name} के लिए आधिकारिक सरकारी पोर्टल <strong>${info.portal}</strong> खुल रहा है…`
+    : `${info.icon} Opening official government portal <strong>${info.portal}</strong> for ${info.name}…`;
+  addAI(openMsg);
 
   const loader = document.createElement('div');
   loader.className = 'site-loader';
   loader.innerHTML = `<div class="sl-ico">${info.icon}</div>
-    <div class="sl-title">${info.portal} खुल रहा है...</div>
+    <div class="sl-title">${isHi ? `${info.portal} खुल रहा है...` : `Opening ${info.portal}...`}</div>
     <div class="sl-sub">Official Government of India Website</div>
     <div class="sl-bar"><div class="sl-fill"></div></div>`;
   $conv.appendChild(loader); scrollDown();
 
-  speak(`${info.name} के लिए आधिकारिक पोर्टल खुल रहा है। वहाँ आपको ${info.lbl} दिखेगा — वहीं से आवेदन करें।`, () => {});
+  speak(isHi
+    ? `${info.name} के लिए आधिकारिक पोर्टल खुल रहा है। वहाँ आपको ${info.lbl} दिखेगा — वहीं से आवेदन करें।`
+    : `Opening the official portal for ${info.name}. You will see ${info.lbl} — apply from there.`,
+  () => {});
 
   setTimeout(() => {
     loader.remove();
@@ -2493,14 +2566,14 @@ function openSvcFormOverlay(svc) {
         <div>
           <div class="ac-txt">${info.lbl}</div>
           <div class="ac-sub">${info.portal}</div>
-          <button class="apply-btn-p" style="margin-top:8px;font-size:13px" onclick="window.open('${info.url}','_blank')">🔗 पोर्टल खोलें</button>
+          <button class="apply-btn-p" style="margin-top:8px;font-size:13px" onclick="window.open('${info.url}','_blank')">🔗 ${isHi ? 'पोर्टल खोलें' : 'Open Portal'}</button>
         </div>
       </div>
       <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
         <span class="ac-ico">💡</span>
         <div>
-          <div class="ac-txt">Submit आप खुद करें</div>
-          <div class="ac-sub">नागरिक साथी सुरक्षा के लिए form submit नहीं करता</div>
+          <div class="ac-txt">${isHi ? 'Submit आप खुद करें' : 'Submit yourself'}</div>
+          <div class="ac-sub">${isHi ? 'नागरिक साथी सुरक्षा के लिए form submit नहीं करता' : 'Nagrik Saathi does not submit forms for security reasons'}</div>
         </div>
       </div>`;
     $conv.appendChild(linkCard); scrollDown();
