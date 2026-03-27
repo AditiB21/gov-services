@@ -828,8 +828,9 @@ function scrollDown() { setTimeout(() => $conv.scrollTo({ top:$conv.scrollHeight
 // CARDS
 // ══════════════════════════════════════
 function showSchemeResults() {
+  const isHi = currentLang === 'hi';
   const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')"><div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${s.sector}</span></div><div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${s.benefit}</div><div class="smc-ministry">${s.ministry}</div></div><span class="smc-arr">›</span></div>`
+    `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')"><div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${isHi ? s.sector : (s.sectorEn || s.sector)}</span></div><div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${isHi ? s.benefit : (s.benefitEn || s.benefit)}</div><div class="smc-ministry">${s.ministry}</div></div><span class="smc-arr">›</span></div>`
   ).join('');
   const html = `<div class="scheme-results"><div class="sr-hd">${T('scheme_results_hd')}</div><div class="scheme-menu-list">${cardsHtml}</div><div class="scheme-menu-hint">${T('scheme_menu_hint')}</div></div>`;
   const row = document.createElement('div');
@@ -882,10 +883,7 @@ function selectScheme(key) {
   setTimeout(() => {
     hideTyping();
     const isHi = currentLang === 'hi';
-    const docNames = s.docs.map(([,n]) => n).join(', ');
-    const msg = isHi
-      ? s.docsText
-      : `For ${s.name}, you'll need: ${docNames}. Please scan each document below, then tap Verify — I'll check them for any issues.`;
+    const msg = isHi ? s.docsText : (s.docsTextEn || `For ${s.name}, please scan the required documents below, then tap Verify.`);
     addAI(msg);
     showDocCard();
     speak(msg, () => setMic('idle'));
@@ -914,8 +912,8 @@ function showSchemePicker(mode) {
 
   const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
     `<div class="scheme-menu-card" id="spmc-${key}" style="border-left:4px solid ${s.color}" onclick="confirmModeScheme('${mode}','${key}')">
-       <div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${s.sector}</span></div>
-       <div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${s.benefit}</div><div class="smc-ministry">${s.ministry}</div></div>
+       <div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${isHi ? s.sector : (s.sectorEn || s.sector)}</span></div>
+       <div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${isHi ? s.benefit : (s.benefitEn || s.benefit)}</div><div class="smc-ministry">${s.ministry}</div></div>
        <span class="smc-arr">›</span>
      </div>`
   ).join('');
@@ -971,9 +969,10 @@ function showDocCard() {
   const hdTxt = isHi ? `📄 दस्तावेज़ स्कैन करें — ${scheme.name}` : `📄 Scan Documents — ${scheme.name}`;
   const c = document.createElement('div');
   c.className = 'doc-card';
+  const docsArr = (isHi || !scheme.docsEn) ? scheme.docs : scheme.docsEn;
   c.innerHTML = `
     <div class="doc-hd">${hdTxt}</div>
-    ${scheme.docs.map(([ico,name,id])=>`
+    ${docsArr.map(([ico,name,id])=>`
     <div class="doc-row">
       <span class="doc-ico">${ico}</span>
       <div class="doc-info">
@@ -1485,35 +1484,51 @@ let schemePhase    = null; // null | 'awaiting_selection'
 // ── Multi-scheme data ──
 const SCHEMES = {
   kisan: {
-    icon:'🌾', name:'PM Kisan Samman Nidhi', sector:'कृषि', color:'#1a6b3c',
+    icon:'🌾', name:'PM Kisan Samman Nidhi',
+    sector:'कृषि', sectorEn:'Agriculture', color:'#1a6b3c',
     ministry:'Ministry of Agriculture, GoI',
-    benefit:'₹6,000 / वर्ष', detail:'तीन किश्त · सीधे बैंक में',
+    benefit:'₹6,000 / वर्ष', benefitEn:'₹6,000 / year',
+    detail:'तीन किश्त · सीधे बैंक में', detailEn:'3 installments · Direct bank transfer',
     docs:[['🪪','आधार कार्ड','d0'],['📜','खतौनी (ज़मीन का रिकॉर्ड)','d1'],['🏦','बैंक पासबुक','d2']],
+    docsEn:[['🪪','Aadhaar Card','d0'],['📜','Khatauni (Land Record)','d1'],['🏦','Bank Passbook','d2']],
     docsText:'इस योजना के लिए तीन चीज़ें चाहिए — आधार कार्ड, ज़मीन का रिकॉर्ड यानी खतौनी, और बैंक पासबुक। इन्हें स्कैन करके वेरीफाई करो।',
+    docsTextEn:'For PM Kisan, you\'ll need: Aadhaar Card, Khatauni (Land Record), and Bank Passbook. Scan each document below, then tap Verify.',
     portal:'pmkisan.gov.in', formKey:'kisan',
   },
   ayushman: {
-    icon:'🏥', name:'Ayushman Bharat PM-JAY', sector:'स्वास्थ्य', color:'#c0392b',
+    icon:'🏥', name:'Ayushman Bharat PM-JAY',
+    sector:'स्वास्थ्य', sectorEn:'Health', color:'#c0392b',
     ministry:'Ministry of Health, GoI',
-    benefit:'₹5 लाख / वर्ष', detail:'स्वास्थ्य बीमा · 1,929+ अस्पताल',
+    benefit:'₹5 लाख / वर्ष', benefitEn:'₹5 lakh / year',
+    detail:'स्वास्थ्य बीमा · 1,929+ अस्पताल', detailEn:'Health insurance · 1,929+ hospitals',
     docs:[['🪪','आधार कार्ड','d0'],['📋','राशन कार्ड','d1'],['📄','आय प्रमाण पत्र','d2']],
+    docsEn:[['🪪','Aadhaar Card','d0'],['📋','Ration Card','d1'],['📄','Income Certificate','d2']],
     docsText:'आयुष्मान भारत के लिए तीन दस्तावेज़ चाहिए — आधार कार्ड, राशन कार्ड, और आय प्रमाण पत्र। इन्हें स्कैन करके वेरीफाई करो।',
+    docsTextEn:'For Ayushman Bharat, you\'ll need: Aadhaar Card, Ration Card, and Income Certificate. Scan each document below, then tap Verify.',
     portal:'pmjay.gov.in', formKey:'ayushman',
   },
   awas: {
-    icon:'🏠', name:'PM Awas Yojana (Gramin)', sector:'आवास', color:'#1a4fa8',
+    icon:'🏠', name:'PM Awas Yojana (Gramin)',
+    sector:'आवास', sectorEn:'Housing', color:'#1a4fa8',
     ministry:'Ministry of Rural Development, GoI',
-    benefit:'₹2.5 लाख सब्सिडी', detail:'पक्के मकान के लिए · ग्रामीण',
+    benefit:'₹2.5 लाख सब्सिडी', benefitEn:'₹2.5 lakh subsidy',
+    detail:'पक्के मकान के लिए · ग्रामीण', detailEn:'Permanent house · Rural',
     docs:[['🪪','आधार कार्ड','d0'],['📄','आय प्रमाण पत्र','d1'],['🏦','बैंक पासबुक','d2']],
+    docsEn:[['🪪','Aadhaar Card','d0'],['📄','Income Certificate','d1'],['🏦','Bank Passbook','d2']],
     docsText:'PM Awas Yojana के लिए तीन दस्तावेज़ चाहिए — आधार कार्ड, आय प्रमाण पत्र, और बैंक पासबुक। इन्हें स्कैन करके वेरीफाई करो।',
+    docsTextEn:'For PM Awas Yojana, you\'ll need: Aadhaar Card, Income Certificate, and Bank Passbook. Scan each document below, then tap Verify.',
     portal:'pmayg.nic.in', formKey:'awas',
   },
   vishwakarma: {
-    icon:'🔨', name:'PM Vishwakarma Yojana', sector:'आजीविका', color:'#7d3c98',
+    icon:'🔨', name:'PM Vishwakarma Yojana',
+    sector:'आजीविका', sectorEn:'Livelihood', color:'#7d3c98',
     ministry:'Ministry of MSME, GoI',
-    benefit:'₹3 लाख लोन + ट्रेनिंग', detail:'कारीगर · शिल्पकार · हस्तकला',
+    benefit:'₹3 लाख लोन + ट्रेनिंग', benefitEn:'₹3 lakh loan + Training',
+    detail:'कारीगर · शिल्पकार · हस्तकला', detailEn:'Artisans · Craftsmen · Handicraft',
     docs:[['🪪','आधार कार्ड','d0'],['💳','PAN कार्ड','d1'],['🔧','व्यवसाय प्रमाण','d2']],
+    docsEn:[['🪪','Aadhaar Card','d0'],['💳','PAN Card','d1'],['🔧','Business Proof','d2']],
     docsText:'PM Vishwakarma के लिए तीन दस्तावेज़ चाहिए — आधार कार्ड, PAN कार्ड, और अपने काम का प्रमाण। इन्हें स्कैन करके वेरीफाई करो।',
+    docsTextEn:'For PM Vishwakarma, you\'ll need: Aadhaar Card, PAN Card, and Business Proof. Scan each document below, then tap Verify.',
     portal:'pmvishwakarma.gov.in', formKey:'vishwakarma',
   },
 };
@@ -1547,9 +1562,47 @@ const VISHWAKARMA_FORM = [
   { lbl:'IFSC कोड',        val:'SBIN0001234',           hint:'बैंक की पासबुक पर मिलेगा',            voice:'आखिरी खाना — IFSC कोड।' },
 ];
 
+const KISAN_FORM_EN = [
+  { lbl:'Full Name',          val:'Ramesh Kumar',    hint:'As per Aadhaar card',                   voice:'First field — Full Name. I have pre-filled Ramesh Kumar. This must match your Aadhaar exactly, otherwise the form may be rejected.' },
+  { lbl:'Date of Birth',      val:'15/05/1990',       hint:'DD/MM/YYYY — must match Aadhaar',       voice:'Second field — Date of Birth. I have filled in 15th May 1990. This is needed for age verification and Aadhaar linking.' },
+  { lbl:'State',              val:'Uttar Pradesh',    hint:'Scheme funds come state-wise',           voice:'Third field — State. I have filled in Uttar Pradesh. Your scheme payment will come based on your state.' },
+  { lbl:'Land (in hectares)', val:'1.5',              hint:'Must be less than 2 hectares',          voice:'Fourth field — Land holding. I have filled in 1.5 hectares. For PM Kisan, land must be under 2 hectares.' },
+  { lbl:'Bank Account No.',   val:'XXXX 1234',        hint:'Must be linked to Aadhaar',             voice:'Fifth field — Bank Account Number. The money will come directly to this account — it must be linked to your Aadhaar.' },
+  { lbl:'IFSC Code',          val:'SBIN0001234',      hint:'Found on first page of bank passbook',  voice:'Last field — IFSC Code. You can find this on your bank passbook. I have filled in SBI N zero zero zero one two three four.' },
+];
+const AYUSHMAN_FORM_EN = [
+  { lbl:'Full Name',          val:'Ramesh Kumar',     hint:'As per Aadhaar card',                   voice:'First field — Full Name. I have filled in Ramesh Kumar. This must match your Aadhaar exactly.' },
+  { lbl:'Date of Birth',      val:'15/05/1990',       hint:'DD/MM/YYYY',                            voice:'Second field — Date of Birth. I have filled in 15th May 1990.' },
+  { lbl:'Aadhaar Number',     val:'XXXX XXXX 1234',   hint:'12-digit Aadhaar number',               voice:'Third field — Aadhaar Number. This will be linked to your PM-JAY card.' },
+  { lbl:'Ration Card No.',    val:'UP-12345678',      hint:'BPL / NFSA ration card number',         voice:'Fourth field — Ration Card Number. This proves your eligibility for the scheme.' },
+  { lbl:'Mobile Number',      val:'+91 98765 43210',  hint:'OTP will be sent to this number',       voice:'Fifth field — Mobile Number. The OTP will be sent to this number.' },
+  { lbl:'State',              val:'Uttar Pradesh',    hint:'Hospitals assigned based on state',     voice:'Last field — State. I have filled in Uttar Pradesh.' },
+];
+const AWAS_FORM_EN = [
+  { lbl:'Full Name',          val:'Ramesh Kumar',     hint:'As per Aadhaar card',                   voice:'First field — Full Name. I have filled in Ramesh Kumar.' },
+  { lbl:'Date of Birth',      val:'15/05/1990',       hint:'DD/MM/YYYY',                            voice:'Second field — Date of Birth. 15th May 1990.' },
+  { lbl:'State',              val:'Uttar Pradesh',    hint:'Housing funds come state-wise',          voice:'Third field — State. Uttar Pradesh.' },
+  { lbl:'Category',           val:'OBC',              hint:'SC / ST / OBC / General',               voice:'Fourth field — Category. I have filled in OBC. This determines your subsidy amount.' },
+  { lbl:'Annual Income',      val:'₹85,000',          hint:'Must be below ₹1 lakh',                 voice:'Fifth field — Annual Income. I have filled in eighty-five thousand rupees.' },
+  { lbl:'Bank Account No.',   val:'XXXX 1234',        hint:'Subsidy will be credited here',         voice:'Sixth field — Bank Account. The subsidy amount will come directly here.' },
+  { lbl:'IFSC Code',          val:'SBIN0001234',      hint:'Found on your bank passbook',           voice:'Last field — IFSC Code. You will find this on your bank passbook.' },
+];
+const VISHWAKARMA_FORM_EN = [
+  { lbl:'Full Name',          val:'Ramesh Kumar',     hint:'As per Aadhaar card',                   voice:'First field — Full Name. I have filled in Ramesh Kumar.' },
+  { lbl:'Date of Birth',      val:'15/05/1990',       hint:'DD/MM/YYYY',                            voice:'Second field — Date of Birth. 15th May 1990.' },
+  { lbl:'Trade / Craft',      val:'Blacksmith',       hint:'Choose your traditional occupation',    voice:'Third field — Trade. I have filled in Blacksmith. You must choose your traditional occupation.' },
+  { lbl:'State',              val:'Uttar Pradesh',    hint:'Will be linked to state training centre', voice:'Fourth field — State. Uttar Pradesh.' },
+  { lbl:'Aadhaar Number',     val:'XXXX XXXX 1234',   hint:'12-digit Aadhaar number',               voice:'Fifth field — Aadhaar Number.' },
+  { lbl:'Bank Account No.',   val:'XXXX 1234',        hint:'Loan and training stipend will come here', voice:'Sixth field — Bank Account. The loan amount will come directly here.' },
+  { lbl:'IFSC Code',          val:'SBIN0001234',      hint:'Found on your bank passbook',           voice:'Last field — IFSC Code.' },
+];
+
 function getActiveForm() {
-  const map = { kisan: KISAN_FORM, ayushman: AYUSHMAN_FORM, awas: AWAS_FORM, vishwakarma: VISHWAKARMA_FORM };
-  return map[selectedScheme] || KISAN_FORM;
+  const isHi = currentLang === 'hi';
+  const map = isHi
+    ? { kisan: KISAN_FORM, ayushman: AYUSHMAN_FORM, awas: AWAS_FORM, vishwakarma: VISHWAKARMA_FORM }
+    : { kisan: KISAN_FORM_EN, ayushman: AYUSHMAN_FORM_EN, awas: AWAS_FORM_EN, vishwakarma: VISHWAKARMA_FORM_EN };
+  return map[selectedScheme || 'kisan'] || (isHi ? KISAN_FORM : KISAN_FORM_EN);
 }
 
 // ══════════════════════════════════════
@@ -1635,7 +1688,7 @@ function showFormSimulator() {
       <div>
         <div class="wob-step-tag">STEP 2 OF 3 — Applicant Details</div>
         <div class="wob-form-hd">New Registration — ${scheme.name}</div>
-        <div class="wob-form-sub">सभी खाने आधार कार्ड के अनुसार भरें</div>
+        <div class="wob-form-sub">${msg('सभी खाने आधार कार्ड के अनुसार भरें', 'All fields filled as per Aadhaar card')}</div>
       </div>
       ${activeForm.map((f,i) => `
         <div class="wob-field" id="wf-${i}">
@@ -1649,10 +1702,10 @@ function showFormSimulator() {
     <div class="wob-voice-strip">
       <div class="wob-voice-av">🏛️</div>
       <div class="wob-voice-info">
-        <div class="wob-voice-status">🔊 आवाज़ से गाइड हो रहा हूँ</div>
-        <div class="wob-voice-text" id="wobVoiceTxt">एक पल...</div>
+        <div class="wob-voice-status">${msg('🔊 आवाज़ से गाइड हो रहा हूँ', '🔊 Voice-guided filling')}</div>
+        <div class="wob-voice-text" id="wobVoiceTxt">${msg('एक पल...', 'One moment...')}</div>
       </div>
-      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceFormField()" disabled>अगला →</button>
+      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceFormField()" disabled>${msg('अगला →', 'Next →')}</button>
     </div>
     <div style="padding:0 14px 14px;background:#fff;">
       <div class="unified-box" style="width:100%">
