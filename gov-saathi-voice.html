@@ -520,6 +520,8 @@ let docPhase     = null;
 let serviceIntent = null;   // 'aadhaar'|'passport'|'pan'|'driving' — set from landing chips
 let serviceTurn  = 0;
 let helpdeskMode = false;
+let docsMode     = false;   // 'Check my documents' flow
+let formMode     = false;   // 'Apply / fill a form' flow
 let listening    = false;
 let speaking     = false;
 let currentAudio = null;
@@ -559,8 +561,8 @@ const STRINGS = {
     mic_loading:'⏳  ढूंढ रहा हूँ...', mic_loading_hint:'एक सेकंड...',
     greet_default:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजनाएँ ढूंढूँगा — बस ३ छोटे सवाल पूछूँगा।',
     greet_scheme:'नमस्ते! मैं नागरिक साथी हूँ। आपके लिए सबसे सही सरकारी योजना ढूंढूँगा। पहले कुछ सवाल पूछूँगा।',
-    greet_docs:'नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा। पहले बताइए, आप क्या काम करते हैं?',
-    greet_form:'नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। पहले कुछ जानकारी लेता हूँ।',
+    greet_docs:'नमस्ते! मैं नागरिक साथी हूँ। आपके दस्तावेज़ जाँचूँगा और कोई गलती हो तो बताऊँगा। बताइए — किस योजना के लिए आवेदन करना चाहते हैं?',
+    greet_form:'नमस्ते! मैं नागरिक साथी हूँ। फ़ॉर्म भरने में आवाज़ से मदद करूँगा। बताइए — किस योजना के लिए आवेदन करना चाहते हैं?',
     greet_aadhaar:'नमस्ते! आधार कार्ड से जुड़ी मदद के लिए मैं यहाँ हूँ। बताइए, क्या करना है — अपडेट, नई एनरोलमेंट, या कुछ और?',
     greet_passport:'नमस्ते! पासपोर्ट के लिए मदद करूँगा। बताइए — नया पासपोर्ट बनाना है, या रिन्यू करना है?',
     greet_pan:'नमस्ते! PAN कार्ड के लिए मदद करूँगा। नया बनाना है, या कोई सुधार करना है?',
@@ -602,8 +604,8 @@ const STRINGS = {
     mic_loading:'⏳  Searching...', mic_loading_hint:'One moment...',
     greet_default:"Hello! I'm Nagrik Saathi. I'll find the best government schemes for you — just 3 quick questions.",
     greet_scheme:"Hello! I'm Nagrik Saathi. I'll find the right government scheme for you. Let me ask a few questions first.",
-    greet_docs:"Hello! I'm Nagrik Saathi. I'll help check your documents. First, tell me — what do you do for a living?",
-    greet_form:"Hello! I'm Nagrik Saathi. I'll help you fill forms with voice guidance. Let me collect some details first.",
+    greet_docs:"Hello! I'm Nagrik Saathi. I'll check your documents and flag any issues. Tell me — which scheme are you planning to apply for?",
+    greet_form:"Hello! I'm Nagrik Saathi. I'll guide you through the application with voice assistance. Which scheme do you want to apply for?",
     greet_aadhaar:"Hello! I'm here to help with your Aadhaar Card. Tell me — do you want to update it, new enrolment, or something else?",
     greet_passport:"Hello! I'll help you with your Passport. Do you need a fresh passport, or a renewal?",
     greet_pan:"Hello! I'll help you with your PAN Card. Do you need a new one, or want to make a correction?",
@@ -878,23 +880,98 @@ function speakThen(text, onDone, timeoutMs) {
   setTimeout(finish, timeoutMs || 10000);
 }
 
+// ══════════════════════════════════════
+// DOCS / FORM — SCHEME PICKER
+// ══════════════════════════════════════
+function showSchemePicker(mode) {
+  const isHi = currentLang === 'hi';
+  const hd   = mode === 'docs'
+    ? (isHi ? '📋 किस योजना के दस्तावेज़ जाँचने हैं?' : '📋 Which scheme\'s documents to check?')
+    : (isHi ? '✍️ किस योजना के लिए आवेदन करना है?' : '✍️ Which scheme to apply for?');
+  const lbl  = mode === 'docs'
+    ? (isHi ? 'योजना चुनें — दस्तावेज़ सूची दिखाई जाएगी' : 'Select a scheme — document list will be shown')
+    : (isHi ? 'योजना चुनें — आवेदन में मदद करूँगा' : 'Select a scheme — I\'ll guide you through the application');
+  const ph   = isHi ? '— योजना चुनें —' : '— Select a scheme —';
+  const btn  = isHi ? 'आगे बढ़ें →' : 'Proceed →';
+
+  const chipsHtml = Object.entries(SCHEMES).map(([key, s]) =>
+    `<div class="scheme-chip-el" style="background:${s.color}">
+       <span>${s.icon}</span>
+       <div>${s.name}<br><span style="font-weight:400;opacity:.85">${s.sector}</span></div>
+     </div>`
+  ).join('');
+  const optionsHtml = Object.entries(SCHEMES).map(([key, s]) =>
+    `<option value="${key}">${s.icon} ${s.name} — ${s.benefit}</option>`
+  ).join('');
+
+  const c = document.createElement('div');
+  c.className = 'scheme-results';
+  c.innerHTML = `
+    <div class="sr-hd">${hd}</div>
+    <div class="scheme-chips">${chipsHtml}</div>
+    <div class="scheme-dropdown-wrap">
+      <div class="scheme-dropdown-lbl">${lbl}</div>
+      <select class="scheme-select" id="modeSchemeDropdown" onchange="document.getElementById('modeSchemeConfirmBtn').disabled=!this.value">
+        <option value="">${ph}</option>
+        ${optionsHtml}
+      </select>
+      <button class="scheme-confirm-btn" id="modeSchemeConfirmBtn" disabled onclick="confirmModeScheme('${mode}')">${btn}</button>
+    </div>`;
+  $conv.appendChild(c); scrollDown();
+}
+
+function confirmModeScheme(mode) {
+  const sel = document.getElementById('modeSchemeDropdown');
+  if (!sel || !sel.value) return;
+  selectedScheme = sel.value;
+  sel.disabled = true;
+  document.getElementById('modeSchemeConfirmBtn').disabled = true;
+
+  const scheme = SCHEMES[selectedScheme];
+  const isHi = currentLang === 'hi';
+  addUser(scheme.name);
+  showTyping(); setMic('loading');
+
+  setTimeout(() => {
+    hideTyping();
+    if (mode === 'docs') {
+      const msg = isHi
+        ? `${scheme.name} के लिए ज़रूरी दस्तावेज़ नीचे दिए हैं। सभी स्कैन करें, फिर "वेरीफाई" पर क्लिक करें — मैं जाँचूँगा कि सब सही है।`
+        : `Here are the documents required for ${scheme.name}. Scan all of them, then click "Verify" — I'll check for any issues.`;
+      addAI(msg);
+      speak(msg, () => { showDocCard(); setMic('idle'); });
+    } else {
+      const msg = isHi
+        ? `${scheme.name} के लिए आवेदन शुरू करते हैं। मैं आपको पोर्टल पर ले जाऊँगा और हर खाना भरने में मदद करूँगा।`
+        : `Let's start your application for ${scheme.name}. I'll take you to the portal and guide you through each field.`;
+      addAI(msg);
+      speak(msg, () => { startFormFlow(); });
+    }
+  }, 900);
+}
+
 function showDocCard() {
   const scheme = SCHEMES[selectedScheme || 'kisan'];
+  const isHi = currentLang === 'hi';
+  const scanTxt  = isHi ? 'स्कैन करें' : 'Scan';
+  const scanBtn  = isHi ? '📷 स्कैन' : '📷 Scan';
+  const verifyLbl = isHi ? 'वेरीफाई करो' : 'Verify All';
+  const hdTxt = isHi ? `📄 दस्तावेज़ स्कैन करें — ${scheme.name}` : `📄 Scan Documents — ${scheme.name}`;
   const c = document.createElement('div');
   c.className = 'doc-card';
   c.innerHTML = `
-    <div class="doc-hd">📄 दस्तावेज़ स्कैन करें — ${scheme.name}</div>
+    <div class="doc-hd">${hdTxt}</div>
     ${scheme.docs.map(([ico,name,id])=>`
     <div class="doc-row">
       <span class="doc-ico">${ico}</span>
       <div class="doc-info">
         <div class="doc-name">${name}</div>
-        <div class="doc-st" id="st-${id}">स्कैन करें</div>
+        <div class="doc-st" id="st-${id}">${scanTxt}</div>
       </div>
-      <button class="doc-btn" id="btn-${id}" onclick="tapDoc('${id}')">📷 स्कैन</button>
+      <button class="doc-btn" id="btn-${id}" onclick="tapDoc('${id}')">${scanBtn}</button>
     </div>`).join('')}
     <div class="doc-verify-row">
-      <button class="doc-verify" id="verifyBtn" disabled onclick="verifyDocs()">वेरीफाई करो</button>
+      <button class="doc-verify" id="verifyBtn" disabled onclick="verifyDocs()">${verifyLbl}</button>
     </div>`;
   $conv.appendChild(c); scrollDown();
 }
@@ -907,8 +984,8 @@ function tapDoc(id) {
   // Brief "scanning" delay makes it feel real
   setTimeout(() => {
     btn.className   = 'doc-btn done';
-    btn.textContent = '✓ हो गया';
-    st.textContent  = 'स्कैन हो गया';
+    btn.textContent = currentLang === 'hi' ? '✓ हो गया' : '✓ Done';
+    st.textContent  = currentLang === 'hi' ? 'स्कैन हो गया' : 'Scanned';
     st.className    = 'doc-st ok';
     docUploaded[id] = true;
     if (docUploaded.d0 && docUploaded.d1 && docUploaded.d2) {
@@ -920,12 +997,13 @@ function tapDoc(id) {
 }
 
 function verifyDocs() {
-  addUser("वेरीफाई करो");
+  const isHi = currentLang === 'hi';
+  addUser(isHi ? 'वेरीफाई करो' : 'Verify');
   const docCard = $conv.querySelector('.doc-card');
   if (docCard) docCard.style.opacity = '0.5';
 
-  // "Checking" speech fires in parallel — visuals don't wait for it
-  speak("ठीक है, अभी जाँच करता हूँ...", null);
+  const checkMsg = isHi ? 'ठीक है, अभी जाँच करता हूँ...' : 'Checking your documents now...';
+  speak(checkMsg, null);
 
   // Scan card appears on its own timer (robust — not speech-dependent)
   setTimeout(() => {
@@ -2717,6 +2795,8 @@ function startConv(intent) {
   SC.greet = greetMap[intent] || T('greet_default');
   serviceIntent = SERVICE_INTENTS.includes(intent) ? intent : null;
   helpdeskMode  = (intent === 'helpdesk');
+  docsMode      = (intent === 'docs');
+  formMode      = (intent === 'form');
   serviceTurn   = 0;
 
   document.getElementById('landing').classList.add('exit');
@@ -2738,6 +2818,12 @@ function startConv(intent) {
           } else {
             setMic('idle');
           }
+        } else if (docsMode) {
+          showSchemePicker('docs');
+          setMic('idle');
+        } else if (formMode) {
+          showSchemePicker('form');
+          setMic('idle');
         } else if (pendingFirstMessage) {
           const msg = pendingFirstMessage; pendingFirstMessage = null;
           setTimeout(() => processUserTurn(msg), 300);
@@ -2755,7 +2841,8 @@ function resetToLanding() {
   try { recognition?.stop(); } catch(e) {}
   speaking = listening = false;
   turn = 0; docUploaded = {}; docPhase = null; formPhase = null; formFieldIdx = 0;
-  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null; schemePhase = null; helpdeskMode = false;
+  serviceIntent = null; serviceTurn = 0; selectedScheme = null; activeForm = null; schemePhase = null;
+  helpdeskMode = false; docsMode = false; formMode = false;
   closeWebOverlay();
   webOverlayOpen = false;
   $conv.innerHTML = '';
