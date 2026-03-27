@@ -308,7 +308,7 @@ body{font-family:'JioType',-apple-system,sans-serif;background:#d4d4d4;display:f
 .mic-hint{font-size:11px;color:rgba(0,53,128,.45);font-weight:500;}
 
 /* ════════ SCHEME RESULTS ════════ */
-.scheme-results{border-radius:14px;border:1px solid var(--stroke);overflow:hidden;animation:bUp 380ms ease-out;width:100%;background:#fff;}
+.scheme-results{border-radius:14px;border:1px solid var(--stroke);overflow:hidden;width:100%;background:#fff;}
 .scheme-results>.sr-hd{background:var(--blue);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;}
 .scheme-chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 14px 8px;}
 .scheme-chip-el{border-radius:10px;padding:8px 10px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;line-height:1.3;}
@@ -824,24 +824,12 @@ function showSchemeResults() {
   const c = document.createElement('div');
   c.className = 'scheme-results';
   const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')">
-       <div class="smc-left">
-         <span class="smc-ico">${s.icon}</span>
-         <span class="smc-sector" style="background:${s.color}">${s.sector}</span>
-       </div>
-       <div class="smc-body">
-         <div class="smc-name">${s.name}</div>
-         <div class="smc-benefit">${s.benefit}</div>
-         <div class="smc-ministry">${s.ministry}</div>
-       </div>
-       <span class="smc-arr">›</span>
-     </div>`
+    `<div class="scheme-menu-card" id="smc-${key}" style="border-left:4px solid ${s.color}" onclick="selectSchemeFromMenu('${key}')"><div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${s.sector}</span></div><div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${s.benefit}</div><div class="smc-ministry">${s.ministry}</div></div><span class="smc-arr">›</span></div>`
   ).join('');
-  c.innerHTML = `
-    <div class="sr-hd">${T('scheme_results_hd')}</div>
-    <div class="scheme-menu-list">${cardsHtml}</div>
-    <div class="scheme-menu-hint">${T('scheme_menu_hint')}</div>`;
-  $conv.appendChild(c); scrollDown();
+  c.innerHTML = `<div class="sr-hd">${T('scheme_results_hd')}</div><div class="scheme-menu-list">${cardsHtml}</div><div class="scheme-menu-hint">${T('scheme_menu_hint')}</div>`;
+  $conv.appendChild(c);
+  scrollDown();
+  setTimeout(scrollDown, 200);
 }
 
 function selectSchemeFromMenu(key) {
@@ -912,64 +900,56 @@ function showSchemePicker(mode) {
   const hd   = mode === 'docs'
     ? (isHi ? '📋 किस योजना के दस्तावेज़ जाँचने हैं?' : '📋 Which scheme\'s documents to check?')
     : (isHi ? '✍️ किस योजना के लिए आवेदन करना है?' : '✍️ Which scheme to apply for?');
-  const lbl  = mode === 'docs'
-    ? (isHi ? 'योजना चुनें — दस्तावेज़ सूची दिखाई जाएगी' : 'Select a scheme — document list will be shown')
-    : (isHi ? 'योजना चुनें — आवेदन में मदद करूँगा' : 'Select a scheme — I\'ll guide you through the application');
-  const ph   = isHi ? '— योजना चुनें —' : '— Select a scheme —';
-  const btn  = isHi ? 'आगे बढ़ें →' : 'Proceed →';
+  const hint = mode === 'docs'
+    ? (isHi ? 'एक योजना चुनें → दस्तावेज़ स्कैन करें → वेरीफाई' : 'Tap a scheme → Scan documents → Verify')
+    : (isHi ? 'एक योजना चुनें → पोर्टल खुलेगा → फ़ॉर्म भरें' : 'Tap a scheme → Portal opens → Fill form');
 
-  const chipsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<div class="scheme-chip-el" style="background:${s.color}">
-       <span>${s.icon}</span>
-       <div>${s.name}<br><span style="font-weight:400;opacity:.85">${s.sector}</span></div>
+  const cardsHtml = Object.entries(SCHEMES).map(([key, s]) =>
+    `<div class="scheme-menu-card" id="spmc-${key}" style="border-left:4px solid ${s.color}" onclick="confirmModeScheme('${mode}','${key}')">
+       <div class="smc-left"><span class="smc-ico">${s.icon}</span><span class="smc-sector" style="background:${s.color}">${s.sector}</span></div>
+       <div class="smc-body"><div class="smc-name">${s.name}</div><div class="smc-benefit">${s.benefit}</div><div class="smc-ministry">${s.ministry}</div></div>
+       <span class="smc-arr">›</span>
      </div>`
-  ).join('');
-  const optionsHtml = Object.entries(SCHEMES).map(([key, s]) =>
-    `<option value="${key}">${s.icon} ${s.name} — ${s.benefit}</option>`
   ).join('');
 
   const c = document.createElement('div');
   c.className = 'scheme-results';
   c.innerHTML = `
     <div class="sr-hd">${hd}</div>
-    <div class="scheme-chips">${chipsHtml}</div>
-    <div class="scheme-dropdown-wrap">
-      <div class="scheme-dropdown-lbl">${lbl}</div>
-      <select class="scheme-select" id="modeSchemeDropdown" onchange="document.getElementById('modeSchemeConfirmBtn').disabled=!this.value">
-        <option value="">${ph}</option>
-        ${optionsHtml}
-      </select>
-      <button class="scheme-confirm-btn" id="modeSchemeConfirmBtn" disabled onclick="confirmModeScheme('${mode}')">${btn}</button>
-    </div>`;
+    <div class="scheme-menu-list">${cardsHtml}</div>
+    <div class="scheme-menu-hint">${hint}</div>`;
   $conv.appendChild(c); scrollDown();
 }
 
-function confirmModeScheme(mode) {
-  const sel = document.getElementById('modeSchemeDropdown');
-  if (!sel || !sel.value) return;
-  selectedScheme = sel.value;
-  sel.disabled = true;
-  document.getElementById('modeSchemeConfirmBtn').disabled = true;
+function confirmModeScheme(mode, key) {
+  if (!key) return;
+  // disable all picker cards
+  document.querySelectorAll('[id^="spmc-"]').forEach(card => {
+    card.style.pointerEvents = 'none';
+    card.style.opacity = card.id === 'spmc-' + key ? '1' : '0.35';
+  });
 
-  const scheme = SCHEMES[selectedScheme];
+  selectedScheme = key;
+  const scheme = SCHEMES[key];
   const isHi = currentLang === 'hi';
-  addUser(scheme.name);
+  addUser(`${scheme.icon} ${scheme.name}`);
   showTyping(); setMic('loading');
 
   setTimeout(() => {
     hideTyping();
     if (mode === 'docs') {
-      const msg = isHi
+      const m = isHi
         ? `${scheme.name} के लिए ज़रूरी दस्तावेज़ नीचे दिए हैं। सभी स्कैन करें, फिर "वेरीफाई" पर क्लिक करें — मैं जाँचूँगा कि सब सही है।`
         : `Here are the documents required for ${scheme.name}. Scan all of them, then click "Verify" — I'll check for any issues.`;
-      addAI(msg);
-      speak(msg, () => { showDocCard(); setMic('idle'); });
+      addAI(m);
+      showDocCard();
+      speak(m, () => setMic('idle'));
     } else {
-      const msg = isHi
+      const m = isHi
         ? `${scheme.name} के लिए आवेदन शुरू करते हैं। मैं आपको पोर्टल पर ले जाऊँगा और हर खाना भरने में मदद करूँगा।`
         : `Let's start your application for ${scheme.name}. I'll take you to the portal and guide you through each field.`;
-      addAI(msg);
-      speak(msg, () => { startFormFlow(); });
+      addAI(m);
+      speak(m, () => { startFormFlow(); });
     }
   }, 900);
 }
