@@ -1294,6 +1294,168 @@ function getDemoDefaults() {
 }
 
 // ══════════════════════════════════════
+// SERVICE DOC DATA
+// ══════════════════════════════════════
+const SERVICE_DOCS = {
+  aadhaar: {
+    hi: [['🪪','आधार कार्ड (Original)','d0'],['📋','पहचान प्रमाण — PAN / Voter ID','d1'],['📝','पते का प्रमाण — बिजली बिल','d2']],
+    en: [['🪪','Aadhaar Card (Original)','d0'],['📋','Identity Proof — PAN / Voter ID','d1'],['📝','Address Proof — Electricity Bill','d2']],
+  },
+  pan: {
+    hi: [['🪪','आधार कार्ड','d0'],['📷','पासपोर्ट साइज़ फ़ोटो','d1'],['📜','जन्म प्रमाण — 10वीं Marksheet','d2']],
+    en: [['🪪','Aadhaar Card','d0'],['📷','Passport Size Photo','d1'],['📜','Date of Birth Proof — 10th Marksheet','d2']],
+  },
+  passport: {
+    hi: [['🪪','आधार कार्ड','d0'],['📜','जन्म प्रमाण पत्र','d1'],['📝','पते का प्रमाण — बिजली बिल','d2']],
+    en: [['🪪','Aadhaar Card','d0'],['📜','Birth Certificate','d1'],['📝','Address Proof — Electricity Bill','d2']],
+  },
+  driving: {
+    hi: [['🪪','आधार कार्ड','d0'],['📋','उम्र प्रमाण — 10वीं / जन्म प्रमाण','d1'],['📝','Form 1 — Medical Certificate','d2']],
+    en: [['🪪','Aadhaar Card','d0'],['📋','Age Proof — 10th Marksheet / Birth Cert.','d1'],['📝','Form 1 — Medical Certificate','d2']],
+  },
+};
+
+const SVC_LABELS = {
+  aadhaar: { hi:'आधार अपडेट', en:'Aadhaar Update' },
+  pan:     { hi:'PAN Card',   en:'PAN Card' },
+  passport:{ hi:'Passport',   en:'Passport' },
+  driving: { hi:'Driving Licence', en:'Driving Licence' },
+};
+
+function showSvcActionCard(svc) {
+  const isHi = currentLang === 'hi';
+  const lbl = (SVC_LABELS[svc] || {})[isHi ? 'hi' : 'en'] || svc;
+  const q = msg(
+    `${lbl} के लिए आप क्या करना चाहते हैं?`,
+    `What would you like to do for ${lbl}?`
+  );
+  addAI(q);
+
+  const card = document.createElement('div');
+  card.className = 'apply-cta';
+  card.innerHTML = `
+    <div class="apply-cta-btns" style="gap:10px;">
+      <button class="apply-btn-p" onclick="startSvcDocCheck('${svc}')">📋 ${isHi ? 'दस्तावेज़ जाँचें' : 'Check My Documents'}</button>
+      <button class="apply-btn-p" onclick="startSvcFormFill('${svc}')" style="background:#1a6b3c">📝 ${isHi ? 'AI से फ़ॉर्म भरें' : 'Fill Form with AI'}</button>
+      <button class="apply-btn-s" onclick="startSvcCentre('${svc}')">🏢 ${isHi ? 'सेंटर जाएं' : 'Visit Centre'}</button>
+    </div>`;
+  $conv.appendChild(card); scrollDown();
+  speak(q, () => setMic('idle'));
+}
+
+function startSvcDocCheck(svc) {
+  document.querySelectorAll('.apply-cta .apply-btn-p, .apply-cta .apply-btn-s').forEach(b => b.disabled = true);
+  const isHi = currentLang === 'hi';
+  const lbl = (SVC_LABELS[svc] || {})[isHi ? 'hi' : 'en'] || svc;
+  addUser(msg('दस्तावेज़ जाँचें', 'Check My Documents'));
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    const m = msg(
+      `${lbl} के लिए ज़रूरी दस्तावेज़ नीचे दिए हैं। सभी स्कैन करें, फिर "Verify All" पर क्लिक करें।`,
+      `Here are the documents required for ${lbl}. Scan each one, then tap "Verify All".`
+    );
+    addAI(m);
+    showSvcDocCard(svc);
+    speak(m, () => setMic('idle'));
+  }, 800);
+}
+
+function showSvcDocCard(svc) {
+  const isHi = currentLang === 'hi';
+  const docsArr = (SERVICE_DOCS[svc] || SERVICE_DOCS.aadhaar)[isHi ? 'hi' : 'en'];
+  const lbl = (SVC_LABELS[svc] || {})[isHi ? 'hi' : 'en'] || svc;
+  docUploaded = {};
+  const c = document.createElement('div');
+  c.className = 'doc-card'; c.id = 'svcDocCard';
+  c.innerHTML = `
+    <div class="doc-hd">📄 ${isHi ? `दस्तावेज़ स्कैन करें — ${lbl}` : `Scan Documents — ${lbl}`}</div>
+    ${docsArr.map(([ico,name,id])=>`
+    <div class="doc-row">
+      <span class="doc-ico">${ico}</span>
+      <div class="doc-info">
+        <div class="doc-name">${name}</div>
+        <div class="doc-st" id="st-${id}">${isHi ? 'स्कैन करें' : 'Scan'}</div>
+      </div>
+      <button class="doc-btn" id="btn-${id}" onclick="tapDoc('${id}')">${isHi ? '📷 स्कैन' : '📷 Scan'}</button>
+    </div>`).join('')}
+    <div class="doc-verify-row">
+      <button class="doc-verify" id="verifyBtn" disabled onclick="verifySvcDocs('${svc}')">${isHi ? 'Verify All' : 'Verify All'}</button>
+    </div>`;
+  $conv.appendChild(c); scrollDown();
+}
+
+function verifySvcDocs(svc) {
+  const isHi = currentLang === 'hi';
+  addUser(msg('Verify करो', 'Verify'));
+  const docCard = document.getElementById('svcDocCard');
+  if (docCard) docCard.style.opacity = '0.5';
+  speak(msg('ठीक है, अभी जाँच करता हूँ...', 'Checking your documents now...'), null);
+  setTimeout(() => {
+    const scanCard = buildScanCard();
+    $conv.appendChild(scanCard); scrollDown();
+    animateScan(scanCard, () => { showSvcAllClear(svc); });
+  }, 600);
+}
+
+function showSvcAllClear(svc) {
+  const isHi = currentLang === 'hi';
+  const lbl = (SVC_LABELS[svc] || {})[isHi ? 'hi' : 'en'] || svc;
+  const cl = document.createElement('div');
+  cl.className = 'result-cl';
+  cl.innerHTML = `
+    <div class="rc-hd" style="background:var(--green)">✅ ${isHi ? `${lbl} — सभी दस्तावेज़ ठीक हैं!` : `${lbl} — All Documents Verified!`}</div>
+    <div class="rc-row ok"><span class="rc-ico">✓</span><div><div class="rc-txt">${isHi ? 'सभी दस्तावेज़ सही पाए गए' : 'All documents checked and valid'}</div><div class="rc-sub">${isHi ? 'कोई गलती नहीं मिली' : 'No issues found'}</div></div></div>
+    <div class="rc-row ok"><span class="rc-ico">✓</span><div><div class="rc-txt">${isHi ? 'नाम और पते मिलते हैं' : 'Name and address match'}</div><div class="rc-sub">${isHi ? 'सभी दस्तावेज़ में एक जैसा' : 'Consistent across all documents'}</div></div></div>`;
+  $conv.appendChild(cl); scrollDown();
+
+  const speech = msg(
+    `बहुत बढ़िया! ${lbl} के लिए सभी दस्तावेज़ सही हैं। अब फ़ॉर्म भरने में मदद करूँ?`,
+    `Great! All documents for ${lbl} are verified. Ready to fill the form with AI assistance?`
+  );
+  speakThen(speech, () => {
+    setTimeout(() => {
+      addAI(msg('क्या अब फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'));
+      const card = document.createElement('div');
+      card.className = 'apply-cta';
+      card.innerHTML = `<div class="apply-cta-btns">
+        <button class="apply-btn-p" onclick="startSvcFormFill('${svc}')">📝 ${isHi ? 'हाँ, फ़ॉर्म भरें' : 'Yes, Fill Form'}</button>
+        <button class="apply-btn-s" onclick="setMic('idle')">${isHi ? 'अभी नहीं' : 'Not Now'}</button>
+      </div>`;
+      $conv.appendChild(card); scrollDown();
+      speak(msg('क्या अब फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'), () => setMic('idle'));
+    }, 600);
+  }, 8000);
+}
+
+function startSvcFormFill(svc) {
+  document.querySelectorAll('.apply-cta .apply-btn-p, .apply-cta .apply-btn-s').forEach(b => b.disabled = true);
+  addUser(msg('हाँ, फ़ॉर्म भरें', 'Yes, Fill Form'));
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    if (svc === 'aadhaar') {
+      openAadhaarOnlineOverlay();
+    } else {
+      openSvcFormOverlay(svc);
+    }
+  }, 600);
+}
+
+function startSvcCentre(svc) {
+  document.querySelectorAll('.apply-cta .apply-btn-p, .apply-cta .apply-btn-s').forEach(b => b.disabled = true);
+  addUser(msg('सेंटर जाएं', 'Visit Centre'));
+  showTyping(); setMic('loading');
+  setTimeout(() => {
+    hideTyping();
+    if (svc === 'aadhaar') showAadhaarCenterGuide();
+    else if (svc === 'pan') showPanCenterGuide();
+    else if (svc === 'passport') showPassportCenterGuide();
+    else if (svc === 'driving') showDrivingCenterGuide();
+  }, 700);
+}
+
+// ══════════════════════════════════════
 // SERVICE FLOWS (Aadhaar / Passport / PAN / Driving)
 // ══════════════════════════════════════
 function processServiceTurn(said) {
@@ -1315,47 +1477,22 @@ function processServiceTurn(said) {
         hideTyping();
         showAadhaarGuide(isUpdate ? 'update' : 'update');
       }, 900);
-    } else if (t === 1) {
-      // User answered: online vs center
-      const lower = text.toLowerCase();
-      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(lower);
-      showTyping(); setMic('loading');
-      setTimeout(() => {
-        hideTyping();
-        if (wantsOnline) {
-          openAadhaarOnlineOverlay();
-        } else {
-          showAadhaarCenterGuide();
-        }
-      }, 900);
     }
   } else if (serviceIntent === 'pan') {
     if (t === 0) {
       const isCorrection = /correct|सुधार|change|badl|update|wrong|galat|गलत/i.test(text.toLowerCase());
       showTyping(); setMic('loading');
       setTimeout(() => { hideTyping(); showPanGuide(isCorrection ? 'correction' : 'new'); }, 900);
-    } else if (t === 1) {
-      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
-      showTyping(); setMic('loading');
-      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('pan') : showPanCenterGuide(); }, 900);
     }
   } else if (serviceIntent === 'passport') {
     if (t === 0) {
       showTyping(); setMic('loading');
       setTimeout(() => { hideTyping(); showPassportGuide(); }, 900);
-    } else if (t === 1) {
-      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
-      showTyping(); setMic('loading');
-      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('passport') : showPassportCenterGuide(); }, 900);
     }
   } else if (serviceIntent === 'driving') {
     if (t === 0) {
       showTyping(); setMic('loading');
       setTimeout(() => { hideTyping(); showDrivingGuide(); }, 900);
-    } else if (t === 1) {
-      const wantsOnline = /online|website|net|internet|घर|ghar|digital|portal/i.test(text.toLowerCase());
-      showTyping(); setMic('loading');
-      setTimeout(() => { hideTyping(); wantsOnline ? openSvcFormOverlay('driving') : showDrivingCenterGuide(); }, 900);
     }
   }
 }
@@ -1422,14 +1559,7 @@ function showAadhaarGuide(subIntent) {
     "Update is done within 90 days."
   );
 
-  speakThen(speech, () => {
-    setTimeout(() => {
-      addAI(msg("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?",
-               "Would you prefer to update Aadhaar online, or visit an Aadhaar centre?"));
-      speak(msg("क्या आप ऑनलाइन अपडेट करना चाहते हैं, या सेंटर जाना ज़्यादा ठीक रहेगा?",
-               "Would you prefer to update online, or visit a centre?"), () => setMic('idle'));
-    }, 500);
-  }, 14000);
+  speakThen(speech, () => { setTimeout(() => showSvcActionCard('aadhaar'), 500); }, 14000);
 }
 
 // ══════════════════════════════════════
@@ -2216,14 +2346,7 @@ function showPanGuide(subIntent) {
         "To apply for a new PAN card, fill Form 49A on NSDL or UTIITSL portal. You will need Aadhaar card, address proof, birth proof and passport size photo. Fee is ₹107. PAN card arrives in 15 to 20 days, e-PAN is received instantly."
       );
 
-  speakThen(speech, () => {
-    setTimeout(() => {
-      addAI(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?",
-               "Would you prefer to apply online, or visit a TIN Facilitation Centre?"));
-      speak(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या TIN Facilitation Centre जाना ठीक रहेगा?",
-               "Would you prefer to apply online, or visit a TIN Facilitation Centre?"), () => setMic('idle'));
-    }, 500);
-  }, 12000);
+  speakThen(speech, () => { setTimeout(() => showSvcActionCard('pan'), 500); }, 12000);
 }
 
 function showPanCenterGuide() {
@@ -2341,14 +2464,7 @@ function showPassportGuide() {
       "Carry Aadhaar card, address proof, birth proof, and two colour photos. For Renewal, also bring old passport. " +
       "Normal passport fee is ₹1,500 and takes 30 to 45 days. Tatkal costs ₹3,500 and is available in 1 to 3 days."
     ),
-    () => {
-      setTimeout(() => {
-        addAI(msg("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?",
-                 "Would you like to book an online appointment, or need info about the PSK centre?"));
-        speak(msg("क्या आप ऑनलाइन Appointment लेना चाहते हैं, या PSK सेंटर की जानकारी चाहिए?",
-                 "Would you like to book an online appointment, or need PSK centre details?"), () => setMic('idle'));
-      }, 500);
-    }, 16000
+    () => { setTimeout(() => showSvcActionCard('passport'), 500); }, 16000
   );
 }
 
@@ -2459,14 +2575,7 @@ function showDrivingGuide() {
       "30 days after getting Learner's Licence, visit RTO for the Driving Test. " +
       "Aadhaar card, birth proof, and two colour photos are required. Minimum age is 18 years."
     ),
-    () => {
-      setTimeout(() => {
-        addAI(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?",
-                 "Would you prefer to apply online, or need details about the RTO Office?"));
-        speak(msg("क्या आप ऑनलाइन आवेदन करना चाहते हैं, या RTO Office की जानकारी चाहिए?",
-                 "Would you prefer to apply online, or need RTO Office details?"), () => setMic('idle'));
-      }, 500);
-    }, 14000
+    () => { setTimeout(() => showSvcActionCard('driving'), 500); }, 14000
   );
 }
 
