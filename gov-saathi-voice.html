@@ -703,7 +703,7 @@ async function speak(text, onDone) {
   const isEn = currentLang === 'en';
 
   // English  → bulbul:v3 + 'ritu' (warm female Indian English, v3 API format)
-  // Hindi    → bulbul:v1 + 'arvind' (existing working config)
+  // Hindi    → bulbul:v2 + 'arvind' (stable Hindi, same text-string API format)
   const reqBody = isEn
     ? JSON.stringify({
         text,
@@ -714,15 +714,12 @@ async function speak(text, onDone) {
         output_audio_codec: 'wav'
       })
     : JSON.stringify({
-        inputs: [text],
+        text,
         target_language_code: 'hi-IN',
         speaker: 'arvind',
-        model: 'bulbul:v1',
+        model: 'bulbul:v2',
         pace: 0.95,
-        pitch: 0,
-        loudness: 1.5,
-        enable_preprocessing: true,
-        speech_sample_rate: 22050
+        output_audio_codec: 'wav'
       });
 
   try {
