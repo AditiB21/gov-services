@@ -659,6 +659,7 @@ const STRINGS = {
 };
 
 function setLang(lang) {
+  unlockAudioCtx(); // iOS: language button tap = user gesture, unlock audio here too
   currentLang = lang;
   const set = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = T(key); };
   const setPH = (id, key) => { const e = document.getElementById(id); if (e) e.placeholder = T(key); };
@@ -693,9 +694,25 @@ function stripHtml(s) {
   return s.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').trim();
 }
 
+// Shared AudioContext — must be created / resumed inside a user-gesture handler
+// so iOS Safari allows audio playback from async callbacks (fetch, setTimeout, etc.)
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+// Call once per user tap to unlock iOS audio
+function unlockAudioCtx() {
+  try { const ctx = getAudioCtx(); if (ctx.state === 'suspended') ctx.resume(); } catch(e) {}
+}
+
+let _audioSource = null; // current AudioBufferSourceNode (Web Audio path)
+
 async function speak(text, onDone) {
   text = stripHtml(text);
   if (!text) { onDone?.(); return; }
+  // Stop any in-progress audio
+  try { _audioSource?.stop(); } catch(e) {} _audioSource = null;
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   speaking = true;
   setMic('speaking');
@@ -737,11 +754,22 @@ async function speak(text, onDone) {
     const b64  = data.audios?.[0];
     if (!b64) throw new Error('No audio data in response: ' + JSON.stringify(data).slice(0, 120));
 
-    const audio = new Audio('data:audio/wav;base64,' + b64);
-    currentAudio = audio;
-    audio.onended = () => { speaking = false; currentAudio = null; setMic('idle'); onDone?.(); };
-    audio.onerror = () => { speaking = false; currentAudio = null; setMic('idle'); onDone?.(); };
-    await audio.play();
+    // Decode base64 → ArrayBuffer
+    const raw   = atob(b64);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+
+    // Use Web Audio API — works on iOS Safari after AudioContext is unlocked
+    const ctx    = getAudioCtx();
+    if (ctx.state === 'suspended') await ctx.resume();
+    const audioBuf = await ctx.decodeAudioData(bytes.buffer);
+    const source   = ctx.createBufferSource();
+    source.buffer  = audioBuf;
+    source.connect(ctx.destination);
+    _audioSource   = source;
+    function onAudioEnd() { speaking = false; _audioSource = null; setMic('idle'); onDone?.(); }
+    source.onended = onAudioEnd;
+    source.start(0);
 
   } catch (err) {
     console.warn('Sarvam TTS error — using browser fallback:', err.message);
@@ -1965,7 +1993,7 @@ function typeInField(el, text, done) {
 
 function advanceFormField() {
   if (speaking) {
-    currentAudio?.pause(); currentAudio = null;
+    try { _audioSource?.stop(); } catch(e) {} _audioSource = null; currentAudio?.pause(); currentAudio = null;
     window.speechSynthesis?.cancel();
     speaking = false;
   }
@@ -2163,7 +2191,7 @@ function voiceGuideUidaiField(idx) {
 }
 
 function advanceUidaiField() {
-  if (speaking) { currentAudio?.pause(); currentAudio = null; window.speechSynthesis?.cancel(); speaking = false; }
+  if (speaking) { try { _audioSource?.stop(); } catch(e) {} _audioSource = null; currentAudio?.pause(); currentAudio = null; window.speechSynthesis?.cancel(); speaking = false; }
   const btn = document.getElementById('wobNextBtn');
   if (btn) btn.disabled = true;
   uidaiFieldIdx++;
@@ -2727,8 +2755,9 @@ function openOfficialSite() {
 // MIC TAP
 // ══════════════════════════════════════
 function onMicTap() {
+  unlockAudioCtx(); // iOS: must call AudioContext.resume() inside user gesture
   if (speaking) {
-    currentAudio?.pause(); currentAudio = null;
+    try { _audioSource?.stop(); } catch(e) {} _audioSource = null; currentAudio?.pause(); currentAudio = null;
     window.speechSynthesis?.cancel();
     speaking = false; setMic('idle'); return;
   }
@@ -2835,7 +2864,7 @@ function submitWobText() {
 
 function handleChatText(text) {
   if (speaking) {
-    currentAudio?.pause(); currentAudio = null;
+    try { _audioSource?.stop(); } catch(e) {} _audioSource = null; currentAudio?.pause(); currentAudio = null;
     window.speechSynthesis?.cancel();
     speaking = false;
   }
@@ -3101,7 +3130,7 @@ function startConv(intent) {
 }
 
 function resetToLanding() {
-  currentAudio?.pause(); currentAudio = null;
+  try { _audioSource?.stop(); } catch(e) {} _audioSource = null; currentAudio?.pause(); currentAudio = null;
   window.speechSynthesis?.cancel();
   try { recognition?.stop(); } catch(e) {}
   speaking = listening = false;
