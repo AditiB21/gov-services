@@ -1318,16 +1318,10 @@ function postDocSkipForm() {
   );
 }
 
-function buildScanCard(docsOverride) {
-  const isHi = currentLang === 'hi';
-  const suffix = isHi ? ' जाँच रहा हूँ...' : ' checking...';
-  let docs;
-  if (docsOverride) {
-    docs = docsOverride.map(([,name]) => name + suffix);
-  } else {
-    const scheme = SCHEMES[selectedScheme || 'kisan'];
-    docs = (isHi ? scheme.docs : (scheme.docsEn || scheme.docs)).map(([,name]) => name + suffix);
-  }
+function buildScanCard() {
+  const scheme = SCHEMES[selectedScheme || 'kisan'];
+  const suffix = currentLang === 'hi' ? ' जाँच रहा हूँ...' : ' checking...';
+  const docs = scheme.docs.map(([,name]) => name + suffix);
   const card = document.createElement('div');
   card.className = 'scan-card';
   card.id = 'scanCard';
@@ -1491,8 +1485,7 @@ function verifySvcDocs(svc) {
   if (docCard) docCard.style.opacity = '0.5';
   speak(msg('ठीक है, अभी जाँच करता हूँ...', 'Checking your documents now...'), null);
   setTimeout(() => {
-    const docsArr = (SERVICE_DOCS[svc] || SERVICE_DOCS.aadhaar)[isHi ? 'hi' : 'en'];
-    const scanCard = buildScanCard(docsArr);
+    const scanCard = buildScanCard();
     $conv.appendChild(scanCard); scrollDown();
     animateScan(scanCard, () => { showSvcAllClear(svc); });
   }, 600);
@@ -1504,41 +1497,28 @@ function showSvcAllClear(svc) {
   const cl = document.createElement('div');
   cl.className = 'result-cl';
   cl.innerHTML = `
-    <div class="rcl-hd" style="background:var(--green)">✅ ${isHi ? `${lbl} — सभी दस्तावेज़ ठीक हैं!` : `${lbl} — All Documents Verified!`}</div>
-    <div class="rcl-row"><span class="rcl-ico">✅</span><div><div class="rcl-name">${isHi ? 'सभी दस्तावेज़ सही पाए गए' : 'All documents checked and valid'}</div><div class="rcl-msg">${isHi ? 'कोई गलती नहीं मिली' : 'No issues found'}</div></div></div>
-    <div class="rcl-row"><span class="rcl-ico">✅</span><div><div class="rcl-name">${isHi ? 'नाम और पते मिलते हैं' : 'Name and address match'}</div><div class="rcl-msg">${isHi ? 'सभी दस्तावेज़ में एक जैसा' : 'Consistent across all documents'}</div></div></div>`;
+    <div class="rc-hd" style="background:var(--green)">✅ ${isHi ? `${lbl} — सभी दस्तावेज़ ठीक हैं!` : `${lbl} — All Documents Verified!`}</div>
+    <div class="rc-row ok"><span class="rc-ico">✓</span><div><div class="rc-txt">${isHi ? 'सभी दस्तावेज़ सही पाए गए' : 'All documents checked and valid'}</div><div class="rc-sub">${isHi ? 'कोई गलती नहीं मिली' : 'No issues found'}</div></div></div>
+    <div class="rc-row ok"><span class="rc-ico">✓</span><div><div class="rc-txt">${isHi ? 'नाम और पते मिलते हैं' : 'Name and address match'}</div><div class="rc-sub">${isHi ? 'सभी दस्तावेज़ में एक जैसा' : 'Consistent across all documents'}</div></div></div>`;
   $conv.appendChild(cl); scrollDown();
 
   const speech = msg(
-    `बहुत बढ़िया! ${lbl} के लिए सभी दस्तावेज़ सही हैं। क्या अभी AI की मदद से फ़ॉर्म भरना चाहते हैं?`,
-    `All documents verified for ${lbl}. Would you like to fill the application form now with AI assistance?`
+    `बहुत बढ़िया! ${lbl} के लिए सभी दस्तावेज़ सही हैं। अब फ़ॉर्म भरने में मदद करूँ?`,
+    `Great! All documents for ${lbl} are verified. Ready to fill the form with AI assistance?`
   );
   speakThen(speech, () => {
     setTimeout(() => {
-      addAI(msg('क्या अभी फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'));
+      addAI(msg('क्या अब फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'));
       const card = document.createElement('div');
       card.className = 'apply-cta';
-      card.id = 'svcPostDocCard';
-      card.innerHTML = `<div class="apply-cta-btns" style="gap:10px;">
-        <button class="apply-btn-p" onclick="startSvcFormFill('${svc}')">✍️ ${isHi ? 'हाँ, फ़ॉर्म भरें' : 'Yes, Fill Form Now'}</button>
-        <button class="apply-btn-s" onclick="svcFormSkip('${svc}')">🕐 ${isHi ? 'बाद में करूँगा' : "I'll do it later"}</button>
+      card.innerHTML = `<div class="apply-cta-btns">
+        <button class="apply-btn-p" onclick="startSvcFormFill('${svc}')">📝 ${isHi ? 'हाँ, फ़ॉर्म भरें' : 'Yes, Fill Form'}</button>
+        <button class="apply-btn-s" onclick="setMic('idle')">${isHi ? 'अभी नहीं' : 'Not Now'}</button>
       </div>`;
       $conv.appendChild(card); scrollDown();
-      speak(msg('क्या अभी फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'), () => setMic('idle'));
+      speak(msg('क्या अब फ़ॉर्म भरना चाहते हैं?', 'Ready to fill the form now?'), () => setMic('idle'));
     }, 600);
   }, 8000);
-}
-
-function svcFormSkip(svc) {
-  document.querySelectorAll('#svcPostDocCard button').forEach(b => b.disabled = true);
-  const isHi = currentLang === 'hi';
-  const lbl = (SVC_LABELS[svc] || {})[isHi ? 'hi' : 'en'] || svc;
-  addUser(isHi ? 'बाद में करूँगा' : "I'll do it later");
-  const m = isHi
-    ? `ठीक है! जब भी <strong>${lbl}</strong> का फ़ॉर्म भरना हो — बस मुझसे कहें, मैं तैयार हूँ।`
-    : `No problem! Whenever you\'re ready to apply for <strong>${lbl}</strong>, just come back — I\'ll be here.`;
-  addAI(m);
-  speak(isHi ? `ठीक है! जब भी फ़ॉर्म भरना हो, मुझसे कहें।` : `No problem! Just come back whenever you are ready.`, () => setMic('idle'));
 }
 
 function startSvcFormFill(svc) {
@@ -1547,7 +1527,11 @@ function startSvcFormFill(svc) {
   showTyping(); setMic('loading');
   setTimeout(() => {
     hideTyping();
-    openSvcFormSimulator(svc); // unified for all services incl. aadhaar
+    if (svc === 'aadhaar') {
+      openAadhaarOnlineOverlay();
+    } else {
+      openSvcFormOverlay(svc);
+    }
   }, 600);
 }
 
@@ -2077,6 +2061,7 @@ function advanceFormField() {
 
 function showFormReview() {
   formPhase = 'final';
+  // Mark all fields done, 100% progress
   const bar = document.getElementById('wobProg');
   if (bar) bar.style.width = '100%';
   activeForm.forEach((_, i) => {
@@ -2084,170 +2069,49 @@ function showFormReview() {
     if (row) row.className = 'wob-field done';
   });
 
+  // Update voice strip
   const vtxt = document.getElementById('wobVoiceTxt');
-  if (vtxt) vtxt.textContent = msg('सभी खाने भर गए। एक बार देखें और Submit करें।', 'All fields filled. Review and press Submit.');
+  if (vtxt) vtxt.textContent = 'सभी खाने भर गए। एक बार देखें और Submit करें।';
   const btn = document.getElementById('wobNextBtn');
-  if (btn) { btn.textContent = msg('✅ Submit करें', '✅ Submit'); btn.disabled = false; btn.onclick = showSubmitConfirm; }
+  if (btn) { btn.textContent = '✅ Submit करें'; btn.disabled = false; btn.onclick = showSubmitConfirm; }
 
+  // Scroll to top of form body
   const body = document.getElementById('wobBody');
   if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
 
   speakThen(
-    msg(
-      "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे तक देख लीजिए। सब सही लगे तो Submit का बटन दबाइए — यह काम आपको खुद करना है, मैं submit नहीं करूँगा।",
-      "All fields are filled correctly. Please review from top to bottom. When everything looks good, press Submit — you must do this yourself, I will not submit on your behalf."
-    ),
+    "बहुत बढ़िया! सभी खाने सही भरे हैं। एक बार ऊपर से नीचे तक देख लीजिए। सब सही लगे तो Submit का बटन दबाइए — यह काम आपको खुद करना है, मैं submit नहीं करूँगा।",
     () => setMic('idle'), 14000
   );
 }
 
 function showSubmitConfirm() {
+  const scheme = SCHEMES[selectedScheme || 'kisan'];
   closeWebOverlay();
-  const isHi = currentLang === 'hi';
-
-  // Determine context: service flow or scheme flow
-  const svc = serviceIntent;
-  const meta = svc ? SVC_FORM_META[svc] : null;
-  const scheme = !svc ? SCHEMES[selectedScheme || 'kisan'] : null;
-
-  const title  = isHi ? 'फ़ॉर्म तैयार है!' : 'Form is Ready!';
-  const warn   = isHi ? '⚠️ Submit और payment आपको खुद करना है।' : '⚠️ You must submit and make any payment yourself.';
-  let msg2, portal, url, speech;
-
-  if (meta) {
-    const submitNote = isHi ? meta.submitHi : meta.submitEn;
-    const name = isHi ? meta.nameHi : meta.nameEn;
-    msg2   = submitNote;
-    portal = meta.portal;
-    url    = meta.url;
-    speech = isHi
-      ? `फ़ॉर्म बिल्कुल तैयार है। ${name} पोर्टल पर जाकर Submit का बटन दबाइए। शुभकामनाएं!`
-      : `Your form is ready. Go to the ${name} portal and press Submit. Best of luck!`;
-  } else {
-    msg2   = isHi ? `सभी खाने सही भरे हैं। ${scheme.name} की वेबसाइट पर जाकर Submit दबाएं — ${scheme.benefit} आपके बैंक में।` : `All fields are filled correctly. Go to the ${scheme.name} website and press Submit — ${scheme.benefitEn || scheme.benefit} to your bank account.`;
-    portal = scheme.portal;
-    url    = 'https://' + scheme.portal;
-    speech = isHi ? `फ़ॉर्म बिल्कुल तैयार है। अब ${scheme.portal} पर जाकर submit का बटन दबाइए। शुभकामनाएं!` : `Your form is ready. Go to ${scheme.portal} and press Submit. Best of luck!`;
-  }
-
   setTimeout(() => {
     const card = document.createElement('div');
     card.className = 'submit-ready';
     card.innerHTML = `
       <div class="sr-ico">✅</div>
-      <div class="sr-title">${title}</div>
-      <div class="sr-msg">${msg2}</div>
-      <div class="sr-warn">${warn}</div>
-      <button class="sr-btn" onclick="window.open('${url}','_blank')">🌐 ${portal} →</button>`;
+      <div class="sr-title">फ़ॉर्म तैयार है!</div>
+      <div class="sr-msg">सभी खाने सही भरे हैं। ${scheme.name} की वेबसाइट पर जाकर Submit दबाएं — ${scheme.benefit} आपके बैंक में।</div>
+      <div class="sr-warn">⚠️ Submit आपको खुद करना है — मैं नहीं करूँगा।</div>
+      <button class="sr-btn" onclick="openOfficialSite()">🌐 ${scheme.portal} खोलें →</button>`;
     $conv.appendChild(card); scrollDown();
-    speak(speech, () => setMic('idle'));
+    speak(`फ़ॉर्म बिल्कुल तैयार है। अब ${scheme.portal} पर जाकर submit का बटन दबाइए। शुभकामनाएं!`, () => setMic('idle'));
   }, 400);
-}
-
-// ══════════════════════════════════════
-// SERVICE FORM DATA (PAN / Passport / Driving / Aadhaar)
-// ══════════════════════════════════════
-const SVC_FORM_META = {
-  aadhaar:  { icon:'🆔', nameHi:'आधार अपडेट',         nameEn:'Aadhaar Update',         portal:'myaadhaar.uidai.gov.in',   ministryHi:'UIDAI — भारत सरकार',              ministryEn:'UIDAI — Government of India',             submitHi:'myaadhaar.uidai.gov.in पर Submit करें → ₹50 पेमेंट करें → OTP verify करें। अपडेट ९० दिन में हो जाएगा।', submitEn:'Submit on myaadhaar.uidai.gov.in → Pay ₹50 → Verify OTP. Update done within 90 days.', url:'https://myaadhaar.uidai.gov.in' },
-  pan:      { icon:'💳', nameHi:'PAN Card आवेदन',     nameEn:'PAN Card Application',   portal:'onlineservices.nsdl.com',  ministryHi:'NSDL — आयकर विभाग, GoI',         ministryEn:'NSDL — Income Tax Department, GoI',       submitHi:'NSDL पोर्टल पर Submit करें → ₹107 पेमेंट करें। e-PAN तुरंत मिलेगा।', submitEn:'Submit on NSDL portal → Pay ₹107. e-PAN will be received instantly.', url:'https://onlineservices.nsdl.com/paam/endUserRegisterContact.html' },
-  passport: { icon:'🛂', nameHi:'Passport आवेदन',    nameEn:'Passport Application',   portal:'passportindia.gov.in',     ministryHi:'विदेश मंत्रालय — भारत सरकार',    ministryEn:'Ministry of External Affairs, GoI',       submitHi:'passportindia.gov.in पर Submit करें → Appointment book करें → PSK जाएं। Passport ३०–४५ दिन में आएगा।', submitEn:'Submit on passportindia.gov.in → Book Appointment → Visit PSK. Passport arrives in 30–45 days.', url:'https://www.passportindia.gov.in/AppOnlineProject/welcomeLink' },
-  driving:  { icon:'🚗', nameHi:'Driving Licence',   nameEn:'Driving Licence',        portal:'sarathi.parivahan.gov.in', ministryHi:'सड़क परिवहन मंत्रालय, GoI',       ministryEn:'Ministry of Road Transport, GoI',         submitHi:'sarathi.parivahan.gov.in पर Submit करें → Online Learner\'s Test दें। LL मिलने के ३० दिन बाद DL Test दें।', submitEn:'Submit on sarathi.parivahan.gov.in → Take online Learner\'s Test. Take DL Test 30 days after getting LL.', url:'https://sarathi.parivahan.gov.in/' },
-};
-
-// ── Aadhaar Update Form ──
-const AADHAAR_FORM_HI = [
-  { lbl:'आधार नंबर',        val:'XXXX XXXX 1234',    hint:'12 अंकों का आधार नंबर — आखिरी 4 दिखाई दे रहे हैं', voice:'पहला खाना — आधार नंबर। मैंने भरा है — आपका रजिस्टर्ड आधार नंबर। यह पहले से UIDAI के सर्वर पर लिंक है।' },
-  { lbl:'रजिस्टर्ड मोबाइल', val:'+91 98765 43210',  hint:'OTP इसी नंबर पर आएगा — आधार से लिंक होना चाहिए', voice:'दूसरा खाना — मोबाइल नंबर। यह आधार से लिंक होना चाहिए — OTP इसी पर आएगा।' },
-  { lbl:'क्या बदलना है?',   val:'नाम (Name)',        hint:'एक बार में एक बदलाव हो सकता है', voice:'तीसरा खाना — क्या बदलना है। मैंने चुना है — नाम। आप चाहें तो पता या मोबाइल भी बदल सकते हैं।' },
-  { lbl:'नया नाम',          val:'रमेश कुमार',        hint:'बिल्कुल वैसा लिखें जैसा सरकारी दस्तावेज़ में है', voice:'चौथा खाना — नया नाम। मैंने भरा है — रमेश कुमार। ध्यान रहे — PAN कार्ड या पासपोर्ट जैसा ही लिखें, वरना reject हो सकता है।' },
-  { lbl:'प्रमाण दस्तावेज़', val:'PAN Card',          hint:'नाम बदलने के लिए government ID ज़रूरी है', voice:'पाँचवाँ खाना — प्रमाण दस्तावेज़। PAN कार्ड, पासपोर्ट, या वोटर ID — कोई भी एक चलेगा।' },
-];
-const AADHAAR_FORM_EN = [
-  { lbl:'Aadhaar Number',       val:'XXXX XXXX 1234',    hint:'12-digit Aadhaar — last 4 digits shown', voice:'First field — Aadhaar Number. I have pre-filled your registered Aadhaar number. It is already linked to UIDAI servers.' },
-  { lbl:'Registered Mobile',    val:'+91 98765 43210',   hint:'OTP will be sent here — must be linked to Aadhaar', voice:'Second field — Mobile Number. This must be linked to your Aadhaar — OTP will be sent to this number.' },
-  { lbl:'What to update?',      val:'Name',              hint:'Only one change per request is allowed', voice:'Third field — What to update. I have selected Name. You can also change address or mobile if needed.' },
-  { lbl:'New Name',             val:'Ramesh Kumar',      hint:'Write exactly as it appears in official documents', voice:'Fourth field — New Name. I have filled in Ramesh Kumar. Make sure it matches your PAN card or Passport exactly, otherwise the request may be rejected.' },
-  { lbl:'Supporting Document',  val:'PAN Card',          hint:'A government ID is required to update name', voice:'Fifth field — Supporting Document. PAN Card, Passport, or Voter ID — any one will work.' },
-];
-
-// ── PAN Card Form ──
-const PAN_FORM_HI = [
-  { lbl:'पूरा नाम',       val:'रमेश कुमार',                         hint:'आधार कार्ड पर जैसा लिखा है',     voice:'पहला खाना — पूरा नाम। मैंने भरा है — रमेश कुमार। आधार कार्ड पर जो नाम है, बिल्कुल वैसा ही लिखें।' },
-  { lbl:'जन्म तारीख',     val:'15/05/1990',                         hint:'DD/MM/YYYY फ़ॉर्मेट में',          voice:'दूसरा खाना — जन्म तारीख। मैंने भरा है — पंद्रह मई, उन्नीस सौ नब्बे। यह आधार से मिलनी चाहिए।' },
-  { lbl:'लिंग',           val:'पुरुष (Male)',                        hint:'Male / Female / Transgender',     voice:'तीसरा खाना — लिंग। मैंने चुना है — पुरुष।' },
-  { lbl:'पिता का नाम',    val:'राम कुमार',                          hint:'आधार के अनुसार',                   voice:'चौथा खाना — पिता का नाम। मैंने भरा है — राम कुमार। यह PAN कार्ड पर भी छपता है।' },
-  { lbl:'मोबाइल नंबर',    val:'98765 43210',                        hint:'OTP verification के लिए',         voice:'पाँचवाँ खाना — मोबाइल नंबर। यह OTP verification के लिए ज़रूरी है।' },
-  { lbl:'आधार नंबर',      val:'XXXX XXXX 1234',                     hint:'PAN-Aadhaar linking के लिए',      voice:'छठा खाना — आधार नंबर। PAN कार्ड को आधार से लिंक करना अनिवार्य है।' },
-  { lbl:'पता',            val:'123, गोमती नगर, लखनऊ — 226010',     hint:'घर का पूरा पता',                  voice:'सातवाँ खाना — पूरा पता। यह आपके आधार कार्ड का पता है।' },
-];
-const PAN_FORM_EN = [
-  { lbl:'Full Name',        val:'Ramesh Kumar',                         hint:'As per Aadhaar card',             voice:'First field — Full Name. I have filled in Ramesh Kumar. Write exactly as on your Aadhaar card.' },
-  { lbl:'Date of Birth',    val:'15/05/1990',                           hint:'DD/MM/YYYY format',                voice:'Second field — Date of Birth. I have filled in 15th May 1990. This must match your Aadhaar.' },
-  { lbl:'Gender',           val:'Male',                                  hint:'Male / Female / Transgender',     voice:'Third field — Gender. I have selected Male.' },
-  { lbl:"Father's Name",    val:'Ram Kumar',                            hint:'As per Aadhaar',                   voice:"Fourth field — Father's Name. I have filled in Ram Kumar. This will also be printed on your PAN card." },
-  { lbl:'Mobile Number',    val:'98765 43210',                          hint:'For OTP verification',             voice:'Fifth field — Mobile Number. This is required for OTP verification.' },
-  { lbl:'Aadhaar Number',   val:'XXXX XXXX 1234',                       hint:'Mandatory for PAN-Aadhaar linking', voice:'Sixth field — Aadhaar Number. Linking PAN with Aadhaar is mandatory.' },
-  { lbl:'Address',          val:'123, Gomti Nagar, Lucknow — 226010',   hint:'Your full residential address',    voice:'Seventh field — Address. This is your residential address from Aadhaar.' },
-];
-
-// ── Passport Form ──
-const PASSPORT_FORM_HI = [
-  { lbl:'उपनाम (Surname)',     val:'Kumar',                              hint:'पासपोर्ट में Surname अलग होता है',  voice:'पहला खाना — उपनाम यानी Surname। मैंने भरा है — Kumar।' },
-  { lbl:'पहला नाम (Given Name)', val:'Ramesh',                          hint:'Surname के अलावा बाकी नाम',          voice:'दूसरा खाना — Given Name। मैंने भरा है — Ramesh।' },
-  { lbl:'जन्म तारीख',           val:'15/05/1990',                       hint:'DD/MM/YYYY',                          voice:'तीसरा खाना — जन्म तारीख — पंद्रह मई, उन्नीस सौ नब्बे।' },
-  { lbl:'जन्म स्थान',           val:'Lucknow, Uttar Pradesh',           hint:'जहाँ आप पैदा हुए',                   voice:'चौथा खाना — जन्म स्थान। मैंने भरा है — लखनऊ, उत्तर प्रदेश।' },
-  { lbl:'लिंग',                 val:'पुरुष (Male)',                      hint:'Male / Female',                       voice:'पाँचवाँ खाना — लिंग — पुरुष।' },
-  { lbl:'आधार नंबर',            val:'XXXX XXXX 1234',                   hint:'Address verification के लिए अनिवार्य', voice:'छठा खाना — आधार नंबर। पासपोर्ट के लिए आधार अनिवार्य है।' },
-  { lbl:'मोबाइल नंबर',          val:'98765 43210',                      hint:'PSK appointment notification',       voice:'सातवाँ खाना — मोबाइल नंबर। PSK appointment और status इसी पर आएगा।' },
-  { lbl:'वर्तमान पता',          val:'123, गोमती नगर, लखनऊ — 226010',  hint:'आधार के पते से मिलना चाहिए',         voice:'आठवाँ खाना — वर्तमान पता। यह आधार के पते से मिलना चाहिए।' },
-  { lbl:'आवेदन प्रकार',         val:'Fresh (नया)',                      hint:'Fresh पासपोर्ट या Renewal',          voice:'नौवाँ खाना — आवेदन प्रकार। मैंने चुना है — Fresh — यानी नया पासपोर्ट।' },
-];
-const PASSPORT_FORM_EN = [
-  { lbl:'Surname',              val:'Kumar',                              hint:'Last name as on passport',          voice:'First field — Surname. I have filled in Kumar.' },
-  { lbl:'Given Name(s)',        val:'Ramesh',                            hint:'All names except surname',           voice:'Second field — Given Name. I have filled in Ramesh.' },
-  { lbl:'Date of Birth',        val:'15/05/1990',                        hint:'DD/MM/YYYY',                         voice:'Third field — Date of Birth — 15th May 1990.' },
-  { lbl:'Place of Birth',       val:'Lucknow, Uttar Pradesh',            hint:'City and state where you were born', voice:'Fourth field — Place of Birth. I have filled in Lucknow, Uttar Pradesh.' },
-  { lbl:'Gender',               val:'Male',                              hint:'Male / Female',                      voice:'Fifth field — Gender — Male.' },
-  { lbl:'Aadhaar Number',       val:'XXXX XXXX 1234',                    hint:'Mandatory for address verification', voice:'Sixth field — Aadhaar Number. Aadhaar is mandatory for a passport application.' },
-  { lbl:'Mobile Number',        val:'98765 43210',                       hint:'For PSK appointment notifications',  voice:'Seventh field — Mobile Number. PSK appointment and status updates will be sent here.' },
-  { lbl:'Present Address',      val:'123, Gomti Nagar, Lucknow — 226010', hint:'Should match Aadhaar address',    voice:'Eighth field — Present Address. This should match your Aadhaar address.' },
-  { lbl:'Application Type',     val:'Fresh (New)',                       hint:'Fresh passport or Renewal',          voice:'Ninth field — Application Type. I have selected Fresh — meaning a brand new passport.' },
-];
-
-// ── Driving Licence Form ──
-const DRIVING_FORM_HI = [
-  { lbl:'पूरा नाम',              val:'रमेश कुमार',                       hint:'आधार के अनुसार',                  voice:'पहला खाना — पूरा नाम। मैंने भरा है — रमेश कुमार। यह आधार से बिल्कुल मिलना चाहिए।' },
-  { lbl:'पिता / पति का नाम',     val:'राम कुमार',                        hint:'आधार के अनुसार',                  voice:'दूसरा खाना — पिता या पति का नाम। मैंने भरा है — राम कुमार।' },
-  { lbl:'जन्म तारीख',            val:'15/05/1990',                       hint:'DD/MM/YYYY — उम्र 18+ होनी चाहिए', voice:'तीसरा खाना — जन्म तारीख — पंद्रह मई, उन्नीस सौ नब्बे। Driving Licence के लिए कम से कम अठारह साल की उम्र चाहिए।' },
-  { lbl:'लिंग',                  val:'पुरुष (Male)',                      hint:'Male / Female',                   voice:'चौथा खाना — लिंग — पुरुष।' },
-  { lbl:'पता',                   val:'123, गोमती नगर, लखनऊ — 226010',   hint:'आधार से मिलना चाहिए',             voice:'पाँचवाँ खाना — पता। यह आपके आधार का पता है।' },
-  { lbl:'आधार नंबर',             val:'XXXX XXXX 1234',                   hint:'पहचान और पते के प्रमाण के रूप में', voice:'छठा खाना — आधार नंबर। यह पहचान और पते के प्रमाण के रूप में काम करेगा।' },
-  { lbl:'मोबाइल नंबर',           val:'98765 43210',                      hint:'RTO appointment के लिए',          voice:'सातवाँ खाना — मोबाइल नंबर। RTO appointment और status इसी पर आएगा।' },
-  { lbl:'वाहन श्रेणी',           val:'LMV (Light Motor Vehicle)',        hint:'Car/Jeep = LMV · Bike = 2-Wheeler', voice:'आठवाँ खाना — वाहन श्रेणी। मैंने चुना है — LMV यानी Light Motor Vehicle — यानी कार। अगर बाइक के लिए है तो 2-Wheeler चुनें।' },
-];
-const DRIVING_FORM_EN = [
-  { lbl:'Full Name',              val:'Ramesh Kumar',                       hint:'As per Aadhaar card',               voice:'First field — Full Name. I have filled in Ramesh Kumar. This must match your Aadhaar exactly.' },
-  { lbl:"Father's / Husband's Name", val:'Ram Kumar',                      hint:'As per Aadhaar',                    voice:"Second field — Father's or Husband's Name. I have filled in Ram Kumar." },
-  { lbl:'Date of Birth',          val:'15/05/1990',                         hint:'DD/MM/YYYY — must be 18+ for LMV',  voice:'Third field — Date of Birth — 15th May 1990. You must be at least 18 years old for a Driving Licence.' },
-  { lbl:'Gender',                 val:'Male',                               hint:'Male / Female',                     voice:'Fourth field — Gender — Male.' },
-  { lbl:'Address',                val:'123, Gomti Nagar, Lucknow — 226010', hint:'Should match Aadhaar address',      voice:'Fifth field — Address. This is your residential address from Aadhaar.' },
-  { lbl:'Aadhaar Number',         val:'XXXX XXXX 1234',                     hint:'For identity and address proof',    voice:'Sixth field — Aadhaar Number. This will serve as both identity and address proof.' },
-  { lbl:'Mobile Number',          val:'98765 43210',                        hint:'For RTO appointment notifications', voice:'Seventh field — Mobile Number. RTO appointment and status updates will be sent here.' },
-  { lbl:'Vehicle Category',       val:'LMV (Light Motor Vehicle)',          hint:'Car/Jeep = LMV · Motorcycle = 2-Wheeler', voice:'Eighth field — Vehicle Category. I have selected LMV — Light Motor Vehicle — meaning a car. Select 2-Wheeler if applying for a motorcycle.' },
-];
-
-function getActiveSvcForm(svc) {
-  const isHi = currentLang === 'hi';
-  const map = isHi
-    ? { aadhaar: AADHAAR_FORM_HI, pan: PAN_FORM_HI, passport: PASSPORT_FORM_HI, driving: DRIVING_FORM_HI }
-    : { aadhaar: AADHAAR_FORM_EN, pan: PAN_FORM_EN, passport: PASSPORT_FORM_EN, driving: DRIVING_FORM_EN };
-  return map[svc] || (isHi ? PAN_FORM_HI : PAN_FORM_EN);
 }
 
 // ══════════════════════════════════════
 // AADHAAR ONLINE FLOW
 // ══════════════════════════════════════
-const UIDAI_FORM = AADHAAR_FORM_HI; // kept for any legacy references
+const UIDAI_FORM = [
+  { lbl:'आधार नंबर', val:'XXXX XXXX 1234', hint:'12 अंकों का आधार नंबर — आखिरी 4 दिखाई दे रहे हैं', voice:'पहला खाना — आधार नंबर। मैंने भरा है — आपका रजिस्टर्ड आधार नंबर। यह पहले से UIDAI के सर्वर पर लिंक है।' },
+  { lbl:'रजिस्टर्ड मोबाइल', val:'+91 98765 43210', hint:'OTP इसी नंबर पर आएगा — आधार से लिंक होना चाहिए', voice:'दूसरा खाना — मोबाइल नंबर। यह आधार से लिंक होना चाहिए — OTP इसी पर आएगा।' },
+  { lbl:'क्या बदलना है?', val:'नाम (Name)', hint:'एक बार में एक बदलाव हो सकता है', voice:'तीसरा खाना — क्या बदलना है। मैंने चुना है — नाम। आप चाहें तो पता या मोबाइल भी बदल सकते हैं।' },
+  { lbl:'नया नाम', val:'रमेश कुमार', hint:'बिल्कुल वैसा लिखें जैसा सरकारी दस्तावेज़ में है', voice:'चौथा खाना — नया नाम। मैंने भरा है — रमेश कुमार। ध्यान रहे — PAN कार्ड या पासपोर्ट जैसा ही लिखें, वरना reject हो सकता है।' },
+  { lbl:'प्रमाण दस्तावेज़', val:'PAN Card', hint:'नाम बदलने के लिए government ID ज़रूरी है', voice:'पाँचवाँ खाना — प्रमाण दस्तावेज़। PAN कार्ड, पासपोर्ट, या वोटर ID — कोई भी एक चलेगा।' },
+];
 let uidaiFieldIdx = 0;
 
 function openAadhaarOnlineOverlay() {
@@ -2864,111 +2728,63 @@ function showDrivingCenterGuide() {
 }
 
 // ══════════════════════════════════════
-// SERVICE FORM SIMULATOR (PAN / Passport / Driving / Aadhaar)
+// GENERIC SERVICE FORM OVERLAY
 // ══════════════════════════════════════
-function openSvcFormSimulator(svc) {
+function openSvcFormOverlay(svc) {
   const isHi = currentLang === 'hi';
-  const meta = SVC_FORM_META[svc] || SVC_FORM_META.pan;
-  const name = isHi ? meta.nameHi : meta.nameEn;
+  const SVC_INFO = {
+    pan:      { icon:'💳', name:'PAN Card', portal:'onlineservices.nsdl.com', url:'https://onlineservices.nsdl.com/paam/endUserRegisterContact.html', lbl:'NSDL PAN Portal' },
+    passport: { icon:'🛂', name:'Passport', portal:'passportindia.gov.in', url:'https://www.passportindia.gov.in/AppOnlineProject/welcomeLink', lbl:'Passport Seva Portal' },
+    driving:  { icon:'🚗', name:'Driving Licence', portal:'sarathi.parivahan.gov.in', url:'https://sarathi.parivahan.gov.in/', lbl:'Sarathi Parivahan Portal' },
+  };
+  const info = SVC_INFO[svc] || SVC_INFO.pan;
 
-  activeForm    = getActiveSvcForm(svc);
-  formFieldIdx  = 0;
+  const openMsg = isHi
+    ? `${info.icon} ${info.name} के लिए आधिकारिक सरकारी पोर्टल <strong>${info.portal}</strong> खुल रहा है…`
+    : `${info.icon} Opening official government portal <strong>${info.portal}</strong> for ${info.name}…`;
+  addAI(openMsg);
 
-  addAI(msg(
-    `ज़रूर! मैं आपको <strong>${name} की आधिकारिक सरकारी वेबसाइट</strong> पर ले जाता हूँ — सभी ज़रूरी खाने पहले से भरे हैं।`,
-    `Sure! I'll take you to the <strong>official ${name} government portal</strong> — all required fields are pre-filled.`
-  ));
-  speak(msg(
-    `ज़रूर! ${name} की वेबसाइट खुल रही है। सभी ज़रूरी खाने पहले से भरे हैं। हम साथ में एक-एक खाना देखेंगे।`,
-    `Sure! Opening the official ${name} portal. All fields are pre-filled. We will go through each one together.`
-  ), () => {
+  const loader = document.createElement('div');
+  loader.className = 'site-loader';
+  loader.innerHTML = `<div class="sl-ico">${info.icon}</div>
+    <div class="sl-title">${isHi ? `${info.portal} खुल रहा है...` : `Opening ${info.portal}...`}</div>
+    <div class="sl-sub">Official Government of India Website</div>
+    <div class="sl-bar"><div class="sl-fill"></div></div>`;
+  $conv.appendChild(loader); scrollDown();
+
+  speak(isHi
+    ? `${info.name} के लिए आधिकारिक पोर्टल खुल रहा है। वहाँ आपको ${info.lbl} दिखेगा — वहीं से आवेदन करें।`
+    : `Opening the official portal for ${info.name}. You will see ${info.lbl} — apply from there.`,
+  () => {});
+
+  setTimeout(() => {
+    loader.remove();
+    const linkCard = document.createElement('div');
+    linkCard.className = 'action-card';
+    linkCard.innerHTML = `
+      <div class="ac-hd">${info.icon} ${info.name} — Official Portal</div>
+      <div class="ac-step">
+        <span class="ac-ico">🌐</span>
+        <div>
+          <div class="ac-txt">${info.lbl}</div>
+          <div class="ac-sub">${info.portal}</div>
+          <button class="apply-btn-p" style="margin-top:8px;font-size:13px" onclick="window.open('${info.url}','_blank')">🔗 ${isHi ? 'पोर्टल खोलें' : 'Open Portal'}</button>
+        </div>
+      </div>
+      <div class="ac-step" style="background:#e6f4ec;border-radius:0 0 14px 14px;">
+        <span class="ac-ico">💡</span>
+        <div>
+          <div class="ac-txt">${isHi ? 'Submit आप खुद करें' : 'Submit yourself'}</div>
+          <div class="ac-sub">${isHi ? 'नागरिक साथी सुरक्षा के लिए form submit नहीं करता' : 'Nagrik Saathi does not submit forms for security reasons'}</div>
+        </div>
+      </div>`;
+    $conv.appendChild(linkCard); scrollDown();
+
     setTimeout(() => {
-      const loader = document.createElement('div');
-      loader.className = 'site-loader';
-      loader.innerHTML = `<div class="sl-ico">${meta.icon}</div>
-        <div class="sl-title">${isHi ? `${meta.portal} खुल रहा है...` : `Opening ${meta.portal}...`}</div>
-        <div class="sl-sub">Official Government of India Website</div>
-        <div class="sl-bar"><div class="sl-fill"></div></div>`;
-      $conv.appendChild(loader); scrollDown();
-      setTimeout(() => { loader.remove(); showSvcFormOverlay(svc); }, 3000);
-    }, 500);
-  });
-}
-
-function showSvcFormOverlay(svc) {
-  const isHi = currentLang === 'hi';
-  const meta = SVC_FORM_META[svc] || SVC_FORM_META.pan;
-  const name = isHi ? meta.nameHi : meta.nameEn;
-  const ministry = isHi ? meta.ministryHi : meta.ministryEn;
-
-  formFieldIdx = 0;
-  webOverlayOpen = true;
-  if (!activeForm) activeForm = getActiveSvcForm(svc);
-
-  const ov = document.createElement('div');
-  ov.className = 'web-overlay'; ov.id = 'webOverlay';
-  ov.innerHTML = `
-    <div class="wob-bar">
-      <button class="wob-back" onclick="closeWebOverlay()">✕</button>
-      <div class="wob-url"><span class="wob-secure">🔒</span> ${meta.portal}</div>
-    </div>
-    <div class="wob-goi-hd">
-      <span class="wob-goi-emblem">${meta.icon}</span>
-      <div>
-        <div class="wob-goi-nm">${name}</div>
-        <div class="wob-goi-sub">${ministry}</div>
-      </div>
-      <div class="wob-goi-badge">OFFICIAL</div>
-    </div>
-    <div class="wob-prog-wrap"><div class="wob-prog-fill" id="wobProg" style="width:0%"></div></div>
-    <div class="wob-body" id="wobBody">
-      <div>
-        <div class="wob-step-tag">STEP 1 OF 2 — Applicant Details</div>
-        <div class="wob-form-hd">${name} — ${msg('आवेदन फ़ॉर्म', 'Application Form')}</div>
-        <div class="wob-form-sub">${msg('सभी खाने आधार कार्ड के अनुसार भरे हैं', 'All fields pre-filled as per Aadhaar card')}</div>
-      </div>
-      ${activeForm.map((f,i) => `
-        <div class="wob-field" id="wf-${i}">
-          <div class="wob-lbl">${f.lbl} <span class="wob-req">*</span></div>
-          <div class="wob-input-sim empty" id="wi-${i}">—</div>
-          <div class="wob-field-hint">${f.hint}</div>
-          <div class="wob-autofill">✓ Auto-filled</div>
-        </div>`).join('')}
-    </div>
-    <div class="wob-voice-strip">
-      <div class="wob-voice-av">🏛️</div>
-      <div class="wob-voice-info">
-        <div class="wob-voice-status">${msg('🔊 आवाज़ से गाइड हो रहा हूँ', '🔊 Voice-guided filling')}</div>
-        <div class="wob-voice-text" id="wobVoiceTxt">${msg('एक पल...', 'One moment...')}</div>
-      </div>
-      <button class="wob-next-btn" id="wobNextBtn" onclick="advanceFormField()" disabled>${msg('अगला →', 'Next →')}</button>
-    </div>
-    <div style="padding:0 14px 14px;background:#fff;">
-      <div class="unified-box" style="width:100%">
-        <div class="unified-input-wrap">
-          <input class="unified-input" id="wobChatInput" type="text"
-            placeholder="${msg('सवाल पूछें...', 'Ask your question...')}"
-            onkeydown="if(event.key==='Enter')submitWobText()">
-          <button class="send-btn-corner" onclick="submitWobText()">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          </button>
-        </div>
-        <div class="unified-bar-row">
-          <div class="unified-icons">
-            <button class="unified-icon-btn" onclick="submitWobText()">
-              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
-            </button>
-          </div>
-          <button class="speak-pill-btn" onclick="submitWobText()" style="background:var(--blue)">
-            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
-            <span>${msg('बोलें', 'Speak')}</span>
-          </button>
-        </div>
-      </div>
-    </div>`;
-
-  document.querySelector('.phone-frame').appendChild(ov);
-  setTimeout(() => voiceGuideField(0), 1500);
+      addAI(msg("और कोई मदद चाहिए?", "Need any more help?"));
+      speak(msg("और कोई मदद चाहिए?", "Need more help?"), () => setMic('idle'));
+    }, 800);
+  }, 2800);
 }
 
 function closeWebOverlay() {
