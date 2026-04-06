@@ -719,8 +719,8 @@ async function speak(text, onDone) {
 
   const isEn = currentLang === 'en';
 
-  // English  → bulbul:v3 + 'ritu'   (text string format)
-  // Hindi    → bulbul:v1 + 'arvind' (inputs array format — original working config)
+  // English → bulbul:v3 (text string, supports pace + output_audio_codec)
+  // Hindi   → bulbul:v1 (inputs array; pace & output_audio_codec NOT supported by v1)
   const reqBody = isEn
     ? JSON.stringify({
         text,
@@ -734,9 +734,7 @@ async function speak(text, onDone) {
         inputs: [text],
         target_language_code: 'hi-IN',
         speaker: 'arvind',
-        model: 'bulbul:v1',
-        pace: 0.95,
-        output_audio_codec: 'wav'
+        model: 'bulbul:v1'
       });
 
   try {
@@ -759,14 +757,17 @@ async function speak(text, onDone) {
     const bytes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
 
-    // Use Web Audio API — works on iOS Safari after AudioContext is unlocked
-    const ctx    = getAudioCtx();
+    // Use Web Audio API — works on iOS Safari after AudioContext is unlocked.
+    // Use callback form of decodeAudioData (iOS < 14.5 doesn't return a real Promise).
+    const ctx = getAudioCtx();
     if (ctx.state === 'suspended') await ctx.resume();
-    const audioBuf = await ctx.decodeAudioData(bytes.buffer);
-    const source   = ctx.createBufferSource();
-    source.buffer  = audioBuf;
+    const audioBuf = await new Promise((resolve, reject) =>
+      ctx.decodeAudioData(bytes.buffer, resolve, reject)
+    );
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuf;
     source.connect(ctx.destination);
-    _audioSource   = source;
+    _audioSource  = source;
     function onAudioEnd() { speaking = false; _audioSource = null; setMic('idle'); onDone?.(); }
     source.onended = onAudioEnd;
     source.start(0);
