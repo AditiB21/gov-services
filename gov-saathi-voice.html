@@ -1236,10 +1236,10 @@ function showAllClearResults() {
     $conv.appendChild(cl); scrollDown();
 
     const allClearSpeech = isHi
-      ? `बहुत बढ़िया! सभी दस्तावेज़ सही हैं। अब ${scheme.name} का फ़ॉर्म भरते हैं।`
-      : `All documents look great! Let's now fill the ${scheme.name} application form.`;
+      ? `बहुत बढ़िया! ${scheme.name} के सभी दस्तावेज़ सही हैं। क्या अभी आवेदन फ़ॉर्म भरना चाहते हैं?`
+      : `All documents verified for ${scheme.name}. Would you like to fill the application form now?`;
     speakThen(allClearSpeech, () => {
-      setTimeout(() => startFormFlow(), 700);
+      setTimeout(() => showPostDocPrompt(), 700);
     }, 6000);
   }, 1200);
 }
@@ -1260,11 +1260,61 @@ function allClearVerifyResult() {
   $conv.appendChild(cl); scrollDown();
 
   const speech = isHi
-    ? `बहुत बढ़िया! ${scheme.name} के सभी दस्तावेज़ सही हैं। अब फ़ॉर्म भरते हैं।`
-    : `All documents verified for ${scheme.name}. Let's now fill the application form.`;
+    ? `बहुत बढ़िया! ${scheme.name} के सभी दस्तावेज़ सही हैं। क्या अभी आवेदन फ़ॉर्म भरना चाहते हैं?`
+    : `All documents verified for ${scheme.name}. Would you like to fill the application form now?`;
   speakThen(speech, () => {
-    setTimeout(() => startFormFlow(), 700);
+    setTimeout(() => showPostDocPrompt(), 700);
   }, 8000);
+}
+
+// ── Shown after all docs verified — prompt user to fill form ──
+function showPostDocPrompt() {
+  const isHi = currentLang === 'hi';
+  const scheme = SCHEMES[selectedScheme || 'kisan'];
+
+  const q = isHi
+    ? `✅ दस्तावेज़ जाँच पूरी हो गई। अब <strong>${scheme.name}</strong> का आवेदन फ़ॉर्म AI की मदद से भरना चाहते हैं?`
+    : `✅ Document check complete. Would you like to fill the <strong>${scheme.name}</strong> application form with AI assistance?`;
+  addAI(q);
+
+  const card = document.createElement('div');
+  card.className = 'apply-cta';
+  card.id = 'postDocPromptCard';
+  card.innerHTML = `
+    <div class="apply-cta-btns" style="gap:10px;">
+      <button class="apply-btn-p" onclick="postDocFillForm()">
+        ✍️ ${isHi ? 'हाँ, फ़ॉर्म भरें' : 'Yes, Fill Form Now'}
+      </button>
+      <button class="apply-btn-s" onclick="postDocSkipForm()">
+        🕐 ${isHi ? 'बाद में करूँगा' : 'I\'ll do it later'}
+      </button>
+    </div>`;
+  $conv.appendChild(card);
+  scrollDown();
+}
+
+function postDocFillForm() {
+  document.querySelectorAll('#postDocPromptCard button').forEach(b => b.disabled = true);
+  const isHi = currentLang === 'hi';
+  addUser(isHi ? 'हाँ, फ़ॉर्म भरें' : 'Yes, Fill Form Now');
+  startFormFlow();
+}
+
+function postDocSkipForm() {
+  document.querySelectorAll('#postDocPromptCard button').forEach(b => b.disabled = true);
+  const isHi = currentLang === 'hi';
+  const scheme = SCHEMES[selectedScheme || 'kisan'];
+  addUser(isHi ? 'बाद में करूँगा' : "I'll do it later");
+  const m = isHi
+    ? `ठीक है! जब भी फ़ॉर्म भरना हो, मुझसे कहें — मैं <strong>${scheme.name}</strong> के लिए तैयार हूँ।`
+    : `No problem! Whenever you\'re ready to apply for <strong>${scheme.name}</strong>, just let me know — I\'ll be here.`;
+  addAI(m);
+  speak(
+    isHi
+      ? `ठीक है! जब भी फ़ॉर्म भरना हो, मुझसे कहें।`
+      : `No problem! Whenever you're ready to apply, just let me know.`,
+    () => setMic('idle')
+  );
 }
 
 function buildScanCard() {
